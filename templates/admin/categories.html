@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分类管理 - 晨泽发卡</title>
+    <link href="https://cdn.jsdelivr.net/npm/layui@2.8.18/dist/css/layui.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f2f2f2; }
+        .admin-header { background: #393D49; color: white; padding: 0 20px; height: 60px; line-height: 60px; }
+        .admin-header h1 { font-size: 20px; margin: 0; }
+        .admin-nav { background: #393D49; min-height: calc(100vh - 60px); width: 200px; float: left; }
+        .admin-nav a { display: block; padding: 15px 20px; color: #c2c2c2; text-decoration: none; }
+        .admin-nav a:hover, .admin-nav a.active { background: #009688; color: white; }
+        .admin-content { margin-left: 200px; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <h1>晨泽发卡 - 后台管理</h1>
+        <a href="/" style="float: right; color: white; margin-left: 20px;">返回前台</a>
+    </div>
+    <div class="admin-nav">
+        <a href="/admin">概览</a>
+        <a href="/admin/products">商品管理</a>
+        <a href="/admin/cards">卡密管理</a>
+        <a href="/admin/orders">订单管理</a>
+        <a href="/admin/users">用户管理</a>
+        <a href="/admin/categories" class="active">分类管理</a>
+    </div>
+    <div class="admin-content">
+        <div class="layui-card">
+            <div class="layui-card-header">
+                分类列表
+                <button class="layui-btn layui-btn-sm" style="float: right;" onclick="openAdd()">添加分类</button>
+            </div>
+            <div class="layui-card-body">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>名称</th>
+                            <th>排序</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .categories}}
+                        <tr>
+                            <td>{{.ID}}</td>
+                            <td>{{.Name}}</td>
+                            <td>{{.Sort}}</td>
+                            <td>
+                                <button class="layui-btn layui-btn-xs" onclick="deleteCat({{.ID}})">删除</button>
+                            </td>
+                        </tr>
+                        {{end}}
+                        {{if not .categories}}
+                        <tr><td colspan="4" class="text-center">暂无分类</td></tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="add-modal" style="display:none; padding: 20px;">
+        <div class="layui-form-item">
+            <label class="layui-form-label">分类名称</label>
+            <div class="layui-input-block">
+                <input type="text" id="cat-name" class="layui-input" placeholder="请输入分类名称">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">排序</label>
+            <div class="layui-input-block">
+                <input type="number" id="cat-sort" class="layui-input" value="0">
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/layui@2.8.18/dist/layui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        function openAdd() {
+            layui.layer.open({
+                type: 1,
+                title: '添加分类',
+                content: document.getElementById('add-modal'),
+                area: ['400px', '250px'],
+                btn: ['添加', '取消'],
+                yes: function(index) {
+                    axios.post('/api/category', {
+                        name: document.getElementById('cat-name').value,
+                        sort: parseInt(document.getElementById('cat-sort').value)
+                    }).then(res => {
+                        if (res.data.code === 0) {
+                            layer.msg('添加成功', {icon: 1});
+                            layer.close(index);
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            layer.msg(res.data.msg, {icon: 2});
+                        }
+                    });
+                }
+            });
+        }
+
+        function deleteCat(id) {
+            layer.confirm('确定要删除此分类吗？', function(index) {
+                axios.delete('/api/category/' + id).then(res => {
+                    if (res.data.code === 0) {
+                        layer.msg('删除成功', {icon: 1});
+                        setTimeout(() => location.reload(), 1000);
+                    }
+                });
+                layer.close(index);
+            });
+        }
+    </script>
+</body>
+</html>

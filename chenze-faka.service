@@ -1,0 +1,14 @@
+[Unit]
+Description=Chenze Faka System
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/chenze-faka
+ExecStart=/opt/chenze-faka/chenze-faka
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

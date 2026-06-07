@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>晨泽发卡 - 安装向导</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .install-card { max-width: 600px; margin: 50px auto; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card install-card">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4">🚀 晨泽发卡系统安装</h2>
+                
+                <div id="step1">
+                    <h4>环境检测</h4>
+                    <div id="env-status" class="mt-3"></div>
+                    <button class="btn btn-primary mt-3" onclick="checkEnv()">开始检测</button>
+                </div>
+
+                <div id="step2" style="display:none;">
+                    <h4>数据库配置</h4>
+                    <form id="install-form">
+                        <div class="mb-3">
+                            <label class="form-label">数据库主机</label>
+                            <input type="text" class="form-control" name="db_host" value="localhost">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">数据库端口</label>
+                            <input type="number" class="form-control" name="db_port" value="3306">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">数据库用户名</label>
+                            <input type="text" class="form-control" name="db_user" value="root">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">数据库密码</label>
+                            <input type="password" class="form-control" name="db_password">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">数据库名</label>
+                            <input type="text" class="form-control" name="db_name" value="chenze_faka">
+                        </div>
+                        
+                        <h4 class="mt-4">管理员账号</h4>
+                        <div class="mb-3">
+                            <label class="form-label">用户名</label>
+                            <input type="text" class="form-control" name="admin_user" value="admin">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">密码</label>
+                            <input type="password" class="form-control" name="admin_pass">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">邮箱</label>
+                            <input type="email" class="form-control" name="admin_email">
+                        </div>
+
+                        <button type="button" class="btn btn-primary w-100" onclick="install()">开始安装</button>
+                    </form>
+                </div>
+
+                <div id="step3" style="display:none;">
+                    <div class="text-center">
+                        <h3>🎉 安装成功！</h3>
+                        <p class="mt-3">系统已安装完成！</p>
+                        <div class="alert alert-warning">
+                            <strong>⚠️ 重要提示：</strong>请重启程序后再访问！
+                        </div>
+                        <p class="text-muted mt-2">重启后即可访问首页和后台管理</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        function checkEnv() {
+            axios.get('/install/api/env').then(res => {
+                const data = res.data.data;
+                let html = '<ul class="list-group">';
+                html += `<li class="list-group-item">Go 版本: ${data.go_version} ✅</li>`;
+                html += `<li class="list-group-item">目录权限: ${data.writeable ? '可写 ✅' : '不可写 ❌'}</li>`;
+                html += '<li class="list-group-item">MySQL 支持: ✅</li>';
+                html += '</ul>';
+                document.getElementById('env-status').innerHTML = html;
+                
+                if (data.writeable) {
+                    setTimeout(() => {
+                        document.getElementById('step1').style.display = 'none';
+                        document.getElementById('step2').style.display = 'block';
+                    }, 1000);
+                }
+            });
+        }
+
+        function install() {
+            const form = document.getElementById('install-form');
+            const data = {
+                db_host: form.db_host.value,
+                db_port: parseInt(form.db_port.value),
+                db_user: form.db_user.value,
+                db_password: form.db_password.value,
+                db_name: form.db_name.value,
+                admin_user: form.admin_user.value,
+                admin_pass: form.admin_pass.value,
+                admin_email: form.admin_email.value
+            };
+            
+            axios.post('/install/api/install', data).then(res => {
+                document.getElementById('step2').style.display = 'none';
+                document.getElementById('step3').style.display = 'block';
+            }).catch(err => {
+                alert(err.response?.data?.msg || '安装失败');
+            });
+        }
+    </script>
+</body>
+</html>

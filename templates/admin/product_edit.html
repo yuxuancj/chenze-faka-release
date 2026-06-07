@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑商品 - 晨泽发卡</title>
+    <link href="https://cdn.jsdelivr.net/npm/layui@2.8.18/dist/css/layui.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f2f2f2; }
+        .admin-header { background: #393D49; color: white; padding: 0 20px; height: 60px; line-height: 60px; }
+        .admin-header h1 { font-size: 20px; margin: 0; }
+        .admin-nav { background: #393D49; min-height: calc(100vh - 60px); width: 200px; float: left; }
+        .admin-nav a { display: block; padding: 15px 20px; color: #c2c2c2; text-decoration: none; }
+        .admin-nav a:hover, .admin-nav a.active { background: #009688; color: white; }
+        .admin-content { margin-left: 200px; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <h1>晨泽发卡 - 后台管理</h1>
+        <a href="/admin/products" style="float: right; color: white; margin-left: 20px;">返回列表</a>
+        <a href="/" style="float: right; color: white; margin-left: 20px;">返回前台</a>
+    </div>
+    <div class="admin-nav">
+        <a href="/admin">概览</a>
+        <a href="/admin/products" class="active">商品管理</a>
+        <a href="/admin/cards">卡密管理</a>
+        <a href="/admin/orders">订单管理</a>
+        <a href="/admin/users">用户管理</a>
+        <a href="/admin/categories">分类管理</a>
+    </div>
+    <div class="admin-content">
+        <div class="layui-card">
+            <div class="layui-card-header">{{if .product.ID}}编辑商品{{else}}添加商品{{end}}</div>
+            <div class="layui-card-body">
+                <form class="layui-form">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">商品名称</label>
+                        <div class="layui-input-block">
+                            <input type="text" id="name" value="{{.product.Name}}" class="layui-input" lay-verify="required">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">商品价格</label>
+                        <div class="layui-input-block">
+                            <input type="number" id="price" value="{{.product.Price}}" class="layui-input" lay-verify="required">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">商品分类</label>
+                        <div class="layui-input-block">
+                            <select id="category" lay-ignore>
+                                <option value="0">请选择分类</option>
+                                {{range .categories}}
+                                <option value="{{.ID}}" {{if eq .ID $.product.CategoryID}}selected{{end}}>{{.Name}}</option>
+                                {{end}}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">商品类型</label>
+                        <div class="layui-input-block">
+                            <input type="radio" name="type" value="1" title="卡密" {{if eq .product.Type 1}}checked{{end}}>
+                            <input type="radio" name="type" value="2" title="文本" {{if eq .product.Type 2}}checked{{end}}>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">上架状态</label>
+                        <div class="layui-input-block">
+                            <input type="radio" name="status" value="1" title="上架" {{if eq .product.Status 1}}checked{{end}}>
+                            <input type="radio" name="status" value="0" title="下架" {{if eq .product.Status 0}}checked{{end}}>
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-form-text">
+                        <label class="layui-form-label">商品描述</label>
+                        <div class="layui-input-block">
+                            <textarea id="description" class="layui-textarea" rows="5">{{.product.Description}}</textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button type="button" class="layui-btn" lay-submit onclick="saveProduct()">保存</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/layui@2.8.18/dist/layui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        function getSelected(name) {
+            var selected = document.querySelector('input[name="' + name + '"]:checked');
+            return selected ? selected.value : '';
+        }
+
+        function saveProduct() {
+            var productId = '{{.product.ID}}';
+            axios.post('/api/product/' + (productId || 'new'), {
+                name: document.getElementById('name').value,
+                price: parseFloat(document.getElementById('price').value),
+                category_id: parseInt(document.getElementById('category').value),
+                type: parseInt(getSelected('type')),
+                status: parseInt(getSelected('status')),
+                description: document.getElementById('description').value
+            }).then(function(res) {
+                if (res.data.code === 0) {
+                    layer.msg('保存成功', {icon: 1});
+                    setTimeout(function() {
+                        window.location.href = '/admin/products';
+                    }, 1000);
+                } else {
+                    layer.msg(res.data.msg, {icon: 2});
+                }
+            });
+        }
+    </script>
+</body>
+</html>
