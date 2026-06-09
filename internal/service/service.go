@@ -2,6 +2,7 @@ package service
 
 import (
 	"chenze-faka/internal/model"
+	"chenze-faka/internal/pkg/config"
 	"chenze-faka/internal/pkg/db"
 	"crypto/md5"
 	"encoding/hex"
@@ -291,23 +292,39 @@ func (s *CardService) Consume(productID uint, qty int, orderID uint) ([]model.Ca
 	}
 	var cards []model.Card
 	err := db.DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("product_id=? AND status=?", productID, 0).
-			Limit(qty).Order("id asc").Find(&cards).Error; err != nil {
+		// 使用 FOR UPDATE（MySQL）或 SQLite 事务隔离保证行级锁，避免并发超卖同一张卡
+		rows, err := tx.Raw(consumeLockSQL(productID, qty)).Rows()
+		if err != nil {
 			return err
 		}
-		if len(cards) < qty {
+		defer rows.Close()
+		ids := make([]uint, 0, qty)
+		for rows.Next() {
+			var id uint
+			if err := rows.Scan(&id); err != nil {
+				return err
+			}
+			ids = append(ids, id)
+		}
+		if len(ids) < qty {
 			return errors.New("库存不足")
 		}
-		ids := make([]uint, 0, len(cards))
-		for _, c := range cards {
-			ids = append(ids, c.ID)
-		}
+		// 再次锁定后更新（保证无其他事务抢占）
 		if err := tx.Model(&model.Card{}).Where("id IN ?", ids).
 			Updates(map[string]interface{}{"status": 1, "order_id": orderID}).Error; err != nil {
 			return err
 		}
-		if err := tx.Model(&model.Product{}).Where("id=?", productID).
-			Update("stock", gorm.Expr("stock - ?", qty)).Error; err != nil {
+		// 原子递减库存（使用条件更新避免负数）
+		res := tx.Model(&model.Product{}).Where("id=? AND stock >= ?", productID, qty).
+			Update("stock", gorm.Expr("stock - ?", qty))
+		if res.Error != nil {
+			return res.Error
+		}
+		if res.RowsAffected == 0 {
+			return errors.New("库存不足")
+		}
+		// 重新加载卡密信息
+		if err := tx.Where("id IN ?", ids).Find(&cards).Error; err != nil {
 			return err
 		}
 		return nil
@@ -316,6 +333,20 @@ func (s *CardService) Consume(productID uint, qty int, orderID uint) ([]model.Ca
 		return nil, err
 	}
 	return cards, nil
+}
+
+// consumeLockSQL 根据数据库驱动生成带行锁（或等价）的 SQL
+func consumeLockSQL(productID uint, qty int) string {
+	isSQLite := false
+	if config.AppConfig != nil && config.AppConfig.Database.IsSQLite() {
+		isSQLite = true
+	}
+	if isSQLite {
+		// SQLite: 在事务内读取已持有锁，无需 FOR UPDATE
+		return fmt.Sprintf("SELECT id FROM cards WHERE product_id=%d AND status=0 ORDER BY id ASC LIMIT %d", productID, qty)
+	}
+	// MySQL: SELECT ... FOR UPDATE 锁定选中行，避免并发读取同一张卡
+	return fmt.Sprintf("SELECT id FROM cards WHERE product_id=%d AND status=0 ORDER BY id ASC LIMIT %d FOR UPDATE", productID, qty)
 }
 
 type OrderService struct{}
@@ -412,48 +443,135 @@ func (s *OrderService) MarkPaid(orderNo, payType string) (*model.Order, error) {
 	if db.DB == nil {
 		return nil, errors.New("数据库未连接")
 	}
-	order, err := s.GetByOrderNo(orderNo)
+	var order model.Order
+
+	err := db.DB.Transaction(func(tx *gorm.DB) error {
+		// 1. 行锁锁定订单（MySQL: SELECT ... FOR UPDATE，SQLite 事务本身即持有锁）
+		var lockedOrder model.Order
+		sql := buildLockOrderSQL(orderNo)
+		rows, err := tx.Raw(sql).Rows()
+		if err != nil {
+			return err
+		}
+		if !rows.Next() {
+			rows.Close()
+			return gorm.ErrRecordNotFound
+		}
+		var id uint
+		if err := rows.Scan(&id); err != nil {
+			rows.Close()
+			return err
+		}
+		rows.Close()
+		if err := tx.First(&lockedOrder, id).Error; err != nil {
+			return err
+		}
+		order = lockedOrder
+		// 2. 幂等性：若已支付/已完成，直接返回成功（避免重复发货）
+		if order.Status != model.OrderStatusPending {
+			return nil
+		}
+		// 3. 扣减卡密 + 更新库存（内部已含行锁/事务）
+		cards, err := NewCardService().consumeInTx(tx, order.ProductID, order.Quantity, order.ID)
+		if err != nil {
+			return err
+		}
+		now := time.Now()
+		// 4. 更新订单状态为已支付
+		if err := tx.Model(&order).Updates(map[string]interface{}{
+			"status":   model.OrderStatusPaid,
+			"paid_at":  &now,
+			"pay_type": payType,
+		}).Error; err != nil {
+			return err
+		}
+		// 5. 写入 order_cards 发货记录
+		for _, c := range cards {
+			if err := tx.Create(&model.OrderCard{OrderID: order.ID, CardID: c.ID, CardData: c.CardData}).Error; err != nil {
+				return err
+			}
+		}
+		// 6. 增加商品销量
+		if err := tx.Model(&model.Product{}).Where("id=?", order.ProductID).
+			Update("sales", gorm.Expr("sales + ?", order.Quantity)).Error; err != nil {
+			return err
+		}
+		// 7. 标记订单已完成
+		if err := tx.Model(&order).Updates(map[string]interface{}{
+			"status":       model.OrderStatusCompleted,
+			"completed_at": &now,
+		}).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
-	if order.Status != model.OrderStatusPending {
-		return order, nil
+	return &order, nil
+}
+
+// buildLockOrderSQL 构造订单行锁查询 SQL（MySQL FOR UPDATE / SQLite 不需要）
+func buildLockOrderSQL(orderNo string) string {
+	if config.AppConfig != nil && config.AppConfig.Database.IsSQLite() {
+		return fmt.Sprintf("SELECT id FROM orders WHERE order_no='%s' LIMIT 1", orderNo)
 	}
-	cards, err := NewCardService().Consume(order.ProductID, order.Quantity, order.ID)
+	return fmt.Sprintf("SELECT id FROM orders WHERE order_no='%s' LIMIT 1 FOR UPDATE", orderNo)
+}
+
+// consumeInTx 在现有事务内执行卡密扣减（用于 MarkPaid 的链式事务）
+func (s *CardService) consumeInTx(tx *gorm.DB, productID uint, qty int, orderID uint) ([]model.Card, error) {
+	rows, err := tx.Raw(consumeLockSQL(productID, qty)).Rows()
 	if err != nil {
 		return nil, err
 	}
-	now := time.Now()
-	tx := db.DB.Begin()
-	if err := tx.Model(order).Updates(map[string]interface{}{
-		"status":   model.OrderStatusPaid,
-		"paid_at":  &now,
-		"pay_type": payType,
-	}).Error; err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-	for _, c := range cards {
-		if err := tx.Create(&model.OrderCard{OrderID: order.ID, CardID: c.ID, CardData: c.CardData}).Error; err != nil {
-			tx.Rollback()
+	defer rows.Close()
+	ids := make([]uint, 0, qty)
+	for rows.Next() {
+		var id uint
+		if err := rows.Scan(&id); err != nil {
 			return nil, err
 		}
+		ids = append(ids, id)
 	}
-	if err := tx.Model(&model.Product{}).Where("id=?", order.ProductID).
-		Update("sales", gorm.Expr("sales + ?", order.Quantity)).Error; err != nil {
-		tx.Rollback()
+	if len(ids) < qty {
+		return nil, errors.New("库存不足")
+	}
+	if err := tx.Model(&model.Card{}).Where("id IN ?", ids).
+		Updates(map[string]interface{}{"status": 1, "order_id": orderID}).Error; err != nil {
 		return nil, err
 	}
-	completed := time.Now()
-	if err := tx.Model(order).Updates(map[string]interface{}{
-		"status":        model.OrderStatusCompleted,
-		"completed_at": &completed,
-	}).Error; err != nil {
-		tx.Rollback()
+	res := tx.Model(&model.Product{}).Where("id=? AND stock >= ?", productID, qty).
+		Update("stock", gorm.Expr("stock - ?", qty))
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	if res.RowsAffected == 0 {
+		return nil, errors.New("库存不足")
+	}
+	var cards []model.Card
+	if err := tx.Where("id IN ?", ids).Find(&cards).Error; err != nil {
 		return nil, err
 	}
-	tx.Commit()
-	return order, nil
+	return cards, nil
+}
+
+// orderByLockClause 返回当前数据库的行锁子句（MySQL FOR UPDATE，SQLite 留空）
+func orderByLockClause() (clause gorm.StatementModifier) {
+	if config.AppConfig != nil && config.AppConfig.Database.IsSQLite() {
+		return nil
+	}
+	// 使用 gorm 的原生子句：手写 FOR UPDATE
+	return &forUpdateClause{}
+}
+
+type forUpdateClause struct{}
+
+func (f *forUpdateClause) ModifyStatement(stmt *gorm.Statement) {
+	if config.AppConfig != nil && config.AppConfig.Database.IsSQLite() {
+		return
+	}
+	stmt.WriteString(" LOCK IN SHARE MODE")
 }
 
 func (s *OrderService) GetOrderCards(orderID uint) ([]model.OrderCard, error) {
