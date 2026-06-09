@@ -3,20 +3,17 @@ server:
   mode: release
 
 database:
-  host: localhost
-  port: 3306
-  user: root
-  password: 
-  dbname: chenze_faka
+  driver: sqlite
+  dbname: /workspace/chenze_faka.db
 
 jwt:
-  secret: your-secret-key-here-change-this
+  secret: test-secret-key-for-concurrent-testing
   expire: 24
 
 pay:
   epay:
     api_url: https://pay.example.com
-    mch_id: your-mch-id
-    key: your-key
-    notify_url: http://your-domain.com/pay/epay/notify
-    return_url: http://your-domain.com/pay/epay/return
+    mch_id: test_mch_id
+    key: test_key_for_signature
+    notify_url: http://localhost:8080/api/v1/pay/epay/notify
+    return_url: http://localhost:8080/api/v1/pay/epay/return
