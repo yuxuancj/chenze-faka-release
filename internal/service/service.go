@@ -20,6 +20,9 @@ type UserService struct{}
 func NewUserService() *UserService { return &UserService{} }
 
 func (s *UserService) Register(email, password, nickname string) (*model.User, error) {
+	if db.DB == nil {
+		return nil, errors.New("数据库未连接")
+	}
 	email = strings.ToLower(strings.TrimSpace(email))
 	var count int64
 	db.DB.Model(&model.User{}).Where("email = ?", email).Count(&count)
@@ -47,6 +50,9 @@ func (s *UserService) Register(email, password, nickname string) (*model.User, e
 }
 
 func (s *UserService) Login(email, password string) (*model.User, error) {
+	if db.DB == nil {
+		return nil, errors.New("数据库未连接")
+	}
 	email = strings.ToLower(strings.TrimSpace(email))
 	u := &model.User{}
 	if err := db.DB.Where("email = ?", email).First(u).Error; err != nil {
@@ -62,6 +68,9 @@ func (s *UserService) Login(email, password string) (*model.User, error) {
 }
 
 func (s *UserService) GetByID(id uint) (*model.User, error) {
+	if db.DB == nil {
+		return nil, errors.New("数据库未连接")
+	}
 	u := &model.User{}
 	if err := db.DB.First(u, id).Error; err != nil {
 		return nil, err
@@ -70,10 +79,16 @@ func (s *UserService) GetByID(id uint) (*model.User, error) {
 }
 
 func (s *UserService) UpdateProfile(id uint, nickname string) error {
+	if db.DB == nil {
+		return errors.New("数据库未连接")
+	}
 	return db.DB.Model(&model.User{}).Where("id=?", id).Update("nickname", nickname).Error
 }
 
 func (s *UserService) ChangePassword(id uint, oldPwd, newPwd string) error {
+	if db.DB == nil {
+		return errors.New("数据库未连接")
+	}
 	u := &model.User{}
 	if err := db.DB.First(u, id).Error; err != nil {
 		return err
@@ -89,6 +104,9 @@ func (s *UserService) ChangePassword(id uint, oldPwd, newPwd string) error {
 }
 
 func (s *UserService) List(page, size int) (int64, []model.User, error) {
+	if db.DB == nil {
+		return 0, nil, errors.New("数据库未连接")
+	}
 	var total int64
 	var list []model.User
 	db.DB.Model(&model.User{}).Count(&total)
@@ -103,6 +121,9 @@ type CategoryService struct{}
 func NewCategoryService() *CategoryService { return &CategoryService{} }
 
 func (s *CategoryService) All() ([]model.Category, error) {
+	if db.DB == nil {
+		return nil, errors.New("数据库未连接")
+	}
 	var list []model.Category
 	if err := db.DB.Order("sort asc, id desc").Find(&list).Error; err != nil {
 		return nil, err
@@ -111,6 +132,9 @@ func (s *CategoryService) All() ([]model.Category, error) {
 }
 
 func (s *CategoryService) Create(name string, parentID uint, sort int) (*model.Category, error) {
+	if db.DB == nil {
+		return nil, errors.New("数据库未连接")
+	}
 	c := &model.Category{Name: name, ParentID: parentID, Sort: sort, Status: 1}
 	if err := db.DB.Create(c).Error; err != nil {
 		return nil, err
@@ -119,10 +143,16 @@ func (s *CategoryService) Create(name string, parentID uint, sort int) (*model.C
 }
 
 func (s *CategoryService) Update(id uint, name string, sort int) error {
+	if db.DB == nil {
+		return errors.New("数据库未连接")
+	}
 	return db.DB.Model(&model.Category{}).Where("id=?", id).Updates(map[string]interface{}{"name": name, "sort": sort}).Error
 }
 
 func (s *CategoryService) Delete(id uint) error {
+	if db.DB == nil {
+		return errors.New("数据库未连接")
+	}
 	return db.DB.Delete(&model.Category{}, id).Error
 }
 
@@ -131,6 +161,9 @@ type ProductService struct{}
 func NewProductService() *ProductService { return &ProductService{} }
 
 func (s *ProductService) List(page, size int, categoryID uint, keyword string) (int64, []model.Product, error) {
+	if db.DB == nil {
+		return 0, nil, errors.New("数据库未连接")
+	}
 	var total int64
 	var list []model.Product
 	query := db.DB.Model(&model.Product{}).Where("status=? AND is_hidden=?", 1, false)
@@ -148,6 +181,9 @@ func (s *ProductService) List(page, size int, categoryID uint, keyword string) (
 }
 
 func (s *ProductService) AdminList(page, size int, keyword string) (int64, []model.Product, error) {
+	if db.DB == nil {
+		return 0, nil, errors.New("数据库未连接")
+	}
 	var total int64
 	var list []model.Product
 	query := db.DB.Model(&model.Product{})
@@ -162,6 +198,9 @@ func (s *ProductService) AdminList(page, size int, keyword string) (int64, []mod
 }
 
 func (s *ProductService) GetByID(id uint) (*model.Product, error) {
+	if db.DB == nil {
+		return nil, errors.New("数据库未连接")
+	}
 	p := &model.Product{}
 	if err := db.DB.First(p, id).Error; err != nil {
 		return nil, err
@@ -170,14 +209,23 @@ func (s *ProductService) GetByID(id uint) (*model.Product, error) {
 }
 
 func (s *ProductService) Create(p *model.Product) error {
+	if db.DB == nil {
+		return errors.New("数据库未连接")
+	}
 	return db.DB.Create(p).Error
 }
 
 func (s *ProductService) Update(id uint, data map[string]interface{}) error {
+	if db.DB == nil {
+		return errors.New("数据库未连接")
+	}
 	return db.DB.Model(&model.Product{}).Where("id=?", id).Updates(data).Error
 }
 
 func (s *ProductService) Delete(id uint) error {
+	if db.DB == nil {
+		return errors.New("数据库未连接")
+	}
 	return db.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Delete(&model.Product{}, id).Error; err != nil {
 			return err
@@ -191,6 +239,9 @@ type CardService struct{}
 func NewCardService() *CardService { return &CardService{} }
 
 func (s *CardService) Import(productID uint, cards []string) (int, error) {
+	if db.DB == nil {
+		return 0, errors.New("数据库未连接")
+	}
 	tx := db.DB.Begin()
 	count := 0
 	for _, cd := range cards {
@@ -214,6 +265,9 @@ func (s *CardService) Import(productID uint, cards []string) (int, error) {
 }
 
 func (s *CardService) ListByProduct(productID uint, page, size int) (int64, []model.Card, error) {
+	if db.DB == nil {
+		return 0, nil, errors.New("数据库未连接")
+	}
 	var total int64
 	var list []model.Card
 	db.DB.Model(&model.Card{}).Where("product_id=?", productID).Count(&total)
@@ -224,6 +278,9 @@ func (s *CardService) ListByProduct(productID uint, page, size int) (int64, []mo
 }
 
 func (s *CardService) Consume(productID uint, qty int, orderID uint) ([]model.Card, error) {
+	if db.DB == nil {
+		return nil, errors.New("数据库未连接")
+	}
 	var cards []model.Card
 	err := db.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Where("product_id=? AND status=?", productID, 0).
@@ -258,6 +315,9 @@ type OrderService struct{}
 func NewOrderService() *OrderService { return &OrderService{} }
 
 func (s *OrderService) Create(userID, productID uint, qty int, email, payType, remark string) (*model.Order, error) {
+	if db.DB == nil {
+		return nil, errors.New("数据库未连接")
+	}
 	product, err := NewProductService().GetByID(productID)
 	if err != nil {
 		return nil, errors.New("商品不存在")
@@ -271,14 +331,14 @@ func (s *OrderService) Create(userID, productID uint, qty int, email, payType, r
 	amount := product.Price * float64(qty)
 	orderNo := generateOrderNo()
 	order := &model.Order{
-		OrderNo:         orderNo,
-		UserID:          userID,
-		ProductID:       productID,
-		ProductSnapshot: fmt.Sprintf("%s|单价:%.2f", product.Name, product.Price),
-		Quantity:        qty,
-		Amount:          amount,
-		PayType:         payType,
-		Status:          model.OrderStatusPending,
+		OrderNo:          orderNo,
+		UserID:           userID,
+		ProductID:        productID,
+		ProductSnapshot:  fmt.Sprintf("%s|单价:%.2f", product.Name, product.Price),
+		Quantity:         qty,
+		Amount:           amount,
+		PayType:          payType,
+		Status:           model.OrderStatusPending,
 		Email:           email,
 		Remark:          remark,
 	}
@@ -289,6 +349,9 @@ func (s *OrderService) Create(userID, productID uint, qty int, email, payType, r
 }
 
 func (s *OrderService) GetByOrderNo(orderNo string) (*model.Order, error) {
+	if db.DB == nil {
+		return nil, errors.New("数据库未连接")
+	}
 	o := &model.Order{}
 	if err := db.DB.Where("order_no=?", orderNo).First(o).Error; err != nil {
 		return nil, err
@@ -297,6 +360,9 @@ func (s *OrderService) GetByOrderNo(orderNo string) (*model.Order, error) {
 }
 
 func (s *OrderService) GetByID(id uint) (*model.Order, error) {
+	if db.DB == nil {
+		return nil, errors.New("数据库未连接")
+	}
 	o := &model.Order{}
 	if err := db.DB.First(o, id).Error; err != nil {
 		return nil, err
@@ -305,6 +371,9 @@ func (s *OrderService) GetByID(id uint) (*model.Order, error) {
 }
 
 func (s *OrderService) ListByUser(userID uint, page, size int) (int64, []model.Order, error) {
+	if db.DB == nil {
+		return 0, nil, errors.New("数据库未连接")
+	}
 	var total int64
 	var list []model.Order
 	db.DB.Model(&model.Order{}).Where("user_id=?", userID).Count(&total)
@@ -315,6 +384,9 @@ func (s *OrderService) ListByUser(userID uint, page, size int) (int64, []model.O
 }
 
 func (s *OrderService) AdminList(page, size int, keyword string) (int64, []model.Order, error) {
+	if db.DB == nil {
+		return 0, nil, errors.New("数据库未连接")
+	}
 	var total int64
 	var list []model.Order
 	query := db.DB.Model(&model.Order{})
@@ -329,6 +401,9 @@ func (s *OrderService) AdminList(page, size int, keyword string) (int64, []model
 }
 
 func (s *OrderService) MarkPaid(orderNo, payType string) (*model.Order, error) {
+	if db.DB == nil {
+		return nil, errors.New("数据库未连接")
+	}
 	order, err := s.GetByOrderNo(orderNo)
 	if err != nil {
 		return nil, err
@@ -343,8 +418,8 @@ func (s *OrderService) MarkPaid(orderNo, payType string) (*model.Order, error) {
 	now := time.Now()
 	tx := db.DB.Begin()
 	if err := tx.Model(order).Updates(map[string]interface{}{
-		"status":  model.OrderStatusPaid,
-		"paid_at": &now,
+		"status":   model.OrderStatusPaid,
+		"paid_at":  &now,
 		"pay_type": payType,
 	}).Error; err != nil {
 		tx.Rollback()
@@ -363,7 +438,7 @@ func (s *OrderService) MarkPaid(orderNo, payType string) (*model.Order, error) {
 	}
 	completed := time.Now()
 	if err := tx.Model(order).Updates(map[string]interface{}{
-		"status":       model.OrderStatusCompleted,
+		"status":        model.OrderStatusCompleted,
 		"completed_at": &completed,
 	}).Error; err != nil {
 		tx.Rollback()
@@ -374,6 +449,9 @@ func (s *OrderService) MarkPaid(orderNo, payType string) (*model.Order, error) {
 }
 
 func (s *OrderService) GetOrderCards(orderID uint) ([]model.OrderCard, error) {
+	if db.DB == nil {
+		return nil, errors.New("数据库未连接")
+	}
 	var list []model.OrderCard
 	if err := db.DB.Where("order_id=?", orderID).Find(&list).Error; err != nil {
 		return nil, err
@@ -385,7 +463,11 @@ type SettingService struct{}
 
 func NewSettingService() *SettingService { return &SettingService{} }
 
+// Get 安全读取配置项，db 未初始化时返回默认值
 func (s *SettingService) Get(key, def string) string {
+	if db.DB == nil {
+		return def
+	}
 	setting := &model.Setting{}
 	if err := db.DB.Where("`key`=?", key).First(setting).Error; err != nil {
 		return def
@@ -394,6 +476,9 @@ func (s *SettingService) Get(key, def string) string {
 }
 
 func (s *SettingService) Set(key, value string) error {
+	if db.DB == nil {
+		return errors.New("数据库未连接")
+	}
 	setting := &model.Setting{}
 	err := db.DB.Where("`key`=?", key).First(setting).Error
 	if err == gorm.ErrRecordNotFound {

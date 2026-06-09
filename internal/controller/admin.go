@@ -7,7 +7,6 @@ import (
 	"chenze-faka/internal/pkg/jwt"
 	"chenze-faka/internal/pkg/response"
 	"chenze-faka/internal/service"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -36,19 +35,19 @@ func (a *AdminController) Login(ctx *gin.Context) {
 func (a *AdminController) Dashboard(ctx *gin.Context) {
 	var userCount, productCount, orderCount int64
 	var totalAmount float64
-	db.DB.Model(&model.User{}).Count(&userCount)
-	db.DB.Model(&model.Product{}).Count(&productCount)
-	db.DB.Model(&model.Order{}).Count(&orderCount)
-	db.DB.Model(&model.Order{}).Where("status IN ?", []int{1, 2}).Select("IFNULL(SUM(amount),0)").Scan(&totalAmount)
+	if db.DB != nil {
+		db.DB.Model(&model.User{}).Count(&userCount)
+		db.DB.Model(&model.Product{}).Count(&productCount)
+		db.DB.Model(&model.Order{}).Count(&orderCount)
+		db.DB.Model(&model.Order{}).Where("status IN ?", []int{1, 2}).Select("IFNULL(SUM(amount),0)").Scan(&totalAmount)
+	}
 	response.Success(ctx, gin.H{
 		"user_count":    userCount,
 		"product_count": productCount,
 		"order_count":   orderCount,
-		"total_amount":  totalAmount,
+		"total_amount":   totalAmount,
 	})
 }
-
-// ========== Product Management ==========
 
 func (a *AdminController) ProductList(ctx *gin.Context) {
 	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
@@ -67,11 +66,11 @@ func (a *AdminController) ProductCreate(ctx *gin.Context) {
 		CategoryID  uint    `json:"category_id" form:"category_id"`
 		Name        string  `json:"name" form:"name"`
 		Description string  `json:"description" form:"description"`
-		Price       float64 `json:"price" form:"price"`
-		Stock       int     `json:"stock" form:"stock"`
-		Image       string  `json:"image" form:"image"`
-		Type        string  `json:"type" form:"type"`
-		Status      int     `json:"status" form:"status"`
+		Price      float64 `json:"price" form:"price"`
+		Stock      int     `json:"stock" form:"stock"`
+		Image      string  `json:"image" form:"image"`
+		Type       string  `json:"type" form:"type"`
+		Status     int     `json:"status" form:"status"`
 	}
 	ctx.ShouldBind(&req)
 	if req.Name == "" || req.Price <= 0 {
@@ -121,8 +120,6 @@ func (a *AdminController) ProductDelete(ctx *gin.Context) {
 	response.OK(ctx)
 }
 
-// ========== Card Management ==========
-
 func (a *AdminController) CardList(ctx *gin.Context) {
 	productID, _ := strconv.Atoi(ctx.Query("product_id"))
 	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
@@ -150,8 +147,6 @@ func (a *AdminController) CardImport(ctx *gin.Context) {
 	}
 	response.Success(ctx, gin.H{"count": count})
 }
-
-// ========== Category Management ==========
 
 func (a *AdminController) CategoryList(ctx *gin.Context) {
 	list, _ := service.NewCategoryService().All()
@@ -196,8 +191,6 @@ func (a *AdminController) CategoryDelete(ctx *gin.Context) {
 	response.OK(ctx)
 }
 
-// ========== Order Management ==========
-
 func (a *AdminController) OrderList(ctx *gin.Context) {
 	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
 	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "20"))
@@ -232,8 +225,6 @@ func (a *AdminController) UserList(ctx *gin.Context) {
 	response.Success(ctx, gin.H{"total": total, "list": list, "page": page, "size": size})
 }
 
-// ========== Settings ==========
-
 func (a *AdminController) SettingsGet(ctx *gin.Context) {
 	ss := service.NewSettingService()
 	response.Success(ctx, gin.H{
@@ -252,8 +243,6 @@ func (a *AdminController) SettingsSet(ctx *gin.Context) {
 	response.OK(ctx)
 }
 
-// ========== Helper functions ==========
-
 func splitLines(s string) []string {
 	lines := strings.Split(s, "\n")
 	out := make([]string, 0, len(lines))
@@ -264,14 +253,4 @@ func splitLines(s string) []string {
 		}
 	}
 	return out
-}
-
-// renderHTML renders HTML template with common data
-func renderHTML(ctx *gin.Context, template string, data gin.H) {
-	if data == nil {
-		data = gin.H{}
-	}
-	ss := service.NewSettingService()
-	data["site_name"] = ss.Get("site_name", "晨泽发卡")
-	ctx.HTML(http.StatusOK, template, data)
 }
