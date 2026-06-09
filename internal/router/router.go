@@ -5,12 +5,20 @@ import (
 	"chenze-faka/internal/middleware"
 	"chenze-faka/internal/pkg/config"
 	"chenze-faka/internal/service"
+	"chenze-faka/web"
+	"html/template"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func Setup(r *gin.Engine) {
+	tmpl, err := template.ParseFS(web.StaticFiles, "templates/**/*.html")
+	if err != nil {
+		panic("parse templates from embed: " + err.Error())
+	}
+	r.SetHTMLTemplate(tmpl)
+
 	jwtSecret := config.AppConfig.JWT.Secret
 
 	// CORS for API
@@ -83,81 +91,79 @@ func Setup(r *gin.Engine) {
 }
 
 func setupPages(r *gin.Engine) {
-	// 前台页面
 	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", commonData(c))
+		c.HTML(http.StatusOK, "templates/index.html", commonData(c))
 	})
 	r.GET("/products", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "product/list.html", commonData(c))
+		c.HTML(http.StatusOK, "templates/product/list.html", commonData(c))
 	})
 	r.GET("/product/:id", func(c *gin.Context) {
 		data := commonData(c)
 		data["product_id"] = c.Param("id")
-		c.HTML(http.StatusOK, "product/detail.html", data)
+		c.HTML(http.StatusOK, "templates/product/detail.html", data)
 	})
 	r.GET("/user/login", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "user/login.html", commonData(c))
+		c.HTML(http.StatusOK, "templates/user/login.html", commonData(c))
 	})
 	r.GET("/user/register", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "user/register.html", commonData(c))
+		c.HTML(http.StatusOK, "templates/user/register.html", commonData(c))
 	})
 	r.GET("/user/profile", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "user/profile.html", commonData(c))
+		c.HTML(http.StatusOK, "templates/user/profile.html", commonData(c))
 	})
 	r.GET("/user/orders", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "user/orders.html", commonData(c))
+		c.HTML(http.StatusOK, "templates/user/orders.html", commonData(c))
 	})
 	r.GET("/order/:order_no", func(c *gin.Context) {
 		data := commonData(c)
 		data["order_no"] = c.Param("order_no")
-		c.HTML(http.StatusOK, "order/detail.html", data)
+		c.HTML(http.StatusOK, "templates/order/detail.html", data)
 	})
 
-	// 后台页面
 	admin := r.Group("/admin")
 	{
 		admin.GET("/login", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "admin/login.html", commonData(c))
+			c.HTML(http.StatusOK, "templates/admin/login.html", commonData(c))
 		})
 		admin.GET("", func(c *gin.Context) {
 			c.Redirect(http.StatusFound, "/admin/")
 		})
 		admin.GET("/", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "admin/dashboard.html", commonData(c))
+			c.HTML(http.StatusOK, "templates/admin/dashboard.html", commonData(c))
 		})
 		admin.GET("/products", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "admin/products.html", commonData(c))
+			c.HTML(http.StatusOK, "templates/admin/products.html", commonData(c))
 		})
 		admin.GET("/product/new", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "admin/product_edit.html", commonData(c))
+			c.HTML(http.StatusOK, "templates/admin/product_edit.html", commonData(c))
 		})
 		admin.GET("/product/:id", func(c *gin.Context) {
 			data := commonData(c)
 			data["product_id"] = c.Param("id")
-			c.HTML(http.StatusOK, "admin/product_edit.html", data)
+			c.HTML(http.StatusOK, "templates/admin/product_edit.html", data)
 		})
 		admin.GET("/cards", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "admin/cards.html", commonData(c))
+			c.HTML(http.StatusOK, "templates/admin/cards.html", commonData(c))
 		})
 		admin.GET("/categories", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "admin/categories.html", commonData(c))
+			c.HTML(http.StatusOK, "templates/admin/categories.html", commonData(c))
 		})
 		admin.GET("/orders", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "admin/orders.html", commonData(c))
+			c.HTML(http.StatusOK, "templates/admin/orders.html", commonData(c))
 		})
 		admin.GET("/users", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "admin/users.html", commonData(c))
+			c.HTML(http.StatusOK, "templates/admin/users.html", commonData(c))
 		})
 	}
 
-	// 安装向导（可选）
+	// 安装向导（嵌入二进制）
 	r.GET("/install", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "install/index.html", commonData(c))
+		c.HTML(http.StatusOK, "templates/install/index.html", commonData(c))
 	})
 
 	// 404
 	r.NoRoute(func(c *gin.Context) {
-		c.HTML(http.StatusNotFound, "404.html", commonData(c))
+		c.HTML(http.StatusNotFound, "templates/404.html", commonData(c))
 	})
 }
 

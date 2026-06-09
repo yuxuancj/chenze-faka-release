@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -25,7 +24,7 @@ func main() {
 	}
 	logger.Infof("starting chenze-faka...")
 
-	// 配置加载
+	// 配置加载：优先读取 config.yaml，找不到则回退到 config.yaml.example
 	cfgPath := "config.yaml"
 	if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
 		if _, err := os.Stat("config.yaml.example"); err == nil {
@@ -38,9 +37,9 @@ func main() {
 		logger.Fatalf("load config failed: %v", err)
 	}
 
-	// 数据库初始化
+	// 数据库初始化（可降级：数据库连不上时跳过迁移，继续启动）
 	if err := db.Init(config.AppConfig.Database.DSN()); err != nil {
-		logger.Errorf("db init failed: %v (will continue with degraded mode)", err)
+		logger.Errorf("db init failed: %v (degraded mode)", err)
 	} else {
 		if err := db.DB.AutoMigrate(
 			&model.User{},
@@ -66,18 +65,7 @@ func main() {
 	}
 	r := gin.Default()
 
-	// 加载模板：先扫描 html 文件，再逐个注册为其相对路径
-	baseDir := "templates"
-	if info, err := os.Stat(baseDir); err == nil && info.IsDir() {
-		htmlFiles := collectHTML(baseDir)
-		if len(htmlFiles) > 0 {
-			templ := gin.New().HTMLRender
-			_ = templ
-			// 直接用 LoadHTMLGlob 做初步加载，再覆盖
-			r.LoadHTMLGlob(filepath.Join(baseDir, "**/*"))
-		}
-	}
-
+	// 路由（含 embed 模板加载，运行时无需外部 templates/ 目录）
 	router.Setup(r)
 
 	port := config.AppConfig.Server.Port
@@ -88,20 +76,6 @@ func main() {
 	if err := r.Run(fmt.Sprintf(":%d", port)); err != nil {
 		logger.Fatalf("server error: %v", err)
 	}
-}
-
-func collectHTML(baseDir string) []string {
-	var files []string
-	filepath.Walk(baseDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() {
-			return nil
-		}
-		if filepath.Ext(path) == ".html" {
-			files = append(files, path)
-		}
-		return nil
-	})
-	return files
 }
 
 func seedIfEmpty() {
