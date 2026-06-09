@@ -79,10 +79,18 @@ func (s *UserService) GetByID(id uint) (*model.User, error) {
 }
 
 func (s *UserService) UpdateProfile(id uint, nickname string) error {
-	if db.DB == nil {
+	if !db.IsReady() {
 		return errors.New("数据库未连接")
 	}
 	return db.DB.Model(&model.User{}).Where("id=?", id).Update("nickname", nickname).Error
+}
+
+// UpdateUserByAdmin 管理员更新用户（余额、积分、等级、状态）
+func (s *UserService) UpdateUserByAdmin(id uint, updates map[string]interface{}) error {
+	if !db.IsReady() {
+		return errors.New("数据库未连接")
+	}
+	return db.DB.Model(&model.User{}).Where("id=?", id).Updates(updates).Error
 }
 
 func (s *UserService) ChangePassword(id uint, oldPwd, newPwd string) error {
@@ -463,9 +471,9 @@ type SettingService struct{}
 
 func NewSettingService() *SettingService { return &SettingService{} }
 
-// Get 安全读取配置项，db 未初始化时返回默认值
+// Get 安全读取配置项，db 未初始化或不可用时返回默认值
 func (s *SettingService) Get(key, def string) string {
-	if db.DB == nil {
+	if !db.IsReady() {
 		return def
 	}
 	setting := &model.Setting{}

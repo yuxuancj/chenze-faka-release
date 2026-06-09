@@ -64,11 +64,13 @@ func Setup(r *gin.Engine) {
 		adminAPI.GET("/orders", admin.OrderList)
 		adminAPI.GET("/orders/:id", admin.OrderDetail)
 		adminAPI.GET("/users", admin.UserList)
+		adminAPI.PUT("/users/:id", admin.UserUpdate)
 		adminAPI.GET("/settings", admin.SettingsGet)
 		adminAPI.POST("/settings", admin.SettingsSet)
 	}
 
 	setupPages(r)
+	setupInstallAPI(r)
 }
 
 // renderEmbed 从 embed.FS 加载单个模板文件并渲染
@@ -174,5 +176,15 @@ func commonData(c *gin.Context) map[string]interface{} {
 	return map[string]interface{}{
 		"site_name": ss.Get("site_name", "晨泽发卡"),
 		"site_desc": ss.Get("site_desc", ""),
+	}
+}
+
+// setupInstallAPI 注册安装向导 API 路由
+func setupInstallAPI(r *gin.Engine) {
+	install := controller.NewInstallController()
+	installAPI := r.Group("/install/api")
+	{
+		installAPI.GET("/env", install.EnvCheck)
+		installAPI.POST("/install", install.Install)
 	}
 }

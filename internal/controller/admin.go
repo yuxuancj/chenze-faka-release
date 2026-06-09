@@ -225,6 +225,57 @@ func (a *AdminController) UserList(ctx *gin.Context) {
 	response.Success(ctx, gin.H{"total": total, "list": list, "page": page, "size": size})
 }
 
+func (a *AdminController) UserUpdate(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		response.Error(ctx, response.CodeParamError, "无效的用户ID")
+		return
+	}
+
+	var req struct {
+		Nickname *string  `json:"nickname"`
+		Balance  *float64 `json:"balance"`
+		Points   *int     `json:"points"`
+		Level    *int     `json:"level"`
+		Status   *int     `json:"status"`
+	}
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		response.Error(ctx, response.CodeParamError, "参数错误")
+		return
+	}
+
+	updates := make(map[string]interface{})
+	if req.Nickname != nil {
+		updates["nickname"] = *req.Nickname
+	}
+	if req.Balance != nil {
+		updates["balance"] = *req.Balance
+	}
+	if req.Points != nil {
+		updates["points"] = *req.Points
+	}
+	if req.Level != nil {
+		updates["level"] = *req.Level
+	}
+	if req.Status != nil {
+		updates["status"] = *req.Status
+	}
+
+	if len(updates) == 0 {
+		response.Error(ctx, response.CodeParamError, "没有要更新的字段")
+		return
+	}
+
+	if err := service.NewUserService().UpdateUserByAdmin(uint(id), updates); err != nil {
+		response.Error(ctx, response.CodeServerError, err.Error())
+		return
+	}
+
+	response.Success(ctx, gin.H{"message": "更新成功"})
+}
+
 func (a *AdminController) SettingsGet(ctx *gin.Context) {
 	ss := service.NewSettingService()
 	response.Success(ctx, gin.H{

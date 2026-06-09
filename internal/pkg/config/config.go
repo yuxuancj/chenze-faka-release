@@ -20,6 +20,7 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
+	Driver   string `yaml:"driver"`   // mysql 或 sqlite，默认 mysql
 	Host     string `yaml:"host"`
 	Port     int    `yaml:"port"`
 	User     string `yaml:"user"`
@@ -60,6 +61,20 @@ func Load(path string) error {
 }
 
 func (c *DatabaseConfig) DSN() string {
+	if c.Driver == "sqlite" {
+		return c.DBName // SQLite DSN 是文件路径
+	}
+	// MySQL DSN
+	if c.Host == "" {
+		c.Host = "127.0.0.1"
+	}
+	if c.Port == 0 {
+		c.Port = 3306
+	}
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		c.User, c.Password, c.Host, c.Port, c.DBName)
+}
+
+func (c *DatabaseConfig) IsSQLite() bool {
+	return c.Driver == "sqlite"
 }
