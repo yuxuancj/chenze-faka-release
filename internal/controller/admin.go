@@ -7,6 +7,7 @@ import (
 	"chenze-faka/internal/pkg/jwt"
 	"chenze-faka/internal/pkg/response"
 	"chenze-faka/internal/service"
+	"io"
 	"strconv"
 	"strings"
 
@@ -134,7 +135,22 @@ func (a *AdminController) CardList(ctx *gin.Context) {
 
 func (a *AdminController) CardImport(ctx *gin.Context) {
 	productID, _ := strconv.Atoi(ctx.PostForm("product_id"))
+	// 处理两种情况：1) 普通文本字段  2) multipart 文件上传
 	cardsStr := ctx.PostForm("cards")
+	if cardsStr == "" {
+		// multipart 文件上传模式
+		file, err := ctx.FormFile("cards")
+		if err == nil && file != nil {
+			fp, err := file.Open()
+			if err == nil {
+				defer fp.Close()
+				data, err := io.ReadAll(fp)
+				if err == nil {
+					cardsStr = string(data)
+				}
+			}
+		}
+	}
 	if productID == 0 || cardsStr == "" {
 		response.Error(ctx, response.CodeParamError, "参数错误")
 		return

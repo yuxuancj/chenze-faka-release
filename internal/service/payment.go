@@ -40,7 +40,7 @@ func (s *EpayService) BuildRedirectURL(orderNo string, amount float64, productNa
 	return u.String()
 }
 
-// sign 生成 MD5 签名（参数按字母排序后拼接 key）
+// sign 生成 MD5 签名（参数按字母排序后拼接 &key=KEY）
 func (s *EpayService) sign(params map[string]string, key string) string {
 	keys := make([]string, 0, len(params))
 	for k := range params {
@@ -56,6 +56,7 @@ func (s *EpayService) sign(params map[string]string, key string) string {
 		sb.WriteString("=")
 		sb.WriteString(params[k])
 	}
+	sb.WriteString("&key=")
 	sb.WriteString(key)
 	h := md5.Sum([]byte(sb.String()))
 	return hex.EncodeToString(h[:])

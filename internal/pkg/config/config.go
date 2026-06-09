@@ -62,7 +62,8 @@ func Load(path string) error {
 
 func (c *DatabaseConfig) DSN() string {
 	if c.Driver == "sqlite" {
-		return c.DBName // SQLite DSN 是文件路径
+		// 添加 busy_timeout 防止并发写入冲突，DELETE journal mode 避免 WAL 权限问题
+		return c.DBName + "?_busy_timeout=30000&_journal_mode=DELETE"
 	}
 	// MySQL DSN
 	if c.Host == "" {

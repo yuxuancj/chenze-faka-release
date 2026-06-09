@@ -65,8 +65,8 @@ func Init(dsn string) error {
 	}
 
 	if config.AppConfig != nil && config.AppConfig.Database.IsSQLite() {
-		sqlDB.SetMaxIdleConns(10)
-		sqlDB.SetMaxOpenConns(100)
+		sqlDB.SetMaxIdleConns(5)
+		sqlDB.SetMaxOpenConns(5) // SQLite 允许少量并发连接用于读
 	} else {
 		sqlDB.SetMaxIdleConns(10)
 		sqlDB.SetMaxOpenConns(100)

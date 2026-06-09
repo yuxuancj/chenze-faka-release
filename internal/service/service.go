@@ -357,34 +357,60 @@ func (s *OrderService) Create(userID, productID uint, qty int, email, payType, r
 	if db.DB == nil {
 		return nil, errors.New("数据库未连接")
 	}
-	product, err := NewProductService().GetByID(productID)
+	var order *model.Order
+	err := db.DB.Transaction(func(tx *gorm.DB) error {
+		// 1. 对商品行加排他锁（FOR UPDATE），防止并发下单时超卖
+		var product model.Product
+		if err := tx.Raw(buildProductLockSQL(productID)).First(&product).Error; err != nil {
+			return errors.New("商品不存在")
+		}
+		if product.Status != 1 {
+			return errors.New("商品已下架")
+		}
+		if product.Stock < qty {
+			return errors.New("库存不足")
+		}
+		// 2. 原子递减商品库存（条件更新：stock >= qty，避免负数）
+		res := tx.Model(&model.Product{}).Where("id=? AND stock >= ?", productID, qty).
+			Update("stock", gorm.Expr("stock - ?", qty))
+		if res.Error != nil {
+			return res.Error
+		}
+		if res.RowsAffected == 0 {
+			return errors.New("库存不足")
+		}
+		// 3. 创建订单（状态为 pending，支付后由回调更新）
+		orderNo := generateOrderNo()
+		amount := product.Price * float64(qty)
+		order = &model.Order{
+			OrderNo:         orderNo,
+			UserID:          userID,
+			ProductID:       productID,
+			ProductSnapshot: fmt.Sprintf("%s|单价:%.2f", product.Name, product.Price),
+			Quantity:        qty,
+			Amount:          amount,
+			PayType:         payType,
+			Status:          model.OrderStatusPending,
+			Email:           email,
+			Remark:          remark,
+		}
+		if err := tx.Create(order).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 	if err != nil {
-		return nil, errors.New("商品不存在")
-	}
-	if product.Status != 1 {
-		return nil, errors.New("商品已下架")
-	}
-	if product.Stock < qty {
-		return nil, errors.New("库存不足")
-	}
-	amount := product.Price * float64(qty)
-	orderNo := generateOrderNo()
-	order := &model.Order{
-		OrderNo:          orderNo,
-		UserID:           userID,
-		ProductID:        productID,
-		ProductSnapshot:  fmt.Sprintf("%s|单价:%.2f", product.Name, product.Price),
-		Quantity:         qty,
-		Amount:           amount,
-		PayType:          payType,
-		Status:           model.OrderStatusPending,
-		Email:           email,
-		Remark:          remark,
-	}
-	if err := db.DB.Create(order).Error; err != nil {
 		return nil, err
 	}
 	return order, nil
+}
+
+// buildProductLockSQL 构造商品行锁 SQL（MySQL FOR UPDATE / SQLite 跳过）
+func buildProductLockSQL(productID uint) string {
+	if config.AppConfig != nil && config.AppConfig.Database.IsSQLite() {
+		return fmt.Sprintf("SELECT * FROM products WHERE id=%d LIMIT 1", productID)
+	}
+	return fmt.Sprintf("SELECT * FROM products WHERE id=%d LIMIT 1 FOR UPDATE", productID)
 }
 
 func (s *OrderService) GetByOrderNo(orderNo string) (*model.Order, error) {
@@ -554,24 +580,6 @@ func (s *CardService) consumeInTx(tx *gorm.DB, productID uint, qty int, orderID 
 		return nil, err
 	}
 	return cards, nil
-}
-
-// orderByLockClause 返回当前数据库的行锁子句（MySQL FOR UPDATE，SQLite 留空）
-func orderByLockClause() (clause gorm.StatementModifier) {
-	if config.AppConfig != nil && config.AppConfig.Database.IsSQLite() {
-		return nil
-	}
-	// 使用 gorm 的原生子句：手写 FOR UPDATE
-	return &forUpdateClause{}
-}
-
-type forUpdateClause struct{}
-
-func (f *forUpdateClause) ModifyStatement(stmt *gorm.Statement) {
-	if config.AppConfig != nil && config.AppConfig.Database.IsSQLite() {
-		return
-	}
-	stmt.WriteString(" LOCK IN SHARE MODE")
 }
 
 func (s *OrderService) GetOrderCards(orderID uint) ([]model.OrderCard, error) {

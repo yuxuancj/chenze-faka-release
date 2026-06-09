@@ -14,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 func main() {
@@ -68,6 +69,9 @@ func main() {
 	// 路由（含 embed 模板加载，运行时无需外部 templates/ 目录）
 	router.Setup(r)
 
+	// 启动超时订单关闭定时任务（每分钟执行一次）
+	go startOrderExpirer()
+
 	port := config.AppConfig.Server.Port
 	if port == 0 {
 		port = 8080
@@ -75,6 +79,56 @@ func main() {
 	logger.Infof("server listening on :%d", port)
 	if err := r.Run(fmt.Sprintf(":%d", port)); err != nil {
 		logger.Fatalf("server error: %v", err)
+	}
+}
+
+// startOrderExpirer 启动超时订单关闭定时任务
+// 每分钟扫描一次：创建超过 30 分钟且状态仍为 pending 的订单标记为 closed，并恢复商品库存
+func startOrderExpirer() {
+	ticker := time.NewTicker(1 * time.Minute)
+	defer ticker.Stop()
+	for range ticker.C {
+		closeExpiredOrders()
+	}
+}
+
+// closeExpiredOrders 关闭超时未支付的订单，释放已扣减的库存
+func closeExpiredOrders() {
+	if !db.IsReady() {
+		return
+	}
+	cutoff := time.Now().Add(-30 * time.Minute)
+	var expiredOrders []model.Order
+	err := db.DB.Where("status = ? AND created_at < ?", model.OrderStatusPending, cutoff).Find(&expiredOrders).Error
+	if err != nil || len(expiredOrders) == 0 {
+		return
+	}
+	for _, order := range expiredOrders {
+		err := db.DB.Transaction(func(tx *gorm.DB) error {
+			// 再次确认订单状态（防止并发修改）
+			var o model.Order
+			if err := tx.First(&o, order.ID).Error; err != nil {
+				return err
+			}
+			if o.Status != model.OrderStatusPending {
+				return nil
+			}
+			// 标记订单为已关闭
+			if err := tx.Model(&o).Update("status", model.OrderStatusClosed).Error; err != nil {
+				return err
+			}
+			// 恢复商品库存（使用原子条件更新避免重复扣减）
+			res := tx.Model(&model.Product{}).Where("id=?", o.ProductID).
+				Update("stock", gorm.Expr("stock + ?", o.Quantity))
+			if res.Error != nil {
+				return res.Error
+			}
+			logger.Infof("order expired, closed: order_no=%s, restored %d stock", o.OrderNo, o.Quantity)
+			return nil
+		})
+		if err != nil {
+			logger.Errorf("close expired order failed: %v", err)
+		}
 	}
 }
 
