@@ -1,0 +1,22 @@
+server:
+  port: 8080
+  mode: release
+
+database:
+  host: localhost
+  port: 3306
+  user: root
+  password: 
+  dbname: chenze_faka
+
+jwt:
+  secret: your-secret-key-here-change-this
+  expire: 24
+
+pay:
+  epay:
+    api_url: https://pay.example.com
+    mch_id: your-mch-id
+    key: your-key
+    notify_url: http://your-domain.com/pay/epay/notify
+    return_url: http://your-domain.com/pay/epay/return
