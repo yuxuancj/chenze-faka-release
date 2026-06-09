@@ -1,0 +1,44 @@
+package jwt
+
+import (
+	"errors"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+)
+
+type Claims struct {
+	UserID   uint   `json:"uid"`
+	Username string `json:"username"`
+	IsAdmin  bool   `json:"is_admin"`
+	jwt.RegisteredClaims
+}
+
+func Generate(userID uint, username string, isAdmin bool, secret string, expireHours int) (string, error) {
+	claims := &Claims{
+		UserID:   userID,
+		Username: username,
+		IsAdmin:  isAdmin,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expireHours) * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Issuer:    "chenze-faka",
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(secret))
+}
+
+func Parse(tokenStr string, secret string) (*Claims, error) {
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+	return claims, nil
+}
