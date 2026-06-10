@@ -48,6 +48,7 @@ func main() {
 				&model.Category{},
 				&model.Product{},
 				&model.ProductSku{},
+				&model.ProductMemberPrice{},
 				&model.Card{},
 				&model.Order{},
 				&model.OrderCard{},
