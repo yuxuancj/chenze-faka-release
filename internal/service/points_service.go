@@ -176,11 +176,15 @@ func (s *PointsService) SignIn(userID uint) (int, int, error) {
 	err := db.DB.Transaction(func(tx *gorm.DB) error {
 		now := time.Now()
 		todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+
+		// 检查今日是否已签到
 		var todayCount int64
 		tx.Model(&model.SigninLog{}).Where("user_id=? AND created_at >= ?", userID, todayStart).Count(&todayCount)
 		if todayCount > 0 {
 			return errors.New("今日已签到")
 		}
+
+		// 计算连续签到天数
 		yesterdayStart := todayStart.AddDate(0, 0, -1)
 		var lastSign model.SigninLog
 		err := tx.Where("user_id=? AND created_at >= ? AND created_at < ?", userID, yesterdayStart, todayStart).
@@ -190,39 +194,54 @@ func (s *PointsService) SignIn(userID uint) (int, int, error) {
 		} else {
 			continuousDays = 1
 		}
+
+		// 计算奖励积分
 		rewardPoints = ss.GetInt("points_signin_reward", 10)
 		if continuousDays >= 7 {
 			rewardPoints = rewardPoints * 2
 		} else if continuousDays >= 3 {
 			rewardPoints += ss.GetInt("points_continuous_reward", 5)
 		}
+
 		// 创建签到记录
-		if err := tx.Create(&model.SigninLog{
+		signLog := &model.SigninLog{
 			UserID:         userID,
 			ContinuousDays: continuousDays,
 			RewardPoints:   rewardPoints,
-		}).Error; err != nil {
-			return err
 		}
-		// 更新积分
+		if err := tx.Create(signLog).Error; err != nil {
+			return fmt.Errorf("创建签到记录失败: %v", err)
+		}
+
+		// 更新用户积分
 		var user model.User
 		if err := tx.First(&user, userID).Error; err != nil {
-			return err
+			return fmt.Errorf("查询用户失败: %v", err)
 		}
 		newBalance := user.Points + rewardPoints
 		if err := tx.Model(&user).Update("points", newBalance).Error; err != nil {
-			return err
+			return fmt.Errorf("更新积分失败: %v", err)
 		}
+
 		// 写入积分日志
-		return tx.Create(&model.PointsLog{
+		pointsLog := &model.PointsLog{
 			UserID:       userID,
 			Amount:       rewardPoints,
 			Type:         "signin",
-			Description:  fmt.Sprintf("连续签到%d天", continuousDays),
+			Description:  fmt.Sprintf("连续签到%d天，获得%d积分", continuousDays, rewardPoints),
 			BalanceAfter: newBalance,
-		}).Error
+		}
+		if err := tx.Create(pointsLog).Error; err != nil {
+			return fmt.Errorf("创建积分日志失败: %v", err)
+		}
+
+		return nil
 	})
-	return rewardPoints, continuousDays, err
+
+	if err != nil {
+		return 0, 0, err
+	}
+	return rewardPoints, continuousDays, nil
 }
 
 // CanSignIn 检查今日是否可签到

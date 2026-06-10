@@ -579,8 +579,17 @@ func (c *PointsController) SetSettings(ctx *gin.Context) {
 }
 
 func (c *PointsController) SignIn(ctx *gin.Context) {
-	uid, _ := ctx.Get("user_id")
-	points, days, err := service.NewPointsService().SignIn(uid.(uint))
+	uid, ok := ctx.Get("user_id")
+	if !ok {
+		response.Error(ctx, response.CodeTokenInvalid, "用户未登录")
+		return
+	}
+	userID := uid.(uint)
+	if userID == 0 {
+		response.Error(ctx, response.CodeTokenInvalid, "用户ID无效")
+		return
+	}
+	points, days, err := service.NewPointsService().SignIn(userID)
 	if err != nil {
 		response.Error(ctx, response.CodeParamError, err.Error())
 		return
