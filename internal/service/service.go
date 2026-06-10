@@ -2,7 +2,6 @@ package service
 
 import (
 	"chenze-faka/internal/model"
-	"chenze-faka/internal/pkg/config"
 	"chenze-faka/internal/pkg/db"
 	"crypto/md5"
 	"encoding/hex"
@@ -335,17 +334,8 @@ func (s *CardService) Consume(productID uint, qty int, orderID uint) ([]model.Ca
 	return cards, nil
 }
 
-// consumeLockSQL 根据数据库驱动生成带行锁（或等价）的 SQL
+// consumeLockSQL 生成带行锁的 SQL（MySQL FOR UPDATE）
 func consumeLockSQL(productID uint, qty int) string {
-	isSQLite := false
-	if config.AppConfig != nil && config.AppConfig.Database.IsSQLite() {
-		isSQLite = true
-	}
-	if isSQLite {
-		// SQLite: 在事务内读取已持有锁，无需 FOR UPDATE
-		return fmt.Sprintf("SELECT id FROM cards WHERE product_id=%d AND status=0 ORDER BY id ASC LIMIT %d", productID, qty)
-	}
-	// MySQL: SELECT ... FOR UPDATE 锁定选中行，避免并发读取同一张卡
 	return fmt.Sprintf("SELECT id FROM cards WHERE product_id=%d AND status=0 ORDER BY id ASC LIMIT %d FOR UPDATE", productID, qty)
 }
 
@@ -405,11 +395,8 @@ func (s *OrderService) Create(userID, productID uint, qty int, email, payType, r
 	return order, nil
 }
 
-// buildProductLockSQL 构造商品行锁 SQL（MySQL FOR UPDATE / SQLite 跳过）
+// buildProductLockSQL 构造商品行锁 SQL（MySQL FOR UPDATE）
 func buildProductLockSQL(productID uint) string {
-	if config.AppConfig != nil && config.AppConfig.Database.IsSQLite() {
-		return fmt.Sprintf("SELECT * FROM products WHERE id=%d LIMIT 1", productID)
-	}
 	return fmt.Sprintf("SELECT * FROM products WHERE id=%d LIMIT 1 FOR UPDATE", productID)
 }
 
@@ -537,11 +524,8 @@ func (s *OrderService) MarkPaid(orderNo, payType string) (*model.Order, error) {
 	return &order, nil
 }
 
-// buildLockOrderSQL 构造订单行锁查询 SQL（MySQL FOR UPDATE / SQLite 不需要）
+// buildLockOrderSQL 构造订单行锁查询 SQL（MySQL FOR UPDATE）
 func buildLockOrderSQL(orderNo string) string {
-	if config.AppConfig != nil && config.AppConfig.Database.IsSQLite() {
-		return fmt.Sprintf("SELECT id FROM orders WHERE order_no='%s' LIMIT 1", orderNo)
-	}
 	return fmt.Sprintf("SELECT id FROM orders WHERE order_no='%s' LIMIT 1 FOR UPDATE", orderNo)
 }
 

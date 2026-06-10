@@ -20,7 +20,7 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
-	Driver   string `yaml:"driver"`   // mysql 或 sqlite，默认 mysql
+	Driver   string `yaml:"driver"`
 	Host     string `yaml:"host"`
 	Port     int    `yaml:"port"`
 	User     string `yaml:"user"`
@@ -61,11 +61,6 @@ func Load(path string) error {
 }
 
 func (c *DatabaseConfig) DSN() string {
-	if c.Driver == "sqlite" {
-		// 添加 busy_timeout 防止并发写入冲突，DELETE journal mode 避免 WAL 权限问题
-		return c.DBName + "?_busy_timeout=30000&_journal_mode=DELETE"
-	}
-	// MySQL DSN
 	if c.Host == "" {
 		c.Host = "127.0.0.1"
 	}
@@ -74,8 +69,4 @@ func (c *DatabaseConfig) DSN() string {
 	}
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		c.User, c.Password, c.Host, c.Port, c.DBName)
-}
-
-func (c *DatabaseConfig) IsSQLite() bool {
-	return c.Driver == "sqlite"
 }
