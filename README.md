@@ -1,50 +1,19 @@
-# 晨泽发卡 - 生产部署包
+# 晨泽发卡系统发布包
 
-## 快速启动
+## 发布包说明
 
-```bash
-# 1. 修改配置
-vim full/config.yaml
+- **chenze_faka_v2.3-license_prod.tar.gz** (约 6.5MB)
+  - 版本：v2.3-license
+  - 类型：静态二进制（CGO_ENABLED=0，纯 Go，无 glibc 依赖）
+  - 系统：Linux x86_64，CentOS 7/8/9 / Ubuntu / 宝塔面板
 
-# 2. 启动
-cd full
-chmod +x chenze_faka
-./chenze_faka
-```
+## 新增功能
 
-## 运行环境
+1. **授权码验证**：安装向导增加授权码字段
+2. **在线更新**：后台 /admin/api/update/ 接口
+3. **完整数据库迁移**：19 张表
+4. **静态编译**：不依赖系统 glibc
 
-- Linux amd64（已静态编译，无需 CGO）
-- MySQL 5.7+
+## 使用方法
 
-## 首次启动
-
-1. 修改 `full/config.yaml` 中的数据库连接信息
-2. 运行后访问 `http://your-server:8080/admin/` 用默认管理员登录：
-   - 邮箱：`admin@chenze.com`
-   - 密码：`admin123`
-
-## systemd 部署（可选）
-
-```ini
-[Unit]
-Description=Chenze Faka
-After=network.target
-
-[Service]
-Type=simple
-WorkingDirectory=/opt/chenze-faka
-ExecStart=/opt/chenze-faka/chenze_faka
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```bash
-sudo cp chenze_faka /usr/local/bin/
-sudo cp config.yaml /etc/chenze-faka/config.yaml
-sudo systemctl daemon-reload
-sudo systemctl enable chenze-faka
-sudo systemctl start chenze-faka
 ```
