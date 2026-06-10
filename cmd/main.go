@@ -25,43 +25,47 @@ func main() {
 	}
 	logger.Infof("starting chenze-faka...")
 
-	// 配置加载：优先读取 config.yaml，找不到则回退到 config.yaml.example
-	cfgPath := "config.yaml"
-	if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
-		if _, err := os.Stat("config.yaml.example"); err == nil {
-			cfgPath = "config.yaml.example"
-		} else {
-			logger.Fatalf("config.yaml not found")
-		}
-	}
-	if err := config.Load(cfgPath); err != nil {
-		logger.Fatalf("load config failed: %v", err)
+	// 检查是否已安装（install.lock 存在则跳过配置加载和数据库初始化）
+	installed := false
+	if _, err := os.Stat("install.lock"); err == nil {
+		installed = true
 	}
 
-	// 数据库初始化（可降级：数据库连不上时跳过迁移，继续启动）
-	if err := db.Init(config.AppConfig.Database.DSN()); err != nil {
-		logger.Errorf("db init failed: %v (degraded mode)", err)
-	} else {
-		if err := db.DB.AutoMigrate(
-			&model.User{},
-			&model.Category{},
-			&model.Product{},
-			&model.Card{},
-			&model.Order{},
-			&model.OrderCard{},
-			&model.Setting{},
-		); err != nil {
-			logger.Errorf("auto migrate failed: %v", err)
-		} else {
-			logger.Infof("db migrated")
-			seedIfEmpty()
+	if installed {
+		// 已安装：正常加载配置和初始化数据库
+		cfgPath := "config.yaml"
+		if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
+			logger.Fatalf("config.yaml not found")
 		}
+		if err := config.Load(cfgPath); err != nil {
+			logger.Fatalf("load config failed: %v", err)
+		}
+		if err := db.Init(config.AppConfig.Database.DSN()); err != nil {
+			logger.Errorf("db init failed: %v", err)
+		} else {
+			if err := db.DB.AutoMigrate(
+				&model.User{},
+				&model.Category{},
+				&model.Product{},
+				&model.Card{},
+				&model.Order{},
+				&model.OrderCard{},
+				&model.Setting{},
+			); err != nil {
+				logger.Errorf("auto migrate failed: %v", err)
+			} else {
+				logger.Infof("db migrated")
+				seedIfEmpty()
+			}
+		}
+	} else {
+		logger.Infof("system not installed, running in install mode")
 	}
 
 	os.MkdirAll("storage/backups", 0755)
 	os.MkdirAll("storage/uploads", 0755)
 
-	if config.AppConfig.Server.Mode == "release" {
+	if config.AppConfig != nil && config.AppConfig.Server.Mode == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	r := gin.Default()
@@ -69,12 +73,14 @@ func main() {
 	// 路由（含 embed 模板加载，运行时无需外部 templates/ 目录）
 	router.Setup(r)
 
-	// 启动超时订单关闭定时任务（每分钟执行一次）
-	go startOrderExpirer()
+	if installed {
+		// 已安装：启动超时订单关闭定时任务
+		go startOrderExpirer()
+	}
 
-	port := config.AppConfig.Server.Port
-	if port == 0 {
-		port = 8080
+	port := 8080
+	if config.AppConfig != nil && config.AppConfig.Server.Port > 0 {
+		port = config.AppConfig.Server.Port
 	}
 	logger.Infof("server listening on :%d", port)
 	if err := r.Run(fmt.Sprintf(":%d", port)); err != nil {

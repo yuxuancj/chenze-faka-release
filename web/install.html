@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>晨泽发卡 - 安装向导</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #f0f2f5; min-height: 100vh; }
+        .wrap { max-width: 600px; margin: 60px auto; padding: 0 20px; }
+        .card { background: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; }
+        .card-hd { background: #2563eb; color: #fff; padding: 24px; text-align: center; }
+        .card-hd h1 { font-size: 22px; font-weight: 600; }
+        .card-bd { padding: 32px; }
+        .form-item { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 14px; color: #333; margin-bottom: 6px; font-weight: 500; }
+        .form-input { width: 100%; height: 40px; padding: 0 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 14px; transition: border-color 0.2s; }
+        .form-input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
+        .form-section { margin-bottom: 28px; }
+        .form-section-title { font-size: 15px; color: #1a1a1a; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; font-weight: 600; }
+        .btn { display: inline-block; height: 40px; line-height: 40px; padding: 0 24px; border-radius: 4px; font-size: 14px; cursor: pointer; border: none; transition: background 0.2s; }
+        .btn-primary { background: #2563eb; color: #fff; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-primary:disabled { background: #93c5fd; cursor: not-allowed; }
+        .btn-full { width: 100%; }
+        .env-box { background: #f8fbff; border: 1px solid #dbeafe; border-radius: 6px; padding: 16px; margin-bottom: 20px; }
+        .env-item { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; color: #444; }
+        .env-item .ok { color: #16a34a; }
+        .env-item .fail { color: #dc2626; }
+        .msg { padding: 12px 16px; border-radius: 4px; margin-bottom: 16px; font-size: 14px; }
+        .msg-error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .msg-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+        .success-wrap { text-align: center; padding: 40px 0; }
+        .success-wrap h2 { font-size: 20px; color: #16a34a; margin-bottom: 12px; }
+        .success-wrap p { font-size: 14px; color: #666; margin-bottom: 8px; }
+        .success-wrap .tip { background: #fef9c3; border: 1px solid #fde047; border-radius: 4px; padding: 10px 16px; margin-top: 20px; font-size: 13px; color: #854d0e; text-align: left; }
+        .hidden { display: none; }
+        @media (max-width: 640px) {
+            .wrap { margin: 20px auto; }
+            .card-bd { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="wrap">
+        <div class="card">
+            <div class="card-hd"><h1>晨泽发卡系统 - 安装向导</h1></div>
+            <div class="card-bd">
+                <!-- 第一步：环境检测 -->
+                <div id="step-env">
+                    <div class="env-box" id="env-info">
+                        <div class="env-item"><span>Go 版本</span><span class="ok" id="env-go">检测中...</span></div>
+                        <div class="env-item"><span>目录权限</span><span class="ok" id="env-write">检测中...</span></div>
+                        <div class="env-item"><span>数据库</span><span class="ok" id="env-db">检测中...</span></div>
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="checkEnv()">开始环境检测</button>
+                </div>
+
+                <!-- 第二步：配置表单 -->
+                <div id="step-form" class="hidden">
+                    <div id="form-msg" class="hidden"></div>
+                    <form id="install-form" onsubmit="return false;">
+                        <div class="form-section">
+                            <div class="form-section-title">数据库配置</div>
+                            <div class="form-item">
+                                <label class="form-label">数据库主机</label>
+                                <input type="text" class="form-input" name="db_host" value="127.0.0.1" required>
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label">数据库端口</label>
+                                <input type="number" class="form-input" name="db_port" value="3306" required>
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label">数据库用户名</label>
+                                <input type="text" class="form-input" name="db_user" value="root" required>
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label">数据库密码</label>
+                                <input type="password" class="form-input" name="db_password" placeholder="请输入数据库密码">
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label">数据库名称</label>
+                                <input type="text" class="form-input" name="db_name" value="chenze_faka" required>
+                            </div>
+                        </div>
+                        <div class="form-section">
+                            <div class="form-section-title">管理员账号</div>
+                            <div class="form-item">
+                                <label class="form-label">管理员用户名</label>
+                                <input type="text" class="form-input" name="admin_user" value="admin" required>
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label">管理员密码</label>
+                                <input type="password" class="form-input" name="admin_pass" placeholder="请设置管理员密码" required>
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label">管理员邮箱</label>
+                                <input type="email" class="form-input" name="admin_email" placeholder="请输入管理员邮箱" required>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-full" onclick="doInstall()" id="btn-install">开始安装</button>
+                    </form>
+                </div>
+
+                <!-- 第三步：安装成功 -->
+                <div id="step-success" class="hidden">
+                    <div class="success-wrap">
+                        <h2>安装成功</h2>
+                        <p>系统已安装完成，请重启程序后再访问。</p>
+                        <div class="tip">
+                            <strong>提示：</strong>请在服务器上执行 <code>./chenze_faka</code> 重启程序，然后访问首页。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios@1.6.2/dist/axios.min.js"></script>
+<script>
+axios.defaults.timeout = 10000;
+
+function showMsg(id, html, type) {
+    var el = document.getElementById(id);
+    el.className = 'msg msg-' + type;
+    el.innerHTML = html;
+    el.classList.remove('hidden');
+}
+
+function checkEnv() {
+    var btn = document.querySelector('#step-env button');
+    btn.disabled = true;
+    btn.textContent = '检测中...';
+    axios.get('/install/api/env').then(function(res) {
+        var d = res.data.data || {};
+        document.getElementById('env-go').innerHTML = d.go_version ? d.go_version + ' <span class="ok">正常</span>' : '<span class="fail">未知</span>';
+        document.getElementById('env-write').innerHTML = d.writeable ? '<span class="ok">可写</span>' : '<span class="fail">不可写</span>';
+        document.getElementById('env-db').innerHTML = (d.db_status && d.db_status.indexOf('未连接') !== -1) ? '<span class="ok">未连接（安装时自动连接）</span>' : '<span class="ok">正常</span>';
+        btn.textContent = '检测完成';
+        if (d.writeable) {
+            setTimeout(function() {
+                document.getElementById('step-env').classList.add('hidden');
+                document.getElementById('step-form').classList.remove('hidden');
+            }, 800);
+        }
+    }).catch(function() {
+        btn.disabled = false;
+        btn.textContent = '重新检测';
+        document.getElementById('env-db').innerHTML = '<span class="fail">连接异常</span>';
+    });
+}
+
+function doInstall() {
+    var form = document.getElementById('install-form');
+    var fd = new FormData(form);
+    var data = {
+        db_host: fd.get('db_host'),
+        db_port: parseInt(fd.get('db_port')),
+        db_user: fd.get('db_user'),
+        db_password: fd.get('db_password'),
+        db_name: fd.get('db_name'),
+        admin_user: fd.get('admin_user'),
+        admin_pass: fd.get('admin_pass'),
+        admin_email: fd.get('admin_email')
+    };
+    if (!data.admin_user || !data.admin_pass || !data.admin_email) {
+        showMsg('form-msg', '请填写所有管理员信息', 'error');
+        return;
+    }
+    var btn = document.getElementById('btn-install');
+    btn.disabled = true;
+    btn.textContent = '安装中...';
+    showMsg('form-msg', '', 'error');
+    axios.post('/install/api/install', data).then(function(res) {
+        document.getElementById('step-form').classList.add('hidden');
+        document.getElementById('step-success').classList.remove('hidden');
+    }).catch(function(err) {
+        btn.disabled = false;
+        btn.textContent = '重新安装';
+        var msg = '安装失败';
+        if (err.response && err.response.data && err.response.data.msg) {
+            msg = err.response.data.msg;
+        }
+        showMsg('form-msg', msg, 'error');
+    });
+}
+</script>
+</body>
+</html>
