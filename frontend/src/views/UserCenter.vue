@@ -2,7 +2,10 @@
     <Layout>
         <div class="space-y-4">
             <h2 class="text-xl font-bold text-gray-800">个人中心</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div v-if="loading" class="card p-8 text-center text-gray-500">
+                加载中...
+            </div>
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="card">
                     <div class="card-header font-semibold">基本信息</div>
                     <div class="card-body space-y-4">
@@ -14,21 +17,21 @@
                             <label class="form-label">昵称</label>
                             <input v-model="editNickname" type="text" class="form-input">
                         </div>
-                        <button @click="saveProfile" :disabled="loading" class="btn-primary">
-                            {{ loading ? '保存中...' : '保存' }}
+                        <button @click="saveProfile" :disabled="saving" class="btn-primary">
+                            {{ saving ? '保存中...' : '保存' }}
                         </button>
                     </div>
                 </div>
                 <div class="card">
                     <div class="card-header font-semibold">账号信息</div>
-                    <div class="card-body">
-                        <table class="table">
+                    <div class="card-body overflow-x-auto">
+                        <table class="table w-full">
                             <tbody>
                                 <tr><td class="text-gray-500 w-24">用户ID</td><td>{{ user.id || '-' }}</td></tr>
                                 <tr><td class="text-gray-500">余额</td><td>￥{{ user.balance || 0 }}</td></tr>
                                 <tr><td class="text-gray-500">积分</td><td>{{ user.points || 0 }}</td></tr>
                                 <tr><td class="text-gray-500">等级</td><td>{{ user.level || '-' }}</td></tr>
-                                <tr><td class="text-gray-500">状态</td><td>{{ user.status || '正常' }}</td></tr>
+                                <tr><td class="text-gray-500">状态</td><td>{{ user.status ? '正常' : '禁用' }}</td></tr>
                                 <tr><td class="text-gray-500">注册时间</td><td>{{ user.created_at || '-' }}</td></tr>
                             </tbody>
                         </table>
@@ -68,15 +71,19 @@ import { profile, updateProfile, changePassword } from '../api/user'
 
 const user = ref({})
 const editNickname = ref('')
-const loading = ref(false)
+const loading = ref(true)
+const saving = ref(false)
 const pwdLoading = ref(false)
 const pwdForm = reactive({ old: '', new: '', confirm: '' })
 
 function loadProfile() {
-    profile().then((res) => {
-        user.value = res.data || {}
+    loading.value = true
+    profile().then((data) => {
+        user.value = data || {}
         editNickname.value = user.value.nickname || ''
-    }).catch(() => {})
+    }).catch(() => {}).finally(() => {
+        loading.value = false
+    })
 }
 
 function saveProfile() {
@@ -84,18 +91,22 @@ function saveProfile() {
         alert('请输入昵称')
         return
     }
-    loading.value = true
+    saving.value = true
     updateProfile(editNickname.value).then(() => {
         alert('保存成功')
         loadProfile()
     }).catch(() => {}).finally(() => {
-        loading.value = false
+        saving.value = false
     })
 }
 
 function changePwd() {
     if (!pwdForm.old || !pwdForm.new || !pwdForm.confirm) {
         alert('请完整填写密码')
+        return
+    }
+    if (pwdForm.new.length < 6) {
+        alert('新密码至少6位')
         return
     }
     if (pwdForm.new !== pwdForm.confirm) {

@@ -39,14 +39,21 @@ function submit() {
         alert('请输入邮箱和密码')
         return
     }
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRe.test(form.email)) {
+        alert('邮箱格式不正确')
+        return
+    }
     loading.value = true
-    login(form.email, form.password).then((res) => {
-        if (res.data && res.data.token) {
-            localStorage.setItem('token', res.data.token)
-            if (res.data.is_admin) {
+    login(form.email, form.password).then((data) => {
+        if (data && data.token) {
+            localStorage.setItem('token', data.token)
+            if (data.user && data.user.is_admin) {
                 localStorage.setItem('is_admin', 'true')
+            } else {
+                localStorage.removeItem('is_admin')
             }
-            router.push('/user/profile')
+            router.push('/')
         }
     }).catch(() => {}).finally(() => {
         loading.value = false

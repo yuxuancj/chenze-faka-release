@@ -15,7 +15,7 @@
                 </div>
                 <div>
                     <label class="form-label">密码</label>
-                    <input v-model="form.password" type="password" class="form-input" placeholder="请输入密码">
+                    <input v-model="form.password" type="password" class="form-input" placeholder="请输入密码（至少6位）">
                 </div>
                 <div>
                     <label class="form-label">确认密码</label>
@@ -47,12 +47,25 @@ function submit() {
         alert('请填写完整信息')
         return
     }
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRe.test(form.email)) {
+        alert('邮箱格式不正确')
+        return
+    }
+    if (form.password.length < 6) {
+        alert('密码至少6位')
+        return
+    }
     if (form.password !== form.confirm) {
         alert('两次密码输入不一致')
         return
     }
     loading.value = true
-    register(form.email, form.password, form.nickname).then((res) => {
+    register({
+        email: form.email,
+        password: form.password,
+        nickname: form.nickname
+    }).then(() => {
         alert('注册成功，请登录')
         router.push('/user/login')
     }).catch(() => {}).finally(() => {

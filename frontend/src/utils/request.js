@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const request = axios.create({
-    baseURL: window.location.origin + '/api/v1',
+    baseURL: '',
     timeout: 15000
 })
 
@@ -17,16 +17,20 @@ request.interceptors.request.use((config) => {
 
 request.interceptors.response.use((response) => {
     const data = response.data
-    if (data.code === 0) {
-        return data
+    if (data && typeof data.code !== 'undefined') {
+        if (data.code === 0) {
+            return data.data !== undefined ? data.data : true
+        }
+        if (data.code === 1004) {
+            localStorage.removeItem('token')
+            localStorage.removeItem('is_admin')
+            window.location.href = '/user/login'
+            return Promise.reject(new Error(data.msg || '登录状态已过期'))
+        }
+        alert(data.msg || '请求失败')
+        return Promise.reject(new Error(data.msg || '请求失败'))
     }
-    if (data.code === 1004) {
-        localStorage.removeItem('token')
-        localStorage.removeItem('is_admin')
-        window.location.href = '/user/login'
-    }
-    alert(data.msg || '请求失败')
-    return Promise.reject(data)
+    return data
 }, (error) => {
     if (error.response) {
         const data = error.response.data
@@ -34,6 +38,7 @@ request.interceptors.response.use((response) => {
             localStorage.removeItem('token')
             localStorage.removeItem('is_admin')
             window.location.href = '/user/login'
+            return
         }
         alert(data && data.msg ? data.msg : '网络请求失败')
     } else {

@@ -11,13 +11,9 @@
                     <label class="form-label">站点描述</label>
                     <textarea v-model="settings.site_desc" class="form-input" rows="3" placeholder="站点描述"></textarea>
                 </div>
-                <div>
-                    <label class="form-label">联系方式</label>
-                    <input v-model="settings.contact" type="text" class="form-input" placeholder="联系方式">
-                </div>
-                <div class="flex items-center space-x-2">
-                    <button @click="save" :disabled="loading" class="btn-primary">
-                        {{ loading ? '保存中...' : '保存设置' }}
+                <div class="flex items-center gap-2 pt-2">
+                    <button @click="save" :disabled="saving" class="btn-primary">
+                        {{ saving ? '保存中...' : '保存设置' }}
                     </button>
                     <button @click="load" class="btn-secondary">重新加载</button>
                 </div>
@@ -31,32 +27,30 @@ import { ref, reactive, onMounted } from 'vue'
 import AdminLayout from '../components/AdminLayout.vue'
 import { adminSettingsGet, adminSettingsSet } from '../api/admin'
 
-const loading = ref(false)
+const saving = ref(false)
 const settings = reactive({
     site_name: '',
-    site_desc: '',
-    contact: ''
+    site_desc: ''
 })
 
 function load() {
-    adminSettingsGet().then((res) => {
-        const data = res.data || {}
-        settings.site_name = data.site_name || ''
-        settings.site_desc = data.site_desc || ''
-        settings.contact = data.contact || ''
+    adminSettingsGet().then((data) => {
+        if (data) {
+            settings.site_name = data.site_name || ''
+            settings.site_desc = data.site_desc || ''
+        }
     }).catch(() => {})
 }
 
 function save() {
-    loading.value = true
+    saving.value = true
     adminSettingsSet({
         site_name: settings.site_name,
-        site_desc: settings.site_desc,
-        contact: settings.contact
+        site_desc: settings.site_desc
     }).then(() => {
         alert('保存成功')
     }).catch(() => {}).finally(() => {
-        loading.value = false
+        saving.value = false
     })
 }
 

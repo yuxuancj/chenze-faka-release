@@ -1,17 +1,18 @@
 import request from '../utils/request'
 
 export function createOrder(params) {
-    return request.post('/order/create', params)
+    return request.post('/api/v1/orders', params)
 }
 
 export function orderList(page, size) {
-    return request.post('/order/list', { page, size })
+    const params = { page: page || 1, size: size || 20 }
+    return request.get('/api/v1/orders', { params })
 }
 
 export function orderDetail(order_no) {
-    return request.post('/order/detail', { order_no })
+    return request.get('/api/v1/orders/' + order_no)
 }
 
 export function payOrder(order_no) {
-    return request.post('/order/pay', { order_no })
+    return request.post('/api/v1/pay', { order_no })
 }

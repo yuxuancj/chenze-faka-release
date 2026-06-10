@@ -7,8 +7,8 @@ const routes = [
     { path: '/order/:order_no', name: 'orderDetail', component: () => import('../views/OrderDetail.vue') },
     { path: '/cart', name: 'cart', component: () => import('../views/Cart.vue') },
     { path: '/checkout', name: 'checkout', component: () => import('../views/Checkout.vue') },
-    { path: '/user/login', name: 'login', component: () => import('../views/Login.vue') },
-    { path: '/user/register', name: 'register', component: () => import('../views/Register.vue') },
+    { path: '/user/login', name: 'login', component: () => import('../views/Login.vue'), alias: '/login' },
+    { path: '/user/register', name: 'register', component: () => import('../views/Register.vue'), alias: '/register' },
     { path: '/user/profile', name: 'userCenter', component: () => import('../views/UserCenter.vue'), meta: { auth: true } },
     { path: '/user/orders', name: 'userOrders', component: () => import('../views/UserOrders.vue'), meta: { auth: true } },
     { path: '/admin/login', name: 'adminLogin', component: () => import('../views/AdminLogin.vue') },
@@ -20,12 +20,16 @@ const routes = [
     { path: '/admin/categories', name: 'adminCategories', component: () => import('../views/AdminCategories.vue'), meta: { admin: true } },
     { path: '/admin/orders', name: 'adminOrders', component: () => import('../views/AdminOrders.vue'), meta: { admin: true } },
     { path: '/admin/users', name: 'adminUsers', component: () => import('../views/AdminUsers.vue'), meta: { admin: true } },
-    { path: '/admin/settings', name: 'adminSettings', component: () => import('../views/AdminSettings.vue'), meta: { admin: true } }
+    { path: '/admin/settings', name: 'adminSettings', component: () => import('../views/AdminSettings.vue'), meta: { admin: true } },
+    { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('../views/NotFound.vue') }
 ]
 
 const router = createRouter({
     history: createWebHistory(),
-    routes
+    routes,
+    scrollBehavior() {
+        return { top: 0 }
+    }
 })
 
 router.beforeEach((to, from, next) => {

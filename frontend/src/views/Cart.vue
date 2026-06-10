@@ -9,15 +9,9 @@
                 </div>
             </div>
             <div v-else class="space-y-4">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="flex items-center justify-between">
-                            <span class="font-semibold">商品列表</span>
-                            <button @click="cartStore.clearCart()" class="btn-sm btn-danger">清空购物车</button>
-                        </div>
-                    </div>
+                <div class="card overflow-x-auto">
                     <div class="card-body">
-                        <table class="table">
+                        <table class="table w-full">
                             <thead>
                                 <tr>
                                     <th>商品</th>
@@ -29,12 +23,16 @@
                             </thead>
                             <tbody>
                                 <tr v-for="item in cartStore.items" :key="item.product_id">
-                                    <td>{{ item.name }}</td>
+                                    <td>
+                                        <router-link :to="'/product/' + item.product_id" class="text-blue-600 hover:underline">
+                                            {{ item.name }}
+                                        </router-link>
+                                    </td>
                                     <td>￥{{ item.price }}</td>
                                     <td>
-                                        <div class="flex items-center space-x-2">
+                                        <div class="flex items-center gap-2">
                                             <button @click="cartStore.updateQuantity(item.product_id, item.quantity - 1)" class="btn-sm btn-secondary">-</button>
-                                            <input v-model.number="item.quantity" type="number" min="1" class="form-input w-16 text-center" @change="cartStore.updateQuantity(item.product_id, item.quantity)">
+                                            <input v-model.number="item.quantity" type="number" min="1" class="form-input w-20 text-center" @change="cartStore.updateQuantity(item.product_id, item.quantity)">
                                             <button @click="cartStore.updateQuantity(item.product_id, item.quantity + 1)" class="btn-sm btn-secondary">+</button>
                                         </div>
                                     </td>
@@ -48,12 +46,15 @@
                     </div>
                 </div>
                 <div class="card">
-                    <div class="card-body flex items-center justify-between">
+                    <div class="card-body flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div class="text-lg">
                             共 <span class="font-semibold">{{ cartStore.totalCount }}</span> 件商品，
                             合计: <span class="text-blue-600 font-bold text-xl">￥{{ cartStore.totalPrice.toFixed(2) }}</span>
                         </div>
-                        <router-link to="/checkout" class="btn-primary">去结算</router-link>
+                        <div class="flex items-center gap-3">
+                            <button @click="cartStore.clearCart()" class="btn-secondary">清空购物车</button>
+                            <router-link to="/checkout" class="btn-primary">去结算</router-link>
+                        </div>
                     </div>
                 </div>
             </div>

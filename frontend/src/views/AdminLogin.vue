@@ -16,6 +16,9 @@
                 <button @click="submit" :disabled="loading" class="btn-primary w-full">
                     {{ loading ? '登录中...' : '登录' }}
                 </button>
+                <div class="text-center text-sm">
+                    <router-link to="/" class="link">返回首页</router-link>
+                </div>
             </div>
         </div>
     </div>
@@ -36,16 +39,13 @@ function submit() {
         return
     }
     loading.value = true
-    login(form.email, form.password).then((res) => {
-        if (res.data && res.data.token) {
-            localStorage.setItem('token', res.data.token)
-            if (res.data.is_admin) {
-                localStorage.setItem('is_admin', 'true')
-                router.push('/admin/')
-            } else {
-                alert('该账号不是管理员')
-                localStorage.removeItem('token')
-            }
+    login(form.email, form.password).then((data) => {
+        if (data && data.token && data.user && data.user.is_admin) {
+            localStorage.setItem('token', data.token)
+            localStorage.setItem('is_admin', 'true')
+            router.push('/admin/')
+        } else {
+            alert('该账号没有管理员权限')
         }
     }).catch(() => {}).finally(() => {
         loading.value = false

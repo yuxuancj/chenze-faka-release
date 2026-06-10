@@ -1,9 +1,12 @@
 <template>
     <AdminLayout page-title="用户管理">
         <div class="space-y-4">
-            <div class="card">
-                <div class="card-body">
-                    <table class="table">
+            <div v-if="loading" class="card p-8 text-center text-gray-500">
+                加载中...
+            </div>
+            <div v-else class="card">
+                <div class="card-body overflow-x-auto">
+                    <table class="table w-full">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -24,12 +27,12 @@
                             <tr v-for="user in users" :key="user.id">
                                 <td>{{ user.id }}</td>
                                 <td>{{ user.email }}</td>
-                                <td>{{ user.nickname }}</td>
+                                <td>{{ user.nickname || '-' }}</td>
                                 <td>￥{{ user.balance || 0 }}</td>
                                 <td>{{ user.points || 0 }}</td>
-                                <td>{{ user.level || 0 }}</td>
+                                <td>{{ user.level || 1 }}</td>
                                 <td>
-                                    <span v-if="user.status === 1" class="badge-green">正常</span>
+                                    <span v-if="user.status === 1 || user.status === undefined" class="badge-green">正常</span>
                                     <span v-else class="badge-red">禁用</span>
                                 </td>
                                 <td>{{ user.created_at }}</td>
@@ -41,13 +44,14 @@
                     </table>
                 </div>
             </div>
-            <div v-if="pagination && pagination.total > pagination.size" class="flex items-center justify-center space-x-2">
+
+            <div v-if="pagination && pagination.total > pagination.size" class="flex items-center justify-center gap-2">
                 <button @click="prevPage" :disabled="page <= 1" class="btn-sm btn-secondary">上一页</button>
                 <span class="text-sm text-gray-600">第 {{ page }} / {{ totalPages }} 页</span>
                 <button @click="nextPage" :disabled="page >= totalPages" class="btn-sm btn-secondary">下一页</button>
             </div>
 
-            <div v-if="editing.id" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
+            <div v-if="editing.id" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
                 <div class="card w-full max-w-md">
                     <div class="card-header font-semibold">编辑用户</div>
                     <div class="card-body space-y-4">
@@ -72,16 +76,16 @@
                             </div>
                             <div>
                                 <label class="form-label">状态</label>
-                                <select v-model="editing.status" class="form-input">
+                                <select v-model.number="editing.status" class="form-input">
                                     <option :value="1">正常</option>
                                     <option :value="0">禁用</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="flex items-center justify-end space-x-2">
+                        <div class="flex items-center justify-end gap-2 pt-2">
                             <button @click="cancel" class="btn-secondary">取消</button>
-                            <button @click="save" :disabled="loading" class="btn-primary">
-                                {{ loading ? '保存中...' : '保存' }}
+                            <button @click="save" :disabled="saving" class="btn-primary">
+                                {{ saving ? '保存中...' : '保存' }}
                             </button>
                         </div>
                     </div>
@@ -99,17 +103,25 @@ import { adminUserList, adminUserUpdate } from '../api/admin'
 const users = ref([])
 const page = ref(1)
 const pageSize = 20
-const pagination = ref({ total: 0, size: 20 })
+const pagination = reactive({ total: 0, size: 20 })
 const loading = ref(false)
+const saving = ref(false)
 const editing = reactive({ id: null, nickname: '', balance: 0, points: 0, level: 0, status: 1 })
 
-const totalPages = computed(() => Math.ceil(pagination.value.total / pagination.value.size) || 1)
+const totalPages = computed(() => Math.ceil(pagination.total / pagination.size) || 1)
 
 function load() {
-    adminUserList(page.value, pageSize).then((res) => {
-        users.value = res.data && res.data.list ? res.data.list : []
-        pagination.value.total = (res.data && res.data.total) ? res.data.total : 0
-    }).catch(() => {})
+    loading.value = true
+    adminUserList(page.value, pageSize).then((data) => {
+        users.value = (data && data.list) ? data.list : []
+        pagination.total = (data && data.total) ? data.total : 0
+        pagination.size = (data && data.size) ? data.size : pageSize
+    }).catch(() => {
+        users.value = []
+        pagination.total = 0
+    }).finally(() => {
+        loading.value = false
+    })
 }
 
 function editUser(user) {
@@ -117,8 +129,8 @@ function editUser(user) {
     editing.nickname = user.nickname || ''
     editing.balance = user.balance || 0
     editing.points = user.points || 0
-    editing.level = user.level || 0
-    editing.status = user.status || 1
+    editing.level = user.level || 1
+    editing.status = user.status === undefined ? 1 : user.status
 }
 
 function cancel() {
@@ -131,7 +143,7 @@ function cancel() {
 }
 
 function save() {
-    loading.value = true
+    saving.value = true
     adminUserUpdate(editing.id, {
         nickname: editing.nickname,
         balance: editing.balance,
@@ -143,7 +155,7 @@ function save() {
         cancel()
         load()
     }).catch(() => {}).finally(() => {
-        loading.value = false
+        saving.value = false
     })
 }
 
