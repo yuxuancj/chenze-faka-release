@@ -37,12 +37,27 @@ func (s *UserService) Register(email, password, nickname string) (*model.User, e
 	if nickname == "" {
 		nickname = "用户" + randomStr(6)
 	}
+	// 自动生成邀请码（确保唯一）
+	inviteCode := ""
+	for i := 0; i < 20; i++ {
+		code := randomStr(6)
+		var cnt int64
+		db.DB.Model(&model.User{}).Where("invite_code = ? AND invite_code != ''", code).Count(&cnt)
+		if cnt == 0 {
+			inviteCode = code
+			break
+		}
+	}
+	if inviteCode == "" {
+		inviteCode = randomStr(8)
+	}
 	u := &model.User{
-		Email:    email,
-		Password: string(hashed),
-		Nickname: nickname,
-		Level:    1,
-		Status:   model.UserStatusActive,
+		Email:      email,
+		Password:   string(hashed),
+		Nickname:   nickname,
+		Level:      1,
+		Status:     model.UserStatusActive,
+		InviteCode: inviteCode,
 	}
 	if err := db.DB.Create(u).Error; err != nil {
 		return nil, err

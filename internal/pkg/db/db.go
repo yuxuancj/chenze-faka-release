@@ -13,6 +13,7 @@ import (
 )
 
 var DB *gorm.DB
+var driverType string // "mysql" 或 "sqlite"
 
 func IsReady() bool {
 	if DB == nil {
@@ -33,18 +34,7 @@ func IsReady() bool {
 
 // Driver 返回当前数据库驱动类型 ("mysql" 或 "sqlite")
 func Driver() string {
-	if DB == nil {
-		return ""
-	}
-	sqlDB, err := DB.DB()
-	if err != nil || sqlDB == nil {
-		return ""
-	}
-	driverName := strings.Split(sqlDB.Driver().(interface{ Name() string }).Name(), ":")[0]
-	if strings.Contains(driverName, "sqlite") {
-		return "sqlite"
-	}
-	return "mysql"
+	return driverType
 }
 
 func Init(dsn string) error {
@@ -58,9 +48,11 @@ func Init(dsn string) error {
 	if isSQLite {
 		// SQLite DSN 直接是文件路径
 		dialector = sqlite.Open(dsn)
+		driverType = "sqlite"
 	} else {
 		// MySQL DSN
 		dialector = mysql.Open(dsn)
+		driverType = "mysql"
 	}
 
 	var db *gorm.DB
