@@ -309,7 +309,7 @@
 
 <script setup>import { ref, reactive, onMounted } from 'vue';
 import AdminLayout from '../components/AdminLayout.vue';
-import { request } from '../api/admin';
+import request from '../utils/request';
 const tabs = [
  { key: 'basic', label: '基本设置' },
  { key: 'payment', label: '支付设置' },

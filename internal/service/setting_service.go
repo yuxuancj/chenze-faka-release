@@ -1,6 +1,10 @@
 package service
 
 import (
+	"encoding/json"
+	"errors"
+	"sync"
+
 	"chenze-faka/internal/model"
 	"chenze-faka/internal/pkg/db"
 	"chenze-faka/internal/pkg/logger"
@@ -11,7 +15,15 @@ import (
 
 type SettingService struct{}
 
-func NewSettingService() *SettingService { return &SettingService{} }
+var settingServiceOnce sync.Once
+var settingServiceInstance *SettingService
+
+func NewSettingService() *SettingService {
+	settingServiceOnce.Do(func() {
+		settingServiceInstance = &SettingService{}
+	})
+	return settingServiceInstance
+}
 
 func (s *SettingService) Get(key string) (string, error) {
 	var setting model.Setting
@@ -121,4 +133,64 @@ func (s *SettingService) GetAll() ([]model.Setting, error) {
 		logger.Errorf("SettingService.GetAll error: %v", err)
 	}
 	return settings, err
+}
+
+func (s *SettingService) GetWithType(key string, defaultValue interface{}) interface{} {
+	var setting model.Setting
+	result := db.DB.Where("`key` = ?", key).First(&setting)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return defaultValue
+	}
+	if result.Error != nil {
+		return defaultValue
+	}
+	switch setting.Type {
+	case "int":
+		var val int
+		json.Unmarshal([]byte(setting.Value), &val)
+		return val
+	case "bool":
+		var val bool
+		json.Unmarshal([]byte(setting.Value), &val)
+		return val
+	case "json":
+		var val map[string]interface{}
+		json.Unmarshal([]byte(setting.Value), &val)
+		return val
+	default:
+		return setting.Value
+	}
+}
+
+func (s *SettingService) SetWithType(key string, value interface{}, typ string) error {
+	valBytes, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+	setting := model.Setting{
+		Key:   key,
+		Value: string(valBytes),
+		Type:  typ,
+	}
+	return db.DB.Where("`key` = ?", key).Assign(setting).FirstOrCreate(&setting).Error
+}
+
+func (s *SettingService) BatchSet(data map[string]interface{}) error {
+	for k, v := range data {
+		var typ string
+		switch v.(type) {
+		case int, int64, float64:
+			typ = "int"
+		case bool:
+			typ = "bool"
+		case map[string]interface{}, []interface{}:
+			typ = "json"
+		default:
+			typ = "string"
+		}
+		if err := s.SetWithType(k, v, typ); err != nil {
+			return err
+		}
+	}
+	return nil
 }

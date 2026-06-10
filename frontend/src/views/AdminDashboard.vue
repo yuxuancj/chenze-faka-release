@@ -184,7 +184,7 @@
 
 <script setup>import { ref, onMounted, watch, nextTick } from 'vue';
 import AdminLayout from '../components/AdminLayout.vue';
-import { request } from '../api/admin';
+import request from '../utils/request';
 const loading = ref(true);
 const stats = ref({});
 const orderChartRef = ref(null);
