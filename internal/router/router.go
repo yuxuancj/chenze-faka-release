@@ -78,6 +78,7 @@ func Setup(r *gin.Engine) {
 			auth.POST("/seckill/order", seckillCtrl.Order)
 
 			// 分销
+			auth.GET("/distribution/summary", distCtrl.GetSummary)
 			auth.GET("/distribution/invite", distCtrl.GetInviteCode)
 			auth.GET("/distribution/commissions", distCtrl.GetCommissions)
 			auth.GET("/distribution/team", distCtrl.GetTeam)

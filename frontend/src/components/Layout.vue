@@ -13,6 +13,7 @@
                         <template v-if="token">
                             <span v-if="userNickname" class="text-sm text-gray-600">{{ userNickname }}</span>
                             <router-link to="/user/orders" class="nav-link">我的订单</router-link>
+                            <router-link to="/user/distribution" class="nav-link">推广中心</router-link>
                             <router-link to="/user/profile" class="nav-link">个人中心</router-link>
                             <button @click="logout" class="btn-secondary btn-sm">退出</button>
                         </template>
@@ -38,6 +39,7 @@
                     <template v-if="token">
                         <span v-if="userNickname" class="nav-link block">{{ userNickname }}</span>
                         <router-link to="/user/orders" class="nav-link block">我的订单</router-link>
+                        <router-link to="/user/distribution" class="nav-link block">推广中心</router-link>
                         <router-link to="/user/profile" class="nav-link block">个人中心</router-link>
                         <button @click="logout" class="nav-link block w-full text-left">退出登录</button>
                     </template>

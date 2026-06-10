@@ -20,7 +20,7 @@
                         </div>
                         <div>
                             <label class="form-label">秒杀价</label>
-                            <input v-model.number="sform.price" type="number" step="0.01" class="form-input">
+                            <input v-model.number="sform.seckill_price" type="number" step="0.01" class="form-input">
                         </div>
                         <div>
                             <label class="form-label">秒杀库存</label>
@@ -81,7 +81,7 @@
                                 <td>{{ s.id }}</td>
                                 <td>{{ s.product_id }}</td>
                                 <td>{{ s.sku_id || '-' }}</td>
-                                <td class="text-red-600 font-semibold">￥{{ s.price }}</td>
+                                <td class="text-red-600 font-semibold">￥{{ s.seckill_price }}</td>
                                 <td>{{ s.stock }}</td>
                                 <td>{{ s.sold || 0 }}</td>
                                 <td>{{ s.limit_per_user }}</td>
@@ -112,12 +112,12 @@ const showCreateForm = ref(false)
 const showEditForm = ref(false)
 const editingId = ref(0)
 const sform = reactive({
-    product_id: 0, sku_id: 0, price: 0, stock: 0, limit_per_user: 1,
+    product_id: 0, sku_id: 0, seckill_price: 0, stock: 0, limit_per_user: 1,
     status: 1, start_time: '', end_time: ''
 })
 
 function resetForm() {
-    sform.product_id = 0; sform.sku_id = 0; sform.price = 0; sform.stock = 0
+    sform.product_id = 0; sform.sku_id = 0; sform.seckill_price = 0; sform.stock = 0
     sform.limit_per_user = 1; sform.status = 1; sform.start_time = ''; sform.end_time = ''
 }
 
@@ -148,7 +148,7 @@ function editSeckill(s) {
     editingId.value = s.id
     sform.product_id = s.product_id || 0
     sform.sku_id = s.sku_id || 0
-    sform.price = s.price || 0
+    sform.seckill_price = s.seckill_price || 0
     sform.stock = s.stock || 0
     sform.limit_per_user = s.limit_per_user || 1
     sform.status = s.status || 1

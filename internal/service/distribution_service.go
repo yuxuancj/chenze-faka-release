@@ -149,6 +149,31 @@ func (s *DistributionService) GetCommissions(userID uint, page, size int) (int64
 	return total, list, nil
 }
 
+// GetSummary 获取分销统计信息
+func (s *DistributionService) GetSummary(userID uint) (map[string]interface{}, error) {
+	if db.DB == nil {
+		return nil, errors.New("数据库未连接")
+	}
+	
+	var totalCommission float64
+	db.DB.Model(&model.Commission{}).Where("user_id=?", userID).Select("IFNULL(SUM(amount),0)").Scan(&totalCommission)
+	
+	var availableCommission float64
+	db.DB.Model(&model.Commission{}).Where("user_id=? AND status=1", userID).Select("IFNULL(SUM(amount),0)").Scan(&availableCommission)
+	
+	var teamCount int64
+	db.DB.Model(&model.User{}).Where("parent_id=?", userID).Count(&teamCount)
+	
+	code, _ := s.GetInviteCode(userID)
+	
+	return map[string]interface{}{
+		"total_commission":     totalCommission,
+		"available_commission": availableCommission,
+		"team_count":           teamCount,
+		"invite_code":          code,
+	}, nil
+}
+
 // GetTeam 获取团队成员（直接下级）
 func (s *DistributionService) GetTeam(userID uint, page, size int) (int64, []model.User, error) {
 	if db.DB == nil {

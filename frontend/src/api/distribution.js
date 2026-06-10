@@ -11,7 +11,7 @@ export function distributionTeam(page, size) {
 
 export function distributionCommissions(page, size) {
     const params = { page: page || 1, size: size || 20 }
-    return request.get('/api/v1/user/commissions', { params })
+    return request.get('/api/v1/distribution/commissions', { params })
 }
 
 export function distributionPoster() {

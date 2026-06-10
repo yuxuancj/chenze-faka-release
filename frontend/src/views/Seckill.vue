@@ -22,7 +22,7 @@
                     <div class="card-body space-y-3">
                         <h3 class="font-semibold text-gray-800 truncate">{{ item.product_name || '秒杀商品' }}</h3>
                         <div class="flex items-baseline gap-2">
-                            <span class="text-2xl font-bold text-red-600">￥{{ item.price }}</span>
+                            <span class="text-2xl font-bold text-red-600">￥{{ item.seckill_price }}</span>
                             <span class="text-sm text-gray-400 line-through">￥{{ item.original_price }}</span>
                         </div>
                         <div class="flex items-center gap-4 text-xs text-gray-600">

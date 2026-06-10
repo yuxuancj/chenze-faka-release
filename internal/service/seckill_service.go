@@ -30,19 +30,50 @@ func (s *SeckillService) List(page, size int) (int64, []model.Seckill, error) {
 }
 
 // ActiveList 前台活动列表
-func (s *SeckillService) ActiveList() ([]model.Seckill, error) {
+func (s *SeckillService) ActiveList() ([]map[string]interface{}, error) {
 	if db.DB == nil {
 		return nil, errors.New("数据库未连接")
 	}
-	var list []model.Seckill
 	now := time.Now()
-	// 预热中 or 进行中
+	var list []model.Seckill
 	if err := db.DB.Where("status=1 AND stock > 0 AND (preheat_start <= ? OR start_time <= ?)", now, now).
 		Where("(end_time IS NULL OR end_time >= ?)", now).
 		Order("start_time asc").Find(&list).Error; err != nil {
 		return nil, err
 	}
-	return list, nil
+
+	result := make([]map[string]interface{}, 0, len(list))
+	for _, sk := range list {
+		var product model.Product
+		db.DB.First(&product, sk.ProductID)
+		
+		item := map[string]interface{}{
+			"id":              sk.ID,
+			"product_id":      sk.ProductID,
+			"sku_id":          sk.SkuID,
+			"seckill_price":   sk.SeckillPrice,
+			"original_price":  product.Price,
+			"product_name":    product.Name,
+			"stock":           sk.Stock,
+			"sold":            sk.Sold,
+			"original_stock":  sk.Stock + sk.Sold,
+			"limit_per_user":  sk.LimitPerUser,
+			"start_time":      sk.StartTime,
+			"end_time":        sk.EndTime,
+			"preheat_start":   sk.PreheatStart,
+			"status":          sk.Status,
+		}
+
+		if sk.StartTime != nil && now.Before(*sk.StartTime) {
+			item["status"] = "upcoming"
+		} else if sk.EndTime != nil && now.After(*sk.EndTime) {
+			item["status"] = "ended"
+		} else {
+			item["status"] = "ongoing"
+		}
+		result = append(result, item)
+	}
+	return result, nil
 }
 
 // GetByID 获取单个活动

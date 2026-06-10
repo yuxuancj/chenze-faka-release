@@ -250,7 +250,7 @@ func (c *SeckillController) List(ctx *gin.Context) {
 		response.Error(ctx, response.CodeServerError, err.Error())
 		return
 	}
-	response.Success(ctx, list)
+	response.Success(ctx, gin.H{"list": list})
 }
 
 func (c *SeckillController) Order(ctx *gin.Context) {
@@ -366,6 +366,16 @@ func (c *WholesaleController) AdminDelete(ctx *gin.Context) {
 type DistributionController struct{}
 
 func NewDistributionController() *DistributionController { return &DistributionController{} }
+
+func (c *DistributionController) GetSummary(ctx *gin.Context) {
+	uid, _ := ctx.Get("user_id")
+	summary, err := service.NewDistributionService().GetSummary(uid.(uint))
+	if err != nil {
+		response.Error(ctx, response.CodeServerError, err.Error())
+		return
+	}
+	response.Success(ctx, summary)
+}
 
 func (c *DistributionController) GetInviteCode(ctx *gin.Context) {
 	uid, _ := ctx.Get("user_id")
