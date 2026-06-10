@@ -34,7 +34,8 @@ type JWTConfig struct {
 }
 
 type PayConfig struct {
-	Epay EpayConfig `yaml:"epay"`
+	Epay   EpayConfig   `yaml:"epay"`
+	Alipay AlipayConfig `yaml:"alipay"`
 }
 
 type EpayConfig struct {
@@ -43,6 +44,14 @@ type EpayConfig struct {
 	Key       string `yaml:"key"`
 	NotifyURL string `yaml:"notify_url"`
 	ReturnURL string `yaml:"return_url"`
+}
+
+type AlipayConfig struct {
+	AppID           string `yaml:"app_id"`
+	PrivateKey      string `yaml:"private_key"`
+	AlipayPublicKey string `yaml:"alipay_public_key"`
+	NotifyURL       string `yaml:"notify_url"`
+	ReturnURL       string `yaml:"return_url"`
 }
 
 var AppConfig *Config

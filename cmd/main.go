@@ -47,10 +47,19 @@ func main() {
 				&model.User{},
 				&model.Category{},
 				&model.Product{},
+				&model.ProductSku{},
 				&model.Card{},
 				&model.Order{},
 				&model.OrderCard{},
 				&model.Setting{},
+				&model.Coupon{},
+				&model.UserCoupon{},
+				&model.Seckill{},
+				&model.WholesaleRule{},
+				&model.Commission{},
+				&model.Withdraw{},
+				&model.PointsLog{},
+				&model.SigninLog{},
 			); err != nil {
 				logger.Errorf("auto migrate failed: %v", err)
 			} else {

@@ -1,5 +1,3 @@
-// Package router 提供 HTTP 路由配置。
-// Vue 3 SPA 通过 embed.FS 提供静态服务，安装向导独立嵌入。
 package router
 
 import (
@@ -16,13 +14,11 @@ import (
 )
 
 func Setup(r *gin.Engine) {
-	// 未安装时，跳过 JWT secret 验证（此时 config 可能不完整）
 	var jwtSecret string
 	if config.AppConfig != nil {
 		jwtSecret = config.AppConfig.JWT.Secret
 	}
 
-	// 安装检测中间件：未安装则强制跳转到 /install
 	r.Use(installGuard())
 
 	api := r.Group("/api/v1")
@@ -33,15 +29,31 @@ func Setup(r *gin.Engine) {
 		orderCtrl := controller.NewOrderController()
 		payCtrl := controller.NewPaymentController()
 
+		skuCtrl := controller.NewSkuController()
+		alipayCtrl := controller.NewAlipayController()
+		couponCtrl := controller.NewCouponController()
+		seckillCtrl := controller.NewSeckillController()
+		wholesaleCtrl := controller.NewWholesaleController()
+		distCtrl := controller.NewDistributionController()
+		pointsCtrl := controller.NewPointsController()
+		advOrderCtrl := controller.NewAdvancedOrderController()
+
+		// 公开接口
 		api.POST("/user/register", userCtrl.Register)
 		api.POST("/user/login", userCtrl.Login)
 		api.GET("/products", productCtrl.List)
 		api.GET("/products/:id", productCtrl.Detail)
+		api.GET("/products/:id/skus", skuCtrl.GetByProduct)
 		api.GET("/categories", productCtrl.Categories)
-		api.POST("/pay/epay/notify", payCtrl.EpayNotify)
 		api.GET("/pay/epay/notify", payCtrl.EpayNotify)
+		api.POST("/pay/epay/notify", payCtrl.EpayNotify)
 		api.GET("/pay/epay/return", payCtrl.EpayReturn)
+		api.POST("/pay/alipay/notify", alipayCtrl.Notify)
+		api.GET("/seckill/activities", seckillCtrl.List)
+		api.GET("/wholesale/rules", wholesaleCtrl.List)
+		api.GET("/coupons", couponCtrl.List)
 
+		// 需要登录的接口
 		auth := api.Group("")
 		auth.Use(middleware.Auth(jwtSecret))
 		{
@@ -49,23 +61,56 @@ func Setup(r *gin.Engine) {
 			auth.POST("/user/profile", userCtrl.UpdateProfile)
 			auth.POST("/user/password", userCtrl.ChangePassword)
 			auth.POST("/orders", orderCtrl.Create)
+			auth.POST("/orders/advanced", advOrderCtrl.Create)
+			auth.POST("/orders/markpaid", advOrderCtrl.MarkPaid)
 			auth.GET("/orders", orderCtrl.List)
 			auth.GET("/orders/:order_no", orderCtrl.Detail)
 			auth.POST("/pay", payCtrl.Pay)
+			auth.POST("/pay/alipay", alipayCtrl.Pay)
+
+			// 优惠券
+			auth.POST("/coupon/redeem", couponCtrl.Claim)
+			auth.GET("/user/coupons", couponCtrl.UserCoupons)
+
+			// 秒杀下单
+			auth.POST("/seckill/order", seckillCtrl.Order)
+
+			// 分销
+			auth.GET("/distribution/invite", distCtrl.GetInviteCode)
+			auth.GET("/distribution/commissions", distCtrl.GetCommissions)
+			auth.GET("/distribution/team", distCtrl.GetTeam)
+			auth.POST("/withdraw/apply", distCtrl.ApplyWithdraw)
+			auth.GET("/withdraw/list", distCtrl.MyWithdraws)
+
+			// 积分签到
+			auth.POST("/user/signin", pointsCtrl.SignIn)
+			auth.GET("/user/signin/status", pointsCtrl.SignInStatus)
+			auth.GET("/user/points", pointsCtrl.Balance)
+			auth.GET("/user/points/logs", pointsCtrl.Logs)
 		}
 	}
 
+	// 管理后台API
 	adminAPI := r.Group("/admin/api")
 	if jwtSecret != "" {
 		adminAPI.Use(middleware.AdminAuth(jwtSecret))
 	}
 	{
 		admin := controller.NewAdminController()
-		adminAPI.GET("/dashboard", admin.Dashboard)
+		skuCtrl := controller.NewSkuController()
+		couponCtrl := controller.NewCouponController()
+		seckillCtrl := controller.NewSeckillController()
+		wholesaleCtrl := controller.NewWholesaleController()
+		distCtrl := controller.NewDistributionController()
+		dashCtrl := controller.NewDashboardController()
+
+		adminAPI.GET("/dashboard", dashCtrl.AdminDashboard)
 		adminAPI.GET("/products", admin.ProductList)
 		adminAPI.POST("/products", admin.ProductCreate)
 		adminAPI.PUT("/products/:id", admin.ProductUpdate)
 		adminAPI.DELETE("/products/:id", admin.ProductDelete)
+		adminAPI.GET("/products/:id/skus", skuCtrl.AdminList)
+		adminAPI.POST("/products/:id/skus", skuCtrl.AdminBatchUpdate)
 		adminAPI.GET("/cards", admin.CardList)
 		adminAPI.POST("/cards/import", admin.CardImport)
 		adminAPI.GET("/categories", admin.CategoryList)
@@ -78,38 +123,49 @@ func Setup(r *gin.Engine) {
 		adminAPI.PUT("/users/:id", admin.UserUpdate)
 		adminAPI.GET("/settings", admin.SettingsGet)
 		adminAPI.POST("/settings", admin.SettingsSet)
+
+		// 优惠券管理
+		adminAPI.GET("/coupons", couponCtrl.AdminList)
+		adminAPI.POST("/coupons", couponCtrl.AdminCreate)
+		adminAPI.PUT("/coupons/:id", couponCtrl.AdminUpdate)
+		adminAPI.DELETE("/coupons/:id", couponCtrl.AdminDelete)
+
+		// 秒杀管理
+		adminAPI.GET("/seckills", seckillCtrl.AdminList)
+		adminAPI.POST("/seckills", seckillCtrl.AdminCreate)
+		adminAPI.PUT("/seckills/:id", seckillCtrl.AdminUpdate)
+		adminAPI.DELETE("/seckills/:id", seckillCtrl.AdminDelete)
+
+		// 批发规则
+		adminAPI.POST("/wholesale/rules", wholesaleCtrl.AdminCreate)
+		adminAPI.PUT("/wholesale/rules/:id", wholesaleCtrl.AdminUpdate)
+		adminAPI.DELETE("/wholesale/rules/:id", wholesaleCtrl.AdminDelete)
+
+		// 提现审核
+		adminAPI.GET("/withdraws", distCtrl.AdminListWithdraws)
+		adminAPI.POST("/withdraws/:id/process", distCtrl.AdminProcessWithdraw)
 	}
 
 	setupInstallAPI(r)
 	setupStaticFiles(r)
 }
 
-// installGuard 中间件：检查是否已安装。
-// 若 install.lock 不存在，且请求路径不是 /install 或 /install/api，则重定向到 /install。
 func installGuard() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		path := c.Request.URL.Path
-
-		// 安装相关路径放行
 		if path == "/install" || strings.HasPrefix(path, "/install/api") {
 			c.Next()
 			return
 		}
-		// API 路径放行（让后端 API 处理）
 		if strings.HasPrefix(path, "/api/") || strings.HasPrefix(path, "/admin/api") {
 			c.Next()
 			return
 		}
-
-		// 静态资源（带扩展名）放行
 		if strings.Contains(path, ".") {
 			c.Next()
 			return
 		}
-
-		// 检查是否已安装
 		if _, err := os.Stat("install.lock"); os.IsNotExist(err) {
-			// 未安装，重定向到安装页面
 			if path != "/install" {
 				c.Redirect(http.StatusFound, "/install")
 				c.Abort()
@@ -120,7 +176,6 @@ func installGuard() gin.HandlerFunc {
 	}
 }
 
-// setupStaticFiles 将 Vue 3 SPA 构建产物通过 embed.FS 提供静态服务。
 func setupStaticFiles(r *gin.Engine) {
 	subFS, err := fs.Sub(web.StaticFiles, "frontend/dist")
 	if err != nil {
@@ -140,7 +195,6 @@ func setupStaticFiles(r *gin.Engine) {
 
 	fileServer := http.FileServer(http.FS(subFS))
 
-	// 独立处理 /install 路径，从嵌入文件返回安装页面
 	r.GET("/install", func(c *gin.Context) {
 		installHTML, err := web.InstallPage.ReadFile("install.html")
 		if err != nil {
@@ -171,7 +225,6 @@ func setupStaticFiles(r *gin.Engine) {
 	})
 }
 
-// setupInstallAPI 注册安装向导 API 路由
 func setupInstallAPI(r *gin.Engine) {
 	install := controller.NewInstallController()
 	installAPI := r.Group("/install/api")
