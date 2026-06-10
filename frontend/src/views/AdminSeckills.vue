@@ -86,7 +86,7 @@
                                 <td>{{ s.sold || 0 }}</td>
                                 <td>{{ s.limit_per_user }}</td>
                                 <td>{{ s.status === 1 ? '启用' : '禁用' }}</td>
-                                <td class="text-xs">{{ s.start_time }} - {{ s.end_time }}</td>
+                                <td class="text-xs">{{ formatDateTime(s.start_time) }} - {{ formatDateTime(s.end_time) }}</td>
                                 <td>
                                     <button @click="editSeckill(s)" class="btn-sm btn-secondary">编辑</button>
                                     <button @click="deleteSeckill(s.id)" class="btn-sm btn-danger ml-1">删除</button>
@@ -104,6 +104,17 @@
 import { ref, reactive, onMounted } from 'vue'
 import AdminLayout from '../components/AdminLayout.vue'
 import { adminSeckillList, adminSeckillCreate, adminSeckillUpdate, adminSeckillDelete } from '../api/seckill'
+
+function formatDateTime(dateStr) {
+    if (!dateStr) return '-'
+    try {
+        const d = new Date(dateStr)
+        if (isNaN(d.getTime())) return '-'
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+    } catch (e) {
+        return '-'
+    }
+}
 
 const seckills = ref([])
 const loading = ref(false)

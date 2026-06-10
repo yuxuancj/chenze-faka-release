@@ -4,8 +4,8 @@ export function seckillActivities() {
     return request.get('/api/v1/seckill/activities')
 }
 
-export function seckillOrder(product_id, sku_id, quantity) {
-    return request.post('/api/v1/seckill/order', { product_id, sku_id, quantity })
+export function seckillOrder(seckill_id) {
+    return request.post('/api/v1/seckill/order', { seckill_id })
 }
 
 // Admin

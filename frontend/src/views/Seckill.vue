@@ -33,7 +33,7 @@
                             进行中 · 剩余: {{ countdownFor(item) }}
                         </div>
                         <div v-else-if="item.status === 'upcoming'" class="text-xs text-yellow-600 font-semibold">
-                            即将开始 · {{ item.start_time }}
+                            即将开始 · {{ formatDateTime(item.start_time) }}
                         </div>
                         <div v-else-if="item.status === 'ended'" class="text-xs text-gray-500">
                             已结束
@@ -70,17 +70,29 @@ const ordering = ref(false)
 const now = ref(Date.now())
 let timer = null
 
-function countdownFor(item) {
-    if (!item.end_time) return '--'
+function formatDateTime(dateStr) {
+    if (!dateStr) return '--'
     try {
-        const end = new Date(item.end_time.replace(/-/g, '/')).getTime()
+        const d = new Date(dateStr)
+        if (isNaN(d.getTime())) return '--'
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+    } catch (e) {
+        return '--'
+    }
+}
+
+function countdownFor(item) {
+    if (!item.end_time) return '已结束'
+    try {
+        const end = new Date(item.end_time).getTime()
+        if (isNaN(end)) return '已结束'
         const diff = Math.max(0, end - now.value)
         const h = Math.floor(diff / 3600000)
         const m = Math.floor((diff % 3600000) / 60000)
         const s = Math.floor((diff % 60000) / 1000)
         return h + '时' + String(m).padStart(2, '0') + '分' + String(s).padStart(2, '0') + '秒'
     } catch (e) {
-        return '--'
+        return '已结束'
     }
 }
 
@@ -102,18 +114,21 @@ function load() {
 }
 
 function handleBuy(item) {
-    if (!item) return
+    if (!item || ordering.value) return
     ordering.value = true
-    seckillOrder(item.product_id, item.sku_id || 0, 1).then((data) => {
-        const orderNo = (data && (data.order_no || (data.order && data.order.order_no))) || null
+    seckillOrder(item.id).then((data) => {
+        const orderNo = (data && (data.order_no || (data.data && data.data.order_no) || (data.order && data.order.order_no))) || null
         if (orderNo) {
             router.push('/order/' + orderNo)
         } else {
             alert('秒杀下单成功')
             router.push('/user/orders')
         }
-    }).catch(() => {}).finally(() => {
+    }).catch((err) => {
+        alert(err.response?.data?.msg || '秒杀失败，请稍后重试')
+    }).finally(() => {
         ordering.value = false
+        load()
     })
 }
 

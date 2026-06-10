@@ -58,10 +58,19 @@ func (s *SeckillService) ActiveList() ([]map[string]interface{}, error) {
 			"sold":            sk.Sold,
 			"original_stock":  sk.Stock + sk.Sold,
 			"limit_per_user":  sk.LimitPerUser,
-			"start_time":      sk.StartTime,
-			"end_time":        sk.EndTime,
 			"preheat_start":   sk.PreheatStart,
 			"status":          sk.Status,
+		}
+
+		if sk.StartTime != nil {
+			item["start_time"] = sk.StartTime.Format(time.RFC3339)
+		} else {
+			item["start_time"] = ""
+		}
+		if sk.EndTime != nil {
+			item["end_time"] = sk.EndTime.Format(time.RFC3339)
+		} else {
+			item["end_time"] = ""
 		}
 
 		if sk.StartTime != nil && now.Before(*sk.StartTime) {
