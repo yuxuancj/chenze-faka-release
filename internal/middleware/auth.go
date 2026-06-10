@@ -28,14 +28,14 @@ func Auth(secret string) gin.HandlerFunc {
 			}
 		}
 		if auth == "" || !strings.HasPrefix(auth, "Bearer ") {
-			c.JSON(http.StatusUnauthorized, gin.H{"code": response.CodeTokenInvalid, "msg": "未登录"})
+			response.Error(c, response.CodeTokenInvalid, "未登录")
 			c.Abort()
 			return
 		}
 		tokenStr := strings.TrimPrefix(auth, "Bearer ")
 		claims, err := jwt.Parse(tokenStr, secret)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"code": response.CodeTokenInvalid, "msg": "登录已失效"})
+			response.Error(c, response.CodeTokenInvalid, "登录已失效")
 			c.Abort()
 			return
 		}

@@ -249,9 +249,32 @@ type PointsLog struct {
 }
 
 type SigninLog struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	UserID    uint      `gorm:"index;not null" json:"user_id"`
-	ContinuousDays int   `gorm:"default:1" json:"continuous_days"`
-	RewardPoints int     `gorm:"default:0" json:"reward_points"`
+	ID             uint      `gorm:"primaryKey" json:"id"`
+	UserID         uint      `gorm:"index;not null" json:"user_id"`
+	ContinuousDays int       `gorm:"default:1" json:"continuous_days"`
+	RewardPoints   int       `gorm:"default:0" json:"reward_points"`
+	CreatedAt      time.Time `json:"created_at"`
+}
+
+type AuditLog struct {
+	ID          uint      `gorm:"primaryKey" json:"id"`
+	AdminID     uint      `gorm:"index" json:"admin_id"`
+	AdminName   string    `gorm:"size:50" json:"admin_name"`
+	Action      string    `gorm:"size:50" json:"action"`
+	TargetType  string    `gorm:"size:50" json:"target_type"`
+	TargetID    uint      `json:"target_id"`
+	OldValue    string    `gorm:"type:text" json:"old_value"`
+	NewValue    string    `gorm:"type:text" json:"new_value"`
+	IP          string    `gorm:"size:50" json:"ip"`
+	Description string    `gorm:"size:255" json:"description"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+type DistributionTree struct {
+	ID       uint      `gorm:"primaryKey" json:"id"`
+	UserID   uint      `gorm:"uniqueIndex" json:"user_id"`
+	ParentID uint      `gorm:"index" json:"parent_id"`
+	Level    int       `gorm:"default:0" json:"level"`
+	Path     string    `gorm:"size:255" json:"path"`
 	CreatedAt time.Time `json:"created_at"`
 }

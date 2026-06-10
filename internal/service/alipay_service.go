@@ -1,7 +1,6 @@
 package service
 
 import (
-	"chenze-faka/internal/pkg/config"
 	"crypto"
 	"crypto/rsa"
 	"crypto/x509"
@@ -14,6 +13,30 @@ import (
 	"strings"
 	"time"
 )
+
+type AlipayConfig struct {
+	AppID           string
+	PrivateKey      string
+	AlipayPublicKey string
+	NotifyURL       string
+	ReturnURL       string
+}
+
+func GetAlipayConfig() AlipayConfig {
+	ss := NewSettingService()
+	appID, _ := ss.Get("alipay_app_id")
+	privateKey, _ := ss.Get("alipay_private_key")
+	publicKey, _ := ss.Get("alipay_public_key")
+	notifyURL, _ := ss.Get("alipay_notify_url")
+	returnURL, _ := ss.Get("alipay_return_url")
+	return AlipayConfig{
+		AppID:           appID,
+		PrivateKey:      privateKey,
+		AlipayPublicKey: publicKey,
+		NotifyURL:       notifyURL,
+		ReturnURL:       returnURL,
+	}
+}
 
 type AlipayService struct{}
 
@@ -29,7 +52,7 @@ type TradeCreateRequest struct {
 
 // Precreate 当面付：生成二维码内容
 func (s *AlipayService) Precreate(req TradeCreateRequest) (string, error) {
-	cfg := config.AppConfig.Pay.Alipay
+	cfg := GetAlipayConfig()
 	if cfg.AppID == "" {
 		return "", errors.New("支付宝未配置")
 	}
@@ -45,13 +68,12 @@ func (s *AlipayService) Precreate(req TradeCreateRequest) (string, error) {
 	}
 	sign := s.rsa256Sign(params, cfg.PrivateKey)
 	params["sign"] = sign
-	// 返回模拟二维码内容（实际应调用支付宝API）
 	return s.buildQrContent(params), nil
 }
 
 // WapPay 手机网站支付：返回跳转URL
 func (s *AlipayService) WapPay(req TradeCreateRequest, returnURL string) (string, error) {
-	cfg := config.AppConfig.Pay.Alipay
+	cfg := GetAlipayConfig()
 	if cfg.AppID == "" {
 		return "", errors.New("支付宝未配置")
 	}
@@ -73,7 +95,7 @@ func (s *AlipayService) WapPay(req TradeCreateRequest, returnURL string) (string
 
 // PagePay 电脑网站支付：返回跳转URL
 func (s *AlipayService) PagePay(req TradeCreateRequest, returnURL string) (string, error) {
-	cfg := config.AppConfig.Pay.Alipay
+	cfg := GetAlipayConfig()
 	if cfg.AppID == "" {
 		return "", errors.New("支付宝未配置")
 	}
@@ -95,7 +117,7 @@ func (s *AlipayService) PagePay(req TradeCreateRequest, returnURL string) (strin
 
 // VerifyNotify 验证支付宝异步回调签名
 func (s *AlipayService) VerifyNotify(form url.Values) (outTradeNo string, tradeNo string, tradeStatus string, ok bool) {
-	cfg := config.AppConfig.Pay.Alipay
+	cfg := GetAlipayConfig()
 	if cfg.AlipayPublicKey == "" {
 		return "", "", "", true // 简化模式：未配置公钥时信任
 	}

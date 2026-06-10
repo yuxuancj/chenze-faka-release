@@ -3,6 +3,7 @@ package service
 import (
 	"chenze-faka/internal/model"
 	"chenze-faka/internal/pkg/db"
+	"chenze-faka/internal/pkg/logger"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -165,12 +166,13 @@ func (s *AdvancedOrderService) MarkPaidAdvanced(orderNo, payType string) (*model
 	if db.DB == nil {
 		return nil, errors.New("数据库未连接")
 	}
+	logger.Infof("支付回调处理: order_no=%s, pay_type=%s", orderNo, payType)
 	var order *model.Order
 	err := db.DB.Transaction(func(tx *gorm.DB) error {
-		// 1. 锁定订单
 		var lockedOrder model.Order
 		rows, err := tx.Raw(fmt.Sprintf("SELECT id FROM orders WHERE order_no='%s' LIMIT 1 FOR UPDATE", orderNo)).Rows()
 		if err != nil {
+			logger.Errorf("锁定订单失败: %v", err)
 			return err
 		}
 		var id uint
@@ -179,13 +181,14 @@ func (s *AdvancedOrderService) MarkPaidAdvanced(orderNo, payType string) (*model
 		}
 		rows.Close()
 		if id == 0 {
+			logger.Warnf("订单不存在: order_no=%s", orderNo)
 			return gorm.ErrRecordNotFound
 		}
 		if err := tx.First(&lockedOrder, id).Error; err != nil {
 			return err
 		}
-		// 2. 幂等：已支付直接返回
 		if lockedOrder.Status != model.OrderStatusPending {
+			logger.Infof("订单已支付，跳过重复处理: order_no=%s, status=%d", orderNo, lockedOrder.Status)
 			order = &lockedOrder
 			return nil
 		}

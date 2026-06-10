@@ -143,7 +143,7 @@ func (c *AlipayController) Notify(ctx *gin.Context) {
 	alipaySvc := service.NewAlipayService()
 	orderNo, _, tradeStatus, ok := alipaySvc.VerifyNotify(form)
 	if !ok {
-		ctx.String(http.StatusBadRequest, "fail")
+		ctx.String(http.StatusOK, "fail")
 		return
 	}
 	if tradeStatus != "" && !strings.Contains(tradeStatus, "SUCCESS") && !strings.Contains(tradeStatus, "TRADE_FINISHED") {
@@ -453,6 +453,30 @@ func (c *DistributionController) AdminProcessWithdraw(ctx *gin.Context) {
 		return
 	}
 	response.OK(ctx)
+}
+
+func (c *DistributionController) Poster(ctx *gin.Context) {
+	var req struct {
+		InviteCode string `json:"invite_code" form:"invite_code"`
+	}
+	ctx.ShouldBind(&req)
+	if req.InviteCode == "" {
+		uid, ok := ctx.Get("user_id")
+		if ok {
+			var err error
+			req.InviteCode, err = service.NewDistributionService().GetInviteCode(uid.(uint))
+			if err != nil {
+				response.Error(ctx, response.CodeServerError, err.Error())
+				return
+			}
+		}
+	}
+	url, err := service.NewDistributionService().GeneratePoster(req.InviteCode)
+	if err != nil {
+		response.Error(ctx, response.CodeServerError, err.Error())
+		return
+	}
+	response.Success(ctx, gin.H{"poster_url": url})
 }
 
 // ========== 积分与签到控制器 ==========

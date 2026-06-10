@@ -294,9 +294,14 @@ func (a *AdminController) UserUpdate(ctx *gin.Context) {
 
 func (a *AdminController) SettingsGet(ctx *gin.Context) {
 	ss := service.NewSettingService()
+	siteName, _ := ss.Get("site_name")
+	if siteName == "" {
+		siteName = "晨泽发卡"
+	}
+	siteDesc, _ := ss.Get("site_desc")
 	response.Success(ctx, gin.H{
-		"site_name": ss.Get("site_name", "晨泽发卡"),
-		"site_desc": ss.Get("site_desc", ""),
+		"site_name": siteName,
+		"site_desc": siteDesc,
 	})
 }
 

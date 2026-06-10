@@ -47,6 +47,10 @@ func (s *PointsService) UsePoints(userID uint, points int, orderID uint, maxDisc
 	if db.DB == nil {
 		return 0, errors.New("数据库未连接")
 	}
+	ss := NewSettingService()
+	if !ss.GetBool("points_enabled", true) {
+		return 0, nil
+	}
 	if points <= 0 {
 		return 0, nil
 	}
@@ -59,9 +63,13 @@ func (s *PointsService) UsePoints(userID uint, points int, orderID uint, maxDisc
 		if user.Points < points {
 			return errors.New("积分不足")
 		}
-		// 100积分 = 1元（可配置）
-		pointsValue := float64(points) / 100.0
-		maxDiscount := orderAmount * maxDiscountRatio
+		pointsRate := ss.GetFloat("points_discount_rate", 1)
+		pointsValue := float64(points) * pointsRate / 100.0
+		effectiveRatio := maxDiscountRatio
+		if effectiveRatio <= 0 {
+			effectiveRatio = ss.GetFloat("points_max_discount_percent", 50) / 100
+		}
+		maxDiscount := orderAmount * effectiveRatio
 		if pointsValue > maxDiscount {
 			pointsValue = maxDiscount
 		}
@@ -87,6 +95,10 @@ func (s *PointsService) UsePointsInTx(tx *gorm.DB, userID uint, points int, orde
 	if points <= 0 {
 		return 0, nil
 	}
+	ss := NewSettingService()
+	if !ss.GetBool("points_enabled", true) {
+		return 0, nil
+	}
 	var user model.User
 	if err := tx.First(&user, userID).Error; err != nil {
 		return 0, err
@@ -94,8 +106,13 @@ func (s *PointsService) UsePointsInTx(tx *gorm.DB, userID uint, points int, orde
 	if user.Points < points {
 		return 0, errors.New("积分不足")
 	}
-	pointsValue := float64(points) / 100.0
-	maxDiscount := orderAmount * maxDiscountRatio
+	pointsRate := ss.GetFloat("points_discount_rate", 1)
+	pointsValue := float64(points) * pointsRate / 100.0
+	effectiveRatio := maxDiscountRatio
+	if effectiveRatio <= 0 {
+		effectiveRatio = ss.GetFloat("points_max_discount_percent", 50) / 100
+	}
+	maxDiscount := orderAmount * effectiveRatio
 	if pointsValue > maxDiscount {
 		pointsValue = maxDiscount
 	}
@@ -151,9 +168,12 @@ func (s *PointsService) SignIn(userID uint) (int, int, error) {
 	if db.DB == nil {
 		return 0, 0, errors.New("数据库未连接")
 	}
+	ss := NewSettingService()
+	if !ss.GetBool("points_enabled", true) {
+		return 0, 0, errors.New("积分功能已关闭")
+	}
 	var rewardPoints, continuousDays int
 	err := db.DB.Transaction(func(tx *gorm.DB) error {
-		// 检查今日是否已签到
 		now := time.Now()
 		todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 		var todayCount int64
@@ -161,7 +181,6 @@ func (s *PointsService) SignIn(userID uint) (int, int, error) {
 		if todayCount > 0 {
 			return errors.New("今日已签到")
 		}
-		// 计算连续签到天数
 		yesterdayStart := todayStart.AddDate(0, 0, -1)
 		var lastSign model.SigninLog
 		err := tx.Where("user_id=? AND created_at >= ? AND created_at < ?", userID, yesterdayStart, todayStart).
@@ -171,12 +190,11 @@ func (s *PointsService) SignIn(userID uint) (int, int, error) {
 		} else {
 			continuousDays = 1
 		}
-		// 基础10积分 + 连续签到奖励
-		rewardPoints = 10
+		rewardPoints = ss.GetInt("points_signin_reward", 10)
 		if continuousDays >= 7 {
-			rewardPoints = 20 // 第7天及以后双倍
+			rewardPoints = rewardPoints * 2
 		} else if continuousDays >= 3 {
-			rewardPoints = 15 // 3-6天多50%
+			rewardPoints += ss.GetInt("points_continuous_reward", 5)
 		}
 		// 创建签到记录
 		if err := tx.Create(&model.SigninLog{

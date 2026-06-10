@@ -1,4 +1,5 @@
 import axios from 'axios'
+import Toast from './toast'
 
 const request = axios.create({
     baseURL: '',
@@ -27,23 +28,22 @@ request.interceptors.response.use((response) => {
             window.location.href = '/user/login'
             return Promise.reject(new Error(data.msg || '登录状态已过期'))
         }
-        alert(data.msg || '请求失败')
+        Toast.error(data.msg || '请求失败')
         return Promise.reject(new Error(data.msg || '请求失败'))
     }
     return data
 }, (error) => {
     if (error.response) {
         const data = error.response.data
-        // Handle 401 unauthorized
         if (error.response.status === 401 || (data && data.code === 1004)) {
             localStorage.removeItem('token')
             localStorage.removeItem('is_admin')
             window.location.href = '/user/login'
             return Promise.reject(new Error(data && data.msg ? data.msg : '登录状态已过期'))
         }
-        alert(data && data.msg ? data.msg : '网络请求失败')
+        Toast.error(data && data.msg ? data.msg : '网络请求失败')
     } else {
-        alert('网络请求失败')
+        Toast.error('网络请求失败')
     }
     return Promise.reject(error)
 })

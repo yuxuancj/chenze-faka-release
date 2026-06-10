@@ -3,6 +3,7 @@ package service
 import (
 	"chenze-faka/internal/model"
 	"chenze-faka/internal/pkg/db"
+	"chenze-faka/internal/pkg/logger"
 	"errors"
 	"fmt"
 	"time"
@@ -88,11 +89,12 @@ func (s *SeckillService) Order(seckillID, userID uint, qty int, email, payType, 
 	if db.DB == nil {
 		return nil, errors.New("数据库未连接")
 	}
+	logger.Infof("秒杀下单请求: seckill_id=%d, user_id=%d, qty=%d", seckillID, userID, qty)
 	var order *model.Order
 	err := db.DB.Transaction(func(tx *gorm.DB) error {
-		// 1. 锁定秒杀活动行
 		var sk model.Seckill
 		if err := tx.Raw(fmt.Sprintf("SELECT * FROM seckills WHERE id=%d LIMIT 1 FOR UPDATE", seckillID)).First(&sk).Error; err != nil {
+			logger.Warnf("秒杀活动不存在: seckill_id=%d", seckillID)
 			return errors.New("秒杀活动不存在")
 		}
 		if sk.Status != 1 {

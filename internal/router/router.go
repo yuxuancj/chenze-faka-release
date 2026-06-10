@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,6 +21,7 @@ func Setup(r *gin.Engine) {
 	}
 
 	r.Use(installGuard())
+	r.Use(middleware.Recovery())
 
 	api := r.Group("/api/v1")
 	api.Use(middleware.CORS())
@@ -60,13 +62,13 @@ func Setup(r *gin.Engine) {
 			auth.GET("/user/profile", userCtrl.Profile)
 			auth.POST("/user/profile", userCtrl.UpdateProfile)
 			auth.POST("/user/password", userCtrl.ChangePassword)
-			auth.POST("/orders", orderCtrl.Create)
-			auth.POST("/orders/advanced", advOrderCtrl.Create)
+			auth.POST("/orders", middleware.RateLimit(5, time.Minute), orderCtrl.Create)
+			auth.POST("/orders/advanced", middleware.RateLimit(5, time.Minute), advOrderCtrl.Create)
 			auth.POST("/orders/markpaid", advOrderCtrl.MarkPaid)
 			auth.GET("/orders", orderCtrl.List)
 			auth.GET("/orders/:order_no", orderCtrl.Detail)
-			auth.POST("/pay", payCtrl.Pay)
-			auth.POST("/pay/alipay", alipayCtrl.Pay)
+			auth.POST("/pay", middleware.RateLimit(10, time.Minute), payCtrl.Pay)
+			auth.POST("/pay/alipay", middleware.RateLimit(10, time.Minute), alipayCtrl.Pay)
 
 			// 优惠券
 			auth.POST("/coupon/redeem", couponCtrl.Claim)
@@ -79,6 +81,7 @@ func Setup(r *gin.Engine) {
 			auth.GET("/distribution/invite", distCtrl.GetInviteCode)
 			auth.GET("/distribution/commissions", distCtrl.GetCommissions)
 			auth.GET("/distribution/team", distCtrl.GetTeam)
+			auth.GET("/distribution/poster", distCtrl.Poster)
 			auth.POST("/withdraw/apply", distCtrl.ApplyWithdraw)
 			auth.GET("/withdraw/list", distCtrl.MyWithdraws)
 

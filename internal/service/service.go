@@ -577,37 +577,6 @@ func (s *OrderService) GetOrderCards(orderID uint) ([]model.OrderCard, error) {
 	return list, nil
 }
 
-type SettingService struct{}
-
-func NewSettingService() *SettingService { return &SettingService{} }
-
-// Get 安全读取配置项，db 未初始化或不可用时返回默认值
-func (s *SettingService) Get(key, def string) string {
-	if !db.IsReady() {
-		return def
-	}
-	setting := &model.Setting{}
-	if err := db.DB.Where("`key`=?", key).First(setting).Error; err != nil {
-		return def
-	}
-	return setting.Value
-}
-
-func (s *SettingService) Set(key, value string) error {
-	if db.DB == nil {
-		return errors.New("数据库未连接")
-	}
-	setting := &model.Setting{}
-	err := db.DB.Where("`key`=?", key).First(setting).Error
-	if err == gorm.ErrRecordNotFound {
-		return db.DB.Create(&model.Setting{Key: key, Value: value}).Error
-	}
-	if err != nil {
-		return err
-	}
-	return db.DB.Model(setting).Update("value", value).Error
-}
-
 func randomStr(n int) string {
 	const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
 	b := make([]byte, n)

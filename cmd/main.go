@@ -60,11 +60,14 @@ func main() {
 				&model.Withdraw{},
 				&model.PointsLog{},
 				&model.SigninLog{},
+				&model.AuditLog{},
+				&model.DistributionTree{},
 			); err != nil {
 				logger.Errorf("auto migrate failed: %v", err)
 			} else {
 				logger.Infof("db migrated")
 				seedIfEmpty()
+				service.NewSettingService().InitDefaults()
 			}
 		}
 	} else {

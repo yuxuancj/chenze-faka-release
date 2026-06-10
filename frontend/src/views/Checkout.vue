@@ -71,7 +71,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="item in items" :key="'i-' + (item.product_id || item.sku_id || Math.random())">
+                                    <tr v-for="(item, index) in items" :key="'i-' + item.product_id + '-' + item.sku_id + '-' + index">
                                         <td>{{ item.name }}</td>
                                         <td>￥{{ item.price }}</td>
                                         <td>{{ item.quantity }}</td>

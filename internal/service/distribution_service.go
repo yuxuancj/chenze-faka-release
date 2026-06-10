@@ -77,14 +77,21 @@ func (s *DistributionService) RecordCommission(tx *gorm.DB, userID uint, orderID
 	if tx == nil {
 		return errors.New("事务未初始化")
 	}
-	// 从用户向上找三级上级
+	ss := NewSettingService()
+	if !ss.GetBool("distrib_enabled", true) {
+		return nil
+	}
+	level1Rate := ss.GetFloat("distrib_level1_rate", 10) / 100
+	level2Rate := ss.GetFloat("distrib_level2_rate", 5) / 100
+	level3Rate := ss.GetFloat("distrib_level3_rate", 2) / 100
+
 	levels := []struct {
 		Level   int
 		Percent float64
 	}{
-		{1, 0.10}, // 一级10%
-		{2, 0.05}, // 二级5%
-		{3, 0.02}, // 三级2%
+		{1, level1Rate},
+		{2, level2Rate},
+		{3, level3Rate},
 	}
 
 	currentID := userID
@@ -100,7 +107,6 @@ func (s *DistributionService) RecordCommission(tx *gorm.DB, userID uint, orderID
 		if commission <= 0 {
 			return nil
 		}
-		// 创建佣金记录
 		rec := &model.Commission{
 			UserID:     user.ParentID,
 			FromUserID: currentID,
@@ -112,7 +118,6 @@ func (s *DistributionService) RecordCommission(tx *gorm.DB, userID uint, orderID
 		if err := tx.Create(rec).Error; err != nil {
 			return err
 		}
-		// 更新上级用户余额（可提现佣金）
 		if err := tx.Model(&model.User{}).Where("id=?", user.ParentID).
 			Update("balance", gorm.Expr("balance + ?", commission)).Error; err != nil {
 			return err
@@ -120,6 +125,14 @@ func (s *DistributionService) RecordCommission(tx *gorm.DB, userID uint, orderID
 		currentID = user.ParentID
 	}
 	return nil
+}
+
+// GeneratePoster 生成推广海报
+func (s *DistributionService) GeneratePoster(inviteCode string) (string, error) {
+	baseURL := "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="
+	inviteLink := "https://example.com/register?invite=" + inviteCode
+	qrURL := baseURL + inviteLink
+	return qrURL, nil
 }
 
 // GetCommissions 查询佣金明细
