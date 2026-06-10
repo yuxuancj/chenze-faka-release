@@ -35,7 +35,7 @@
                         <el-dropdown trigger="click" @command="handleUserCommand">
                             <span class="user-trigger">
                                 {{ userNickname || '用户' }}
-                                <el-icon class="el-icon--right"><arrow-down /></el-icon>
+                                <el-icon class="el-icon--right"><ArrowDown /></el-icon>
                             </span>
                             <template #dropdown>
                                 <el-dropdown-menu>
@@ -66,7 +66,7 @@
                         text
                         @click="mobileMenuVisible = true"
                     >
-                        <el-icon><menu /></el-icon>
+                        <el-icon><Menu /></el-icon>
                     </el-button>
                 </div>
             </div>
@@ -85,54 +85,54 @@
                     @select="handleMobileSelect"
                 >
                     <el-menu-item index="/">
-                        <el-icon><house /></el-icon>
+                        <el-icon><House /></el-icon>
                         <span>首页</span>
                     </el-menu-item>
                     <el-menu-item index="/products">
-                        <el-icon><goods /></el-icon>
+                        <el-icon><Goods /></el-icon>
                         <span>商品</span>
                     </el-menu-item>
                     <el-menu-item index="/cart">
-                        <el-icon><shopping-cart /></el-icon>
+                        <el-icon><ShoppingCart /></el-icon>
                         <span>购物车</span>
                     </el-menu-item>
                     <template v-if="token">
                         <el-menu-item index="/user/profile">
-                            <el-icon><user /></el-icon>
+                            <el-icon><User /></el-icon>
                             <span>个人资料</span>
                         </el-menu-item>
                         <el-menu-item index="/user/orders">
-                            <el-icon><document /></el-icon>
+                            <el-icon><Document /></el-icon>
                             <span>我的订单</span>
                         </el-menu-item>
                         <el-menu-item index="/user/distribution">
-                            <el-icon><share /></el-icon>
+                            <el-icon><Share /></el-icon>
                             <span>推广中心</span>
                         </el-menu-item>
                         <el-menu-item index="/user/signin">
-                            <el-icon><calendar /></el-icon>
+                            <el-icon><Calendar /></el-icon>
                             <span>每日签到</span>
                         </el-menu-item>
                         <el-menu-item index="/user/coupons">
-                            <el-icon><ticket /></el-icon>
+                            <el-icon><Ticket /></el-icon>
                             <span>我的优惠券</span>
                         </el-menu-item>
                         <el-menu-item index="/user/points">
-                            <el-icon><coin /></el-icon>
+                            <el-icon><Coin /></el-icon>
                             <span>积分明细</span>
                         </el-menu-item>
                         <el-menu-item index="logout" @click="logout">
-                            <el-icon><switch-button /></el-icon>
+                            <el-icon><SwitchButton /></el-icon>
                             <span>退出登录</span>
                         </el-menu-item>
                     </template>
                     <template v-else>
                         <el-menu-item index="/user/login">
-                            <el-icon><user /></el-icon>
+                            <el-icon><User /></el-icon>
                             <span>登录</span>
                         </el-menu-item>
                         <el-menu-item index="/user/register">
-                            <el-icon><edit-pen /></el-icon>
+                            <el-icon><EditPen /></el-icon>
                             <span>注册</span>
                         </el-menu-item>
                     </template>

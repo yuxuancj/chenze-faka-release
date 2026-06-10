@@ -1,0 +1,1154 @@
+[
+  {
+    "file": "/workspace/frontend/src/views/AdminPointsSettings.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='font-semibold' 中包含 Tailwind 类 'font-semibold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Distribution.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Distribution.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Distribution.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Distribution.vue",
+    "line": 9,
+    "type": "Tailwind残留",
+    "desc": "class='text-sm text-gray-500' 中包含 Tailwind 类 'text-gray-500'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Distribution.vue",
+    "line": 10,
+    "type": "Tailwind残留",
+    "desc": "class='text-2xl font-bold text-gray-800 mt-2' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Distribution.vue",
+    "line": 10,
+    "type": "Tailwind残留",
+    "desc": "class='text-2xl font-bold text-gray-800 mt-2' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Distribution.vue",
+    "line": 10,
+    "type": "Tailwind残留",
+    "desc": "class='text-2xl font-bold text-gray-800 mt-2' 中包含 Tailwind 类 'mt-2'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Distribution.vue",
+    "line": 16,
+    "type": "Tailwind残留",
+    "desc": "class='text-2xl font-bold text-blue-600 mt-2' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Distribution.vue",
+    "line": 16,
+    "type": "Tailwind残留",
+    "desc": "class='text-2xl font-bold text-blue-600 mt-2' 中包含 Tailwind 类 'text-blue-600'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Distribution.vue",
+    "line": 16,
+    "type": "Tailwind残留",
+    "desc": "class='text-2xl font-bold text-blue-600 mt-2' 中包含 Tailwind 类 'mt-2'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Distribution.vue",
+    "line": 29,
+    "type": "Tailwind残留",
+    "desc": "class='font-semibold' 中包含 Tailwind 类 'font-semibold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCards.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCards.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCards.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCards.vue",
+    "line": 21,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCards.vue",
+    "line": 21,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCards.vue",
+    "line": 21,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between' 中包含 Tailwind 类 'justify-between'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCards.vue",
+    "line": 22,
+    "type": "Tailwind残留",
+    "desc": "class='font-semibold truncate' 中包含 Tailwind 类 'font-semibold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCards.vue",
+    "line": 23,
+    "type": "Tailwind残留",
+    "desc": "class='text-xs text-gray-500' 中包含 Tailwind 类 'text-gray-500'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProductEdit.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProductEdit.vue",
+    "line": 79,
+    "type": "Tailwind残留",
+    "desc": "class='text-sm text-gray-500 ml-3' 中包含 Tailwind 类 'text-gray-500'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProductEdit.vue",
+    "line": 82,
+    "type": "Tailwind残留",
+    "desc": "class='mb-4' 中包含 Tailwind 类 'mb-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProductEdit.vue",
+    "line": 83,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between mb-2' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProductEdit.vue",
+    "line": 83,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between mb-2' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProductEdit.vue",
+    "line": 83,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between mb-2' 中包含 Tailwind 类 'justify-between'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProductEdit.vue",
+    "line": 84,
+    "type": "Tailwind残留",
+    "desc": "class='text-sm text-gray-600' 中包含 Tailwind 类 'text-gray-600'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProductEdit.vue",
+    "line": 95,
+    "type": "Tailwind残留",
+    "desc": "class='text-center text-gray-400 py-2 text-sm' 中包含 Tailwind 类 'text-gray-400'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProductEdit.vue",
+    "line": 95,
+    "type": "Tailwind残留",
+    "desc": "class='text-center text-gray-400 py-2 text-sm' 中包含 Tailwind 类 'py-2'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProductEdit.vue",
+    "line": 118,
+    "type": "Tailwind残留",
+    "desc": "class='flex gap-2 mb-2 items-center' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProductEdit.vue",
+    "line": 118,
+    "type": "Tailwind残留",
+    "desc": "class='flex gap-2 mb-2 items-center' 中包含 Tailwind 类 'gap-2'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProductEdit.vue",
+    "line": 118,
+    "type": "Tailwind残留",
+    "desc": "class='flex gap-2 mb-2 items-center' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProductEdit.vue",
+    "line": 177,
+    "type": "变量未定义",
+    "desc": "模板 v-model 使用变量 'scope' (表达式: scope.row.spec_names)，但在 script setup 中未用 ref/computed 定义"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCards.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='mb-4' 中包含 Tailwind 类 'mb-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCards.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between flex-wrap gap-3' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCards.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between flex-wrap gap-3' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCards.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between flex-wrap gap-3' 中包含 Tailwind 类 'justify-between'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCards.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between flex-wrap gap-3' 中包含 Tailwind 类 'gap-3'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCards.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center gap-2' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCards.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center gap-2' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCards.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center gap-2' 中包含 Tailwind 类 'gap-2'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminOrders.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminOrders.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center gap-2' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminOrders.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center gap-2' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminOrders.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center gap-2' 中包含 Tailwind 类 'gap-2'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCoupons.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='mb-4 flex items-center justify-between' 中包含 Tailwind 类 'mb-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCoupons.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='mb-4 flex items-center justify-between' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCoupons.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='mb-4 flex items-center justify-between' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCoupons.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='mb-4 flex items-center justify-between' 中包含 Tailwind 类 'justify-between'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCoupons.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-lg font-semibold text-gray-800' 中包含 Tailwind 类 'font-semibold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCoupons.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-lg font-semibold text-gray-800' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Checkout.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Checkout.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Checkout.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Checkout.vue",
+    "line": 15,
+    "type": "Tailwind残留",
+    "desc": "class='grid grid-cols-1 md:grid-cols-3 gap-4' 中包含 Tailwind 类 'grid'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Checkout.vue",
+    "line": 15,
+    "type": "Tailwind残留",
+    "desc": "class='grid grid-cols-1 md:grid-cols-3 gap-4' 中包含 Tailwind 类 'gap-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Checkout.vue",
+    "line": 16,
+    "type": "Tailwind残留",
+    "desc": "class='md:col-span-2 space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Checkout.vue",
+    "line": 19,
+    "type": "Tailwind残留",
+    "desc": "class='font-semibold' 中包含 Tailwind 类 'font-semibold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Checkout.vue",
+    "line": 6,
+    "type": "变量未定义",
+    "desc": "模板 v-if/v-show 使用变量 'loadingProduct && fromProduct' (表达式: loadingProduct && fromProduct)，但在 script setup 中未定义"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductDetail.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='is-loading text-blue-600 text-4xl' 中包含 Tailwind 类 'text-blue-600'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductDetail.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='text-gray-500 mt-4' 中包含 Tailwind 类 'text-gray-500'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductDetail.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='text-gray-500 mt-4' 中包含 Tailwind 类 'mt-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductDetail.vue",
+    "line": 7,
+    "type": "Tailwind残留",
+    "desc": "class='text-center py-16 text-gray-500' 中包含 Tailwind 类 'text-gray-500'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductDetail.vue",
+    "line": 9,
+    "type": "Tailwind残留",
+    "desc": "class='mt-4' 中包含 Tailwind 类 'mt-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductDetail.vue",
+    "line": 19,
+    "type": "Tailwind残留",
+    "desc": "class='product-image-area flex items-center justify-center text-gray-500 text-lg' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductDetail.vue",
+    "line": 19,
+    "type": "Tailwind残留",
+    "desc": "class='product-image-area flex items-center justify-center text-gray-500 text-lg' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductDetail.vue",
+    "line": 19,
+    "type": "Tailwind残留",
+    "desc": "class='product-image-area flex items-center justify-center text-gray-500 text-lg' 中包含 Tailwind 类 'text-gray-500'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductDetail.vue",
+    "line": 27,
+    "type": "Tailwind残留",
+    "desc": "class='text-2xl font-bold text-gray-800' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductDetail.vue",
+    "line": 27,
+    "type": "Tailwind残留",
+    "desc": "class='text-2xl font-bold text-gray-800' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCoupons.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCoupons.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCoupons.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCoupons.vue",
+    "line": 16,
+    "type": "Tailwind残留",
+    "desc": "class='coupon-card mb-4' 中包含 Tailwind 类 'mb-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCoupons.vue",
+    "line": 18,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-baseline gap-1 text-orange-600' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCoupons.vue",
+    "line": 18,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-baseline gap-1 text-orange-600' 中包含 Tailwind 类 'gap-1'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCoupons.vue",
+    "line": 19,
+    "type": "Tailwind残留",
+    "desc": "class='text-3xl font-bold' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCoupons.vue",
+    "line": 21,
+    "type": "Tailwind残留",
+    "desc": "class='text-xs text-gray-600 mt-1' 中包含 Tailwind 类 'text-gray-600'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminDashboard.vue",
+    "line": 14,
+    "type": "变量未定义",
+    "desc": "模板 v-if/v-show 使用变量 'stat' (表达式: stat.trend ===)，但在 script setup 中未定义"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserOrders.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserOrders.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserOrders.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminSeckills.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='mb-4 flex items-center justify-between' 中包含 Tailwind 类 'mb-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminSeckills.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='mb-4 flex items-center justify-between' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminSeckills.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='mb-4 flex items-center justify-between' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminSeckills.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='mb-4 flex items-center justify-between' 中包含 Tailwind 类 'justify-between'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminSeckills.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-lg font-semibold text-gray-800' 中包含 Tailwind 类 'font-semibold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminSeckills.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-lg font-semibold text-gray-800' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductList.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='mb-4' 中包含 Tailwind 类 'mb-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductList.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between flex-wrap gap-3' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductList.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between flex-wrap gap-3' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductList.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between flex-wrap gap-3' 中包含 Tailwind 类 'justify-between'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductList.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between flex-wrap gap-3' 中包含 Tailwind 类 'gap-3'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductList.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductList.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductList.vue",
+    "line": 6,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center gap-2' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductList.vue",
+    "line": 6,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center gap-2' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/ProductList.vue",
+    "line": 6,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center gap-2' 中包含 Tailwind 类 'gap-2'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCenter.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCenter.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCenter.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserCenter.vue",
+    "line": 10,
+    "type": "Tailwind残留",
+    "desc": "class='font-semibold' 中包含 Tailwind 类 'font-semibold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/CouponRedeem.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/CouponRedeem.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/CouponRedeem.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/CouponRedeem.vue",
+    "line": 17,
+    "type": "Tailwind残留",
+    "desc": "class='font-semibold' 中包含 Tailwind 类 'font-semibold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminDistribution.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='font-semibold' 中包含 Tailwind 类 'font-semibold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProducts.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='mb-4 flex items-center justify-between flex-wrap gap-3' 中包含 Tailwind 类 'mb-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProducts.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='mb-4 flex items-center justify-between flex-wrap gap-3' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProducts.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='mb-4 flex items-center justify-between flex-wrap gap-3' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProducts.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='mb-4 flex items-center justify-between flex-wrap gap-3' 中包含 Tailwind 类 'justify-between'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProducts.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='mb-4 flex items-center justify-between flex-wrap gap-3' 中包含 Tailwind 类 'gap-3'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProducts.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center gap-2' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProducts.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center gap-2' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminProducts.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center gap-2' 中包含 Tailwind 类 'gap-2'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCategories.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='mb-4' 中包含 Tailwind 类 'mb-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCategories.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCategories.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCategories.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between' 中包含 Tailwind 类 'justify-between'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/AdminCategories.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='text-gray-700' 中包含 Tailwind 类 'text-gray-700'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/NotFound.vue",
+    "line": 2,
+    "type": "Tailwind残留",
+    "desc": "class='min-h-screen bg-gray-50 flex items-center justify-center px-4' 中包含 Tailwind 类 'bg-gray-50'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/NotFound.vue",
+    "line": 2,
+    "type": "Tailwind残留",
+    "desc": "class='min-h-screen bg-gray-50 flex items-center justify-center px-4' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/NotFound.vue",
+    "line": 2,
+    "type": "Tailwind残留",
+    "desc": "class='min-h-screen bg-gray-50 flex items-center justify-center px-4' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/NotFound.vue",
+    "line": 2,
+    "type": "Tailwind残留",
+    "desc": "class='min-h-screen bg-gray-50 flex items-center justify-center px-4' 中包含 Tailwind 类 'px-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/NotFound.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='w-full max-w-md' 中包含 Tailwind 类 'w-full'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/NotFound.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-center py-8 space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/NotFound.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='text-6xl font-bold text-gray-300' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/NotFound.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='text-6xl font-bold text-gray-300' 中包含 Tailwind 类 'text-gray-300'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/NotFound.vue",
+    "line": 6,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-semibold text-gray-800' 中包含 Tailwind 类 'font-semibold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/NotFound.vue",
+    "line": 6,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-semibold text-gray-800' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/NotFound.vue",
+    "line": 7,
+    "type": "Tailwind残留",
+    "desc": "class='text-gray-500' 中包含 Tailwind 类 'text-gray-500'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/NotFound.vue",
+    "line": 8,
+    "type": "Tailwind残留",
+    "desc": "class='pt-4 flex items-center justify-center space-x-3' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/NotFound.vue",
+    "line": 8,
+    "type": "Tailwind残留",
+    "desc": "class='pt-4 flex items-center justify-center space-x-3' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserPoints.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserPoints.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserPoints.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserPoints.vue",
+    "line": 7,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserPoints.vue",
+    "line": 7,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserPoints.vue",
+    "line": 7,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center justify-between' 中包含 Tailwind 类 'justify-between'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserPoints.vue",
+    "line": 9,
+    "type": "Tailwind残留",
+    "desc": "class='text-sm text-gray-500' 中包含 Tailwind 类 'text-gray-500'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserPoints.vue",
+    "line": 10,
+    "type": "Tailwind残留",
+    "desc": "class='text-4xl font-bold text-purple-700 mt-2' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserPoints.vue",
+    "line": 10,
+    "type": "Tailwind残留",
+    "desc": "class='text-4xl font-bold text-purple-700 mt-2' 中包含 Tailwind 类 'mt-2'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserPoints.vue",
+    "line": 25,
+    "type": "Tailwind残留",
+    "desc": "class='font-semibold' 中包含 Tailwind 类 'font-semibold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Cart.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Cart.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Cart.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Register.vue",
+    "line": 2,
+    "type": "Tailwind残留",
+    "desc": "class='min-h-screen bg-gray-50 flex items-center justify-center px-4 register-wrapper' 中包含 Tailwind 类 'bg-gray-50'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Register.vue",
+    "line": 2,
+    "type": "Tailwind残留",
+    "desc": "class='min-h-screen bg-gray-50 flex items-center justify-center px-4 register-wrapper' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Register.vue",
+    "line": 2,
+    "type": "Tailwind残留",
+    "desc": "class='min-h-screen bg-gray-50 flex items-center justify-center px-4 register-wrapper' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Register.vue",
+    "line": 2,
+    "type": "Tailwind残留",
+    "desc": "class='min-h-screen bg-gray-50 flex items-center justify-center px-4 register-wrapper' 中包含 Tailwind 类 'px-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Register.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800 text-center' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Register.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800 text-center' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 6,
+    "type": "Tailwind残留",
+    "desc": "class='text-2xl md:text-3xl font-bold text-white mb-2' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 16,
+    "type": "Tailwind残留",
+    "desc": "class='h-40 bg-gradient-to-br from-red-50 to-orange-100 flex items-center justify-center text-gray-500 text-sm' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 16,
+    "type": "Tailwind残留",
+    "desc": "class='h-40 bg-gradient-to-br from-red-50 to-orange-100 flex items-center justify-center text-gray-500 text-sm' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 16,
+    "type": "Tailwind残留",
+    "desc": "class='h-40 bg-gradient-to-br from-red-50 to-orange-100 flex items-center justify-center text-gray-500 text-sm' 中包含 Tailwind 类 'text-gray-500'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 19,
+    "type": "Tailwind残留",
+    "desc": "class='font-semibold text-gray-800 mt-3 truncate' 中包含 Tailwind 类 'font-semibold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 19,
+    "type": "Tailwind残留",
+    "desc": "class='font-semibold text-gray-800 mt-3 truncate' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 20,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-baseline gap-2 mt-2' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 20,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-baseline gap-2 mt-2' 中包含 Tailwind 类 'gap-2'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 20,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-baseline gap-2 mt-2' 中包含 Tailwind 类 'mt-2'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 21,
+    "type": "Tailwind残留",
+    "desc": "class='text-2xl font-bold text-red-600' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 22,
+    "type": "Tailwind残留",
+    "desc": "class='text-sm text-gray-400 line-through' 中包含 Tailwind 类 'text-gray-400'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 24,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center gap-4 text-xs text-gray-600 mt-2' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 24,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center gap-4 text-xs text-gray-600 mt-2' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 24,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center gap-4 text-xs text-gray-600 mt-2' 中包含 Tailwind 类 'gap-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 24,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center gap-4 text-xs text-gray-600 mt-2' 中包含 Tailwind 类 'text-gray-600'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 24,
+    "type": "Tailwind残留",
+    "desc": "class='flex items-center gap-4 text-xs text-gray-600 mt-2' 中包含 Tailwind 类 'mt-2'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 28,
+    "type": "Tailwind残留",
+    "desc": "class='mt-2' 中包含 Tailwind 类 'mt-2'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 38,
+    "type": "Tailwind残留",
+    "desc": "class='w-full mt-3' 中包含 Tailwind 类 'w-full'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Seckill.vue",
+    "line": 29,
+    "type": "变量未定义",
+    "desc": "模板 v-if/v-show 使用变量 'item' (表达式: item.status ===)，但在 script setup 中未定义"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Login.vue",
+    "line": 2,
+    "type": "Tailwind残留",
+    "desc": "class='min-h-screen bg-gray-50 flex items-center justify-center px-4 login-wrapper' 中包含 Tailwind 类 'bg-gray-50'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Login.vue",
+    "line": 2,
+    "type": "Tailwind残留",
+    "desc": "class='min-h-screen bg-gray-50 flex items-center justify-center px-4 login-wrapper' 中包含 Tailwind 类 'flex'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Login.vue",
+    "line": 2,
+    "type": "Tailwind残留",
+    "desc": "class='min-h-screen bg-gray-50 flex items-center justify-center px-4 login-wrapper' 中包含 Tailwind 类 'items-center'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Login.vue",
+    "line": 2,
+    "type": "Tailwind残留",
+    "desc": "class='min-h-screen bg-gray-50 flex items-center justify-center px-4 login-wrapper' 中包含 Tailwind 类 'px-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Login.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800 text-center' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/Login.vue",
+    "line": 5,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800 text-center' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/OrderDetail.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/OrderDetail.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/OrderDetail.vue",
+    "line": 4,
+    "type": "Tailwind残留",
+    "desc": "class='text-xl font-bold text-gray-800' 中包含 Tailwind 类 'text-gray-800'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/OrderDetail.vue",
+    "line": 14,
+    "type": "Tailwind残留",
+    "desc": "class='font-semibold' 中包含 Tailwind 类 'font-semibold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserSignin.vue",
+    "line": 3,
+    "type": "Tailwind残留",
+    "desc": "class='max-w-md mx-auto space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserSignin.vue",
+    "line": 6,
+    "type": "Tailwind残留",
+    "desc": "class='text-2xl font-bold text-white mb-2' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserSignin.vue",
+    "line": 12,
+    "type": "Tailwind残留",
+    "desc": "class='text-center space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserSignin.vue",
+    "line": 14,
+    "type": "Tailwind残留",
+    "desc": "class='space-y-4' 中包含 Tailwind 类 'space-y-4'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserSignin.vue",
+    "line": 15,
+    "type": "Tailwind残留",
+    "desc": "class='text-gray-600' 中包含 Tailwind 类 'text-gray-600'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserSignin.vue",
+    "line": 16,
+    "type": "Tailwind残留",
+    "desc": "class='text-green-600 font-bold text-xl' 中包含 Tailwind 类 'font-bold'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserSignin.vue",
+    "line": 21,
+    "type": "Tailwind残留",
+    "desc": "class='text-xs text-gray-400' 中包含 Tailwind 类 'text-gray-400'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserSignin.vue",
+    "line": 24,
+    "type": "Tailwind残留",
+    "desc": "class='w-full' 中包含 Tailwind 类 'w-full'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserSignin.vue",
+    "line": 28,
+    "type": "Tailwind残留",
+    "desc": "class='space-y-3' 中包含 Tailwind 类 'space-y-3'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserSignin.vue",
+    "line": 29,
+    "type": "Tailwind残留",
+    "desc": "class='text-gray-600 text-lg' 中包含 Tailwind 类 'text-gray-600'（无样式效果）"
+  },
+  {
+    "file": "/workspace/frontend/src/views/UserSignin.vue",
+    "line": 38,
+    "type": "Tailwind残留",
+    "desc": "class='font-semibold' 中包含 Tailwind 类 'font-semibold'（无样式效果）"
+  }
+]
