@@ -108,8 +108,12 @@ func Setup(r *gin.Engine) {
 		distCtrl := controller.NewDistributionController()
 		pointsCtrl := controller.NewPointsController()
 		dashCtrl := controller.NewDashboardController()
+		settingCtrl := controller.NewSettingController()
 
-		adminAPI.GET("/dashboard", dashCtrl.AdminDashboard)
+		adminAPI.GET("/dashboard", dashCtrl.GetDashboard)
+		adminAPI.GET("/settings/:group", settingCtrl.GetSettings)
+		adminAPI.POST("/settings/:group", settingCtrl.SaveSettings)
+		adminAPI.POST("/settings/test-email", settingCtrl.TestEmail)
 		adminAPI.GET("/products", admin.ProductList)
 		adminAPI.GET("/products/:id", admin.ProductDetail)
 		adminAPI.POST("/products", admin.ProductCreate)
