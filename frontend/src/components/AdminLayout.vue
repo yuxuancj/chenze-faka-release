@@ -17,6 +17,10 @@
                 <router-link to="/admin/categories" class="nav-link block mx-2 rounded" @click="mobileSidebar = false">分类管理</router-link>
                 <router-link to="/admin/orders" class="nav-link block mx-2 rounded" @click="mobileSidebar = false">订单管理</router-link>
                 <router-link to="/admin/users" class="nav-link block mx-2 rounded" @click="mobileSidebar = false">用户管理</router-link>
+                <router-link to="/admin/coupons" class="nav-link block mx-2 rounded" @click="mobileSidebar = false">优惠券管理</router-link>
+                <router-link to="/admin/seckills" class="nav-link block mx-2 rounded" @click="mobileSidebar = false">秒杀活动</router-link>
+                <router-link to="/admin/distribution" class="nav-link block mx-2 rounded" @click="mobileSidebar = false">分销设置</router-link>
+                <router-link to="/admin/points-settings" class="nav-link block mx-2 rounded" @click="mobileSidebar = false">积分设置</router-link>
                 <router-link to="/admin/settings" class="nav-link block mx-2 rounded" @click="mobileSidebar = false">系统设置</router-link>
             </nav>
             <div class="p-3 border-t border-gray-200 text-sm">
