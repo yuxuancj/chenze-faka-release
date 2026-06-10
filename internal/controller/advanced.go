@@ -4,6 +4,7 @@ import (
 	"chenze-faka/internal/model"
 	"chenze-faka/internal/pkg/response"
 	"chenze-faka/internal/service"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -367,6 +368,43 @@ type DistributionController struct{}
 
 func NewDistributionController() *DistributionController { return &DistributionController{} }
 
+// GetSettings 获取分销设置
+func (c *DistributionController) GetSettings(ctx *gin.Context) {
+	ss := service.NewSettingService()
+	settings := gin.H{
+		"distrib_level1_rate":     ss.GetFloat("distrib_level1_rate", 10),
+		"distrib_level2_rate":     ss.GetFloat("distrib_level2_rate", 5),
+		"distrib_level3_rate":     ss.GetFloat("distrib_level3_rate", 2),
+		"distrib_min_withdraw":    ss.GetFloat("distrib_min_withdraw", 10),
+		"distrib_enabled":         ss.GetBool("distrib_enabled", true),
+	}
+	response.Success(ctx, settings)
+}
+
+// SetSettings 保存分销设置
+func (c *DistributionController) SetSettings(ctx *gin.Context) {
+	var req map[string]interface{}
+	ctx.ShouldBindJSON(&req)
+	ss := service.NewSettingService()
+
+	if v, ok := req["distrib_level1_rate"]; ok {
+		ss.Set("distrib_level1_rate", fmt.Sprintf("%v", v))
+	}
+	if v, ok := req["distrib_level2_rate"]; ok {
+		ss.Set("distrib_level2_rate", fmt.Sprintf("%v", v))
+	}
+	if v, ok := req["distrib_level3_rate"]; ok {
+		ss.Set("distrib_level3_rate", fmt.Sprintf("%v", v))
+	}
+	if v, ok := req["distrib_min_withdraw"]; ok {
+		ss.Set("distrib_min_withdraw", fmt.Sprintf("%v", v))
+	}
+	if v, ok := req["distrib_enabled"]; ok {
+		ss.Set("distrib_enabled", fmt.Sprintf("%v", v))
+	}
+	response.Success(ctx, gin.H{"message": "保存成功"})
+}
+
 func (c *DistributionController) GetSummary(ctx *gin.Context) {
 	uid, _ := ctx.Get("user_id")
 	summary, err := service.NewDistributionService().GetSummary(uid.(uint))
@@ -494,6 +532,51 @@ func (c *DistributionController) Poster(ctx *gin.Context) {
 type PointsController struct{}
 
 func NewPointsController() *PointsController { return &PointsController{} }
+
+// GetSettings 获取积分设置
+func (c *PointsController) GetSettings(ctx *gin.Context) {
+	ss := service.NewSettingService()
+	settings := gin.H{
+		"points_rate":                ss.GetFloat("points_rate", 1),
+		"points_exchange_rate":       ss.GetFloat("points_exchange_rate", 100),
+		"points_discount_rate":      ss.GetFloat("points_discount_rate", 1),
+		"points_signin_reward":       ss.GetFloat("points_signin_reward", 10),
+		"points_continuous_reward":   ss.GetFloat("points_continuous_reward", 5),
+		"points_max_discount_percent": ss.GetFloat("points_max_discount_percent", 50),
+		"points_enabled":             ss.GetBool("points_enabled", true),
+	}
+	response.Success(ctx, settings)
+}
+
+// SetSettings 保存积分设置
+func (c *PointsController) SetSettings(ctx *gin.Context) {
+	var req map[string]interface{}
+	ctx.ShouldBindJSON(&req)
+	ss := service.NewSettingService()
+
+	if v, ok := req["points_rate"]; ok {
+		ss.Set("points_rate", fmt.Sprintf("%v", v))
+	}
+	if v, ok := req["points_exchange_rate"]; ok {
+		ss.Set("points_exchange_rate", fmt.Sprintf("%v", v))
+	}
+	if v, ok := req["points_discount_rate"]; ok {
+		ss.Set("points_discount_rate", fmt.Sprintf("%v", v))
+	}
+	if v, ok := req["points_signin_reward"]; ok {
+		ss.Set("points_signin_reward", fmt.Sprintf("%v", v))
+	}
+	if v, ok := req["points_continuous_reward"]; ok {
+		ss.Set("points_continuous_reward", fmt.Sprintf("%v", v))
+	}
+	if v, ok := req["points_max_discount_percent"]; ok {
+		ss.Set("points_max_discount_percent", fmt.Sprintf("%v", v))
+	}
+	if v, ok := req["points_enabled"]; ok {
+		ss.Set("points_enabled", fmt.Sprintf("%v", v))
+	}
+	response.Success(ctx, gin.H{"message": "保存成功"})
+}
 
 func (c *PointsController) SignIn(ctx *gin.Context) {
 	uid, _ := ctx.Get("user_id")

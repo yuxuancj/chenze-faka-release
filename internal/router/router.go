@@ -106,6 +106,7 @@ func Setup(r *gin.Engine) {
 		seckillCtrl := controller.NewSeckillController()
 		wholesaleCtrl := controller.NewWholesaleController()
 		distCtrl := controller.NewDistributionController()
+		pointsCtrl := controller.NewPointsController()
 		dashCtrl := controller.NewDashboardController()
 
 		adminAPI.GET("/dashboard", dashCtrl.AdminDashboard)
@@ -148,6 +149,14 @@ func Setup(r *gin.Engine) {
 		// 提现审核
 		adminAPI.GET("/withdraws", distCtrl.AdminListWithdraws)
 		adminAPI.POST("/withdraws/:id/process", distCtrl.AdminProcessWithdraw)
+
+		// 分销设置
+		adminAPI.GET("/distribution/settings", distCtrl.GetSettings)
+		adminAPI.POST("/distribution/settings", distCtrl.SetSettings)
+
+		// 积分设置
+		adminAPI.GET("/points/settings", pointsCtrl.GetSettings)
+		adminAPI.POST("/points/settings", pointsCtrl.SetSettings)
 	}
 
 	setupInstallAPI(r)

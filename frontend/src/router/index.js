@@ -17,6 +17,7 @@ const routes = [
     { path: '/user/coupons', name: 'userCoupons', component: () => import('../views/UserCoupons.vue') },
     { path: '/user/points', name: 'userPoints', component: () => import('../views/UserPoints.vue') },
     { path: '/user/distribution', name: 'distribution', component: () => import('../views/Distribution.vue') },
+    { path: '/user/signin', name: 'userSignin', component: () => import('../views/UserSignin.vue') },
     { path: '/admin/login', name: 'adminLogin', component: () => import('../views/AdminLogin.vue') },
     { path: '/admin/', name: 'adminDashboard', component: () => import('../views/AdminDashboard.vue') },
     { path: '/admin/products', name: 'adminProducts', component: () => import('../views/AdminProducts.vue') },
@@ -51,7 +52,7 @@ router.beforeEach((to, from, next) => {
         return
     }
 
-    const authPaths = ['/cart', '/checkout', '/user/profile', '/user/orders', '/user/cards', '/user/coupons', '/user/points', '/user/distribution']
+    const authPaths = ['/cart', '/checkout', '/user/profile', '/user/orders', '/user/cards', '/user/coupons', '/user/points', '/user/distribution', '/user/signin']
     if (authPaths.some((p) => to.path === p || to.path.startsWith(p + '/'))) {
         if (!token) {
             next({ path: '/user/login', query: { redirect: to.fullPath } })
