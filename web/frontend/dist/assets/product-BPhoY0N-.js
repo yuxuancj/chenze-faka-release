@@ -1,0 +1,1 @@
+import{r}from"./request-BTRwy4pf.js";function s(t,e,o){const p={page:t||1,size:e||20,keyword:o||""};return r.get("/api/v1/products",{params:p})}function u(t){return r.get("/api/v1/products/"+t)}export{u as a,s as p};

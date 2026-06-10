@@ -1,0 +1,1 @@
+import{r as e}from"./request-BTRwy4pf.js";function s(r){return e.post("/api/v1/orders",r)}function n(r,t){const a={page:r||1,size:t};return e.get("/api/v1/orders",{params:a})}function p(r){return e.get("/api/v1/orders/"+r)}function i(r){return e.post("/api/v1/pay",{order_no:r})}export{n as a,s as c,p as o,i as p};
