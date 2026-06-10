@@ -100,9 +100,9 @@ func (ic *InstallController) Install(ctx *gin.Context) {
 		}
 		// 确保目录存在
 		os.MkdirAll(filepath.Dir(dbPath), 0755)
-
+		// SQLite DSN 是完整路径
 		dsn = dbPath
-		configContent = fmt.Sprintf(`app:
+		configContent = fmt.Sprintf(`server:
   port: 8080
   mode: release
 
@@ -122,7 +122,7 @@ logger:
 		// MySQL
 		dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 			req.DBUser, req.DBPassword, req.DBHost, req.DBPort, req.DBName)
-		configContent = fmt.Sprintf(`app:
+		configContent = fmt.Sprintf(`server:
   port: 8080
   mode: release
 

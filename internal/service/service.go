@@ -665,8 +665,11 @@ func (s *OrderService) Create(userID, productID uint, qty int, email, payType, r
 	return order, nil
 }
 
-// buildProductLockSQL 构造商品行锁 SQL（MySQL FOR UPDATE）
+// buildProductLockSQL 构造商品行锁 SQL（MySQL FOR UPDATE，SQLite 无锁）
 func buildProductLockSQL(productID uint) string {
+	if db.Driver() == "sqlite" {
+		return fmt.Sprintf("SELECT * FROM products WHERE id=%d LIMIT 1", productID)
+	}
 	return fmt.Sprintf("SELECT * FROM products WHERE id=%d LIMIT 1 FOR UPDATE", productID)
 }
 

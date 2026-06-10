@@ -1,0 +1,15 @@
+server:
+  port: 8080
+  mode: release
+
+jwt:
+  secret: ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuv
+  expire: 720
+
+database:
+  driver: sqlite
+  dbname: chenze_faka.db
+
+logger:
+  level: info
+  path: logs/app.log

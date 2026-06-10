@@ -70,6 +70,9 @@ func Load(path string) error {
 }
 
 func (c *DatabaseConfig) DSN() string {
+	if c.Driver == "sqlite" || c.Driver == "sqlite3" {
+		return c.DBName
+	}
 	if c.Host == "" {
 		c.Host = "127.0.0.1"
 	}
