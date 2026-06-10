@@ -33,3 +33,5 @@ Thumbs.db
 dist/
 bin/
 chenze_faka
+frontend/node_modules/
+test_*.py
