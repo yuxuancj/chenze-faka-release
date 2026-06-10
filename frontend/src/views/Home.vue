@@ -1,52 +1,86 @@
 <template>
     <Layout>
-        <div class="space-y-8">
-            <div class="relative bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg overflow-hidden">
-                <div class="px-6 py-12 md:px-12 md:py-16">
-                    <h1 class="text-2xl md:text-4xl font-bold text-white mb-3">商品精选</h1>
-                    <p class="text-blue-100 mb-6 max-w-lg">浏览各类优质商品，快速下单，即刻到账。</p>
-                    <div class="flex flex-wrap gap-3">
-                        <router-link to="/products" class="bg-white text-blue-600 px-6 py-2 rounded-md font-medium hover:bg-blue-50 transition-colors">浏览全部商品</router-link>
-                        <router-link to="/user/login" class="border border-white text-white px-6 py-2 rounded-md font-medium hover:bg-white hover:bg-opacity-10 transition-colors">登录账户</router-link>
-                    </div>
-                </div>
-                <div class="absolute right-0 top-0 w-64 h-64 bg-white bg-opacity-10 rounded-full -mr-32 -mt-32"></div>
-                <div class="absolute right-12 bottom-6 hidden md:block text-right">
-                    <div class="text-white text-opacity-80 text-xs">优质商品</div>
-                    <div class="text-white text-2xl font-bold">快速发货</div>
-                </div>
-            </div>
-
-            <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-xl font-bold text-gray-800">热门商品</h2>
-                    <router-link to="/products" class="text-sm text-blue-600 hover:underline">查看全部</router-link>
-                </div>
-                <div v-if="loading" class="card p-8 text-center text-gray-500">
-                    加载中...
-                </div>
-                <div v-else-if="products.length === 0" class="card p-8 text-center text-gray-500">
-                    暂无商品
-                </div>
-                <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <router-link
-                        v-for="item in products"
-                        :key="item.id"
-                        :to="'/product/' + item.id"
-                        class="card hover:shadow-md transition-shadow overflow-hidden block"
-                    >
-                        <div class="h-40 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-400 text-sm">
-                            {{ item.name }}
-                        </div>
-                        <div class="card-body">
-                            <h3 class="font-semibold text-gray-800 truncate">{{ item.name }}</h3>
-                            <div class="text-xl font-bold text-blue-600 mt-2">￥{{ item.price }}</div>
-                            <div class="text-xs text-gray-500 mt-1">库存: {{ item.stock || 0 }}</div>
-                        </div>
+        <el-card
+            shadow="never"
+            class="hero-card"
+            body-style="padding: 0"
+        >
+            <div class="hero-inner">
+                <h1 class="hero-title">商品精选</h1>
+                <p class="hero-desc">浏览各类优质商品，快速下单，即刻到账。</p>
+                <div class="hero-actions">
+                    <router-link to="/products">
+                        <el-button type="primary" size="large" plain>
+                            浏览全部商品
+                        </el-button>
+                    </router-link>
+                    <router-link to="/user/login">
+                        <el-button size="large" class="hero-btn-outline">
+                            登录账户
+                        </el-button>
                     </router-link>
                 </div>
+                <div class="hero-tag">
+                    <span class="hero-tag-label">优质商品</span>
+                    <span class="hero-tag-value">快速发货</span>
+                </div>
             </div>
-        </div>
+        </el-card>
+
+        <el-card
+            shadow="never"
+            class="section-card"
+        >
+            <template #header>
+                <div class="section-header">
+                    <span class="section-title">热门商品</span>
+                    <router-link to="/products" class="section-link">
+                        查看全部
+                    </router-link>
+                </div>
+            </template>
+
+            <el-skeleton
+                v-if="loading"
+                :rows="3"
+                animated
+                class="loading-skeleton"
+            />
+
+            <el-empty
+                v-else-if="products.length === 0"
+                description="暂无商品"
+                class="empty-state"
+            />
+
+            <el-row
+                v-else
+                :gutter="16"
+            >
+                <el-col
+                    v-for="item in products"
+                    :key="item.id"
+                    :xs="24"
+                    :sm="12"
+                    :md="8"
+                >
+                    <router-link :to="'/product/' + item.id" class="product-link">
+                        <el-card
+                            shadow="hover"
+                            class="product-card"
+                            body-style="padding: 0"
+                        >
+                            <div class="product-thumb">{{ item.name }}</div>
+                            <div class="product-info">
+                                <div class="product-name">{{ item.name }}</div>
+                                <div class="product-price">￥{{ item.price }}</div>
+                                <div class="product-stock">库存: {{ item.stock || 0 }}</div>
+                            </div>
+                        </el-card>
+                    </router-link>
+                </el-col>
+            </el-row>
+        </el-card>
     </Layout>
 </template>
 
@@ -71,3 +105,172 @@ function load() {
 
 onMounted(load)
 </script>
+
+<style scoped>
+.hero-card {
+    margin-bottom: 24px;
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.hero-inner {
+    background: linear-gradient(120deg, #409eff 0%, #2c7be5 100%);
+    padding: 48px 32px;
+    color: #ffffff;
+    position: relative;
+}
+
+.hero-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+}
+
+.hero-desc {
+    font-size: 15px;
+    opacity: 0.9;
+    margin: 0 0 24px 0;
+    max-width: 420px;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.hero-btn-outline {
+    background-color: transparent;
+    color: #ffffff;
+    border-color: #ffffff;
+}
+
+.hero-btn-outline:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border-color: #ffffff;
+}
+
+.hero-tag {
+    position: absolute;
+    right: 32px;
+    bottom: 24px;
+    text-align: right;
+}
+
+.hero-tag-label {
+    display: block;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.hero-tag-value {
+    display: block;
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 4px;
+}
+
+.section-card {
+    border: none;
+    border-radius: 8px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #303133;
+}
+
+.section-link {
+    font-size: 13px;
+    color: #409eff;
+}
+
+.section-link:hover {
+    color: #66b1ff;
+    text-decoration: underline;
+}
+
+.loading-skeleton {
+    padding: 16px;
+}
+
+.empty-state {
+    padding: 48px 0;
+}
+
+.product-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    margin-bottom: 16px;
+}
+
+.product-card {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.product-thumb {
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f0f2f5 0%, #e4e7ed 100%);
+    color: #909399;
+    font-size: 14px;
+    text-align: center;
+    padding: 0 16px;
+    overflow: hidden;
+}
+
+.product-info {
+    padding: 12px 16px;
+}
+
+.product-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #303133;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.product-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #f56c6c;
+    margin-top: 8px;
+}
+
+.product-stock {
+    font-size: 12px;
+    color: #909399;
+    margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+    .hero-inner {
+        padding: 32px 20px;
+    }
+
+    .hero-title {
+        font-size: 22px;
+    }
+
+    .hero-tag {
+        position: static;
+        text-align: left;
+        margin-top: 24px;
+    }
+}
+</style>

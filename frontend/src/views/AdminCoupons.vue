@@ -1,111 +1,93 @@
 <template>
     <AdminLayout page-title="优惠券管理">
-        <div class="space-y-4">
-            <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-gray-800">优惠券列表</h2>
-                <button @click="showCreateForm = true" class="btn-primary btn-sm">新增优惠券</button>
-            </div>
-
-            <div v-if="showCreateForm || showEditForm" class="card">
-                <div class="card-header font-semibold">{{ showEditForm ? '编辑优惠券' : '新增优惠券' }}</div>
-                <div class="card-body space-y-3">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div>
-                            <label class="form-label">优惠券名称</label>
-                            <input v-model="cform.name" type="text" class="form-input">
-                        </div>
-                        <div>
-                            <label class="form-label">类型</label>
-                            <select v-model.number="cform.type" class="form-input">
-                                <option :value="1">满减券</option>
-                                <option :value="2">折扣券</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="form-label">面额 / 折扣率</label>
-                            <input v-model.number="cform.discount_amount" type="number" step="0.01" class="form-input" placeholder="满减券填金额，折扣券填折扣率(0-10)">
-                        </div>
-                        <div>
-                            <label class="form-label">最低消费</label>
-                            <input v-model.number="cform.min_amount" type="number" step="0.01" class="form-input" placeholder="0 表示不限制">
-                        </div>
-                        <div>
-                            <label class="form-label">发放数量</label>
-                            <input v-model.number="cform.total_count" type="number" class="form-input">
-                        </div>
-                        <div>
-                            <label class="form-label">有效期至</label>
-                            <input v-model="cform.expire_time" type="datetime-local" class="form-input">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="form-label">描述</label>
-                            <input v-model="cform.description" type="text" class="form-input">
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button @click="submitCoupon" :disabled="saving" class="btn-primary btn-sm">
-                            {{ saving ? '保存中...' : '保存' }}
-                        </button>
-                        <button @click="cancelCouponForm" class="btn-secondary btn-sm">取消</button>
-                    </div>
-                </div>
-            </div>
-
-            <div v-if="loading" class="card p-8 text-center text-gray-500">加载中...</div>
-            <div v-else class="card">
-                <div class="card-body overflow-x-auto">
-                    <table class="table w-full">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>名称</th>
-                                <th>类型</th>
-                                <th>面额/折扣</th>
-                                <th>最低消费</th>
-                                <th>数量</th>
-                                <th>已领取</th>
-                                <th>状态</th>
-                                <th>有效期</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-if="coupons.length === 0">
-                                <td colspan="10" class="text-center text-gray-500 py-6">暂无数据</td>
-                            </tr>
-                            <tr v-for="c in coupons" :key="c.id">
-                                <td>{{ c.id }}</td>
-                                <td>{{ c.name }}</td>
-                                <td>{{ c.type === 2 ? '折扣券' : '满减券' }}</td>
-                                <td>{{ c.type === 2 ? (c.discount_rate || c.discount_amount) + '折' : '￥' + (c.discount_amount || 0) }}</td>
-                                <td>￥{{ c.min_amount || 0 }}</td>
-                                <td>{{ c.total_count || 0 }}</td>
-                                <td>{{ c.used_count || 0 }}</td>
-                                <td>{{ c.status === 1 ? '启用' : '禁用' }}</td>
-                                <td class="text-xs">{{ c.expire_time || '-' }}</td>
-                                <td>
-                                    <button @click="editCoupon(c)" class="btn-sm btn-secondary">编辑</button>
-                                    <button @click="deleteCoupon(c.id)" class="btn-sm btn-danger ml-1">删除</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-gray-800">优惠券列表</h2>
+            <el-button type="primary" size="small" @click="openCreateDialog">新增优惠券</el-button>
         </div>
+
+        <el-table v-loading="loading" :data="coupons" style="width: 100%" border stripe empty-text="暂无数据">
+            <el-table-column prop="id" label="ID" width="80" />
+            <el-table-column prop="name" label="名称" />
+            <el-table-column label="类型" width="100">
+                <template #default="scope">{{ scope.row.type === 2 ? '折扣券' : '满减券' }}</template>
+            </el-table-column>
+            <el-table-column label="面额/折扣" width="120">
+                <template #default="scope">
+                    {{ scope.row.type === 2 ? (scope.row.discount_rate || scope.row.discount_amount) + '折' : '￥' + (scope.row.discount_amount || 0) }}
+                </template>
+            </el-table-column>
+            <el-table-column label="最低消费" width="120">
+                <template #default="scope">￥{{ scope.row.min_amount || 0 }}</template>
+            </el-table-column>
+            <el-table-column prop="total_count" label="数量" width="100" />
+            <el-table-column prop="used_count" label="已领取" width="100" />
+            <el-table-column label="状态" width="100">
+                <template #default="scope">
+                    <el-tag v-if="scope.row.status === 1" type="success">启用</el-tag>
+                    <el-tag v-else type="info">禁用</el-tag>
+                </template>
+            </el-table-column>
+            <el-table-column prop="expire_time" label="有效期" width="180" />
+            <el-table-column label="操作" width="180" fixed="right">
+                <template #default="scope">
+                    <el-button type="success" size="small" @click="openEditDialog(scope.row)">编辑</el-button>
+                    <el-button type="danger" size="small" @click="deleteCoupon(scope.row.id)">删除</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+
+        <el-dialog v-model="dialogVisible" :title="isEditing ? '编辑优惠券' : '新增优惠券'" width="600px">
+            <el-form :model="cform" label-width="120px">
+                <el-form-item label="优惠券名称">
+                    <el-input v-model="cform.name" />
+                </el-form-item>
+                <el-form-item label="类型">
+                    <el-select v-model="cform.type" style="width: 100%">
+                        <el-option label="满减券" :value="1" />
+                        <el-option label="折扣券" :value="2" />
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="面额/折扣率">
+                    <el-input-number v-model="cform.discount_amount" :precision="2" :step="0.01" :min="0" controls-position="right" style="width: 100%" />
+                </el-form-item>
+                <el-form-item label="最低消费">
+                    <el-input-number v-model="cform.min_amount" :precision="2" :step="0.01" :min="0" controls-position="right" style="width: 100%" />
+                </el-form-item>
+                <el-form-item label="发放数量">
+                    <el-input-number v-model="cform.total_count" :step="1" :min="0" controls-position="right" style="width: 100%" />
+                </el-form-item>
+                <el-form-item label="有效期至">
+                    <el-date-picker
+                        v-model="cform.expire_time"
+                        type="datetime"
+                        placeholder="选择日期时间"
+                        value-format="YYYY-MM-DD HH:mm:ss"
+                        style="width: 100%"
+                    />
+                </el-form-item>
+                <el-form-item label="描述">
+                    <el-input v-model="cform.description" type="textarea" :rows="2" />
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <el-button @click="closeDialog">取消</el-button>
+                <el-button type="primary" :loading="saving" @click="submitCoupon">保存</el-button>
+            </template>
+        </el-dialog>
     </AdminLayout>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import AdminLayout from '../components/AdminLayout.vue'
 import { adminCouponList, adminCouponCreate, adminCouponUpdate, adminCouponDelete } from '../api/coupon'
 
 const coupons = ref([])
 const loading = ref(false)
 const saving = ref(false)
-const showCreateForm = ref(false)
-const showEditForm = ref(false)
+const dialogVisible = ref(false)
+const isEditing = ref(false)
 const editingId = ref(0)
 const cform = reactive({
     name: '', type: 1, discount_amount: 0, min_amount: 0,
@@ -129,8 +111,38 @@ function loadList() {
     }).catch(() => {}).finally(() => { loading.value = false })
 }
 
+function openCreateDialog() {
+    isEditing.value = false
+    editingId.value = 0
+    resetForm()
+    dialogVisible.value = true
+}
+
+function openEditDialog(c) {
+    isEditing.value = true
+    editingId.value = c.id
+    cform.name = c.name || ''
+    cform.type = c.type || 1
+    cform.discount_amount = c.type === 2 ? (c.discount_rate || 0) : (c.discount_amount || 0)
+    cform.min_amount = c.min_amount || 0
+    cform.total_count = c.total_count || 0
+    cform.expire_time = c.expire_time || ''
+    cform.description = c.description || ''
+    dialogVisible.value = true
+}
+
+function closeDialog() {
+    dialogVisible.value = false
+    isEditing.value = false
+    editingId.value = 0
+    resetForm()
+}
+
 function submitCoupon() {
-    if (!cform.name) { alert('请输入名称'); return }
+    if (!cform.name) {
+        ElMessage.warning('请输入名称')
+        return
+    }
     saving.value = true
     const payload = {
         name: cform.name,
@@ -143,44 +155,27 @@ function submitCoupon() {
         description: cform.description,
         status: 1
     }
-    const promise = showEditForm.value && editingId.value
+    const promise = isEditing.value && editingId.value
         ? adminCouponUpdate(editingId.value, payload)
         : adminCouponCreate(payload)
     promise.then(() => {
-        alert('保存成功')
-        showCreateForm.value = false
-        showEditForm.value = false
-        resetForm()
+        ElMessage.success('保存成功')
+        closeDialog()
         loadList()
     }).catch(() => {}).finally(() => { saving.value = false })
 }
 
-function editCoupon(c) {
-    editingId.value = c.id
-    cform.name = c.name || ''
-    cform.type = c.type || 1
-    cform.discount_amount = c.type === 2 ? (c.discount_rate || 0) : (c.discount_amount || 0)
-    cform.min_amount = c.min_amount || 0
-    cform.total_count = c.total_count || 0
-    cform.expire_time = c.expire_time || ''
-    cform.description = c.description || ''
-    showCreateForm.value = false
-    showEditForm.value = true
-}
-
 function deleteCoupon(id) {
-    if (!confirm('确定删除该优惠券？')) return
-    adminCouponDelete(id).then(() => {
-        alert('删除成功')
-        loadList()
+    ElMessageBox.confirm('确定删除该优惠券？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+    }).then(() => {
+        adminCouponDelete(id).then(() => {
+            ElMessage.success('删除成功')
+            loadList()
+        }).catch(() => {})
     }).catch(() => {})
-}
-
-function cancelCouponForm() {
-    showCreateForm.value = false
-    showEditForm.value = false
-    editingId.value = 0
-    resetForm()
 }
 
 onMounted(loadList)

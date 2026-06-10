@@ -3,31 +3,33 @@
         <div class="space-y-4">
             <h2 class="text-xl font-bold text-gray-800">我的优惠券</h2>
 
-            <div class="flex items-center gap-2">
-                <button @click="tab = 'available'" :class="tab === 'available' ? 'btn-primary' : 'btn-secondary'">可使用</button>
-                <button @click="tab = 'used'" :class="tab === 'used' ? 'btn-primary' : 'btn-secondary'">已使用</button>
-                <button @click="tab = 'expired'" :class="tab === 'expired' ? 'btn-primary' : 'btn-secondary'">已过期</button>
-            </div>
+            <el-tabs v-model="tab">
+                <el-tab-pane label="可使用" name="available"></el-tab-pane>
+                <el-tab-pane label="已使用" name="used"></el-tab-pane>
+                <el-tab-pane label="已过期" name="expired"></el-tab-pane>
+            </el-tabs>
 
-            <div v-if="loading" class="card p-8 text-center text-gray-500">加载中...</div>
-            <div v-else-if="filteredCoupons.length === 0" class="card p-8 text-center text-gray-500">暂无优惠券</div>
-            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div v-for="c in filteredCoupons" :key="c.id" class="card overflow-hidden">
-                    <div class="p-4 bg-gradient-to-r from-orange-50 to-yellow-50">
-                        <div class="flex items-baseline gap-1 text-orange-600">
-                            <span class="text-3xl font-bold">{{ formatDiscount(c) }}</span>
+            <el-empty v-if="loading" description="加载中..."></el-empty>
+            <el-empty v-else-if="filteredCoupons.length === 0" description="暂无优惠券"></el-empty>
+            <el-row v-else :gutter="16">
+                <el-col v-for="c in filteredCoupons" :key="c.id" :xs="24" :sm="12" :md="8">
+                    <el-card class="coupon-card mb-4" shadow="hover">
+                        <template #header>
+                            <div class="flex items-baseline gap-1 text-orange-600">
+                                <span class="text-3xl font-bold">{{ formatDiscount(c) }}</span>
+                            </div>
+                            <div class="text-xs text-gray-600 mt-1">
+                                满 {{ c.min_amount || 0 }} 元可用
+                            </div>
+                        </template>
+                        <div class="text-sm">
+                            <div class="font-semibold text-gray-800">{{ c.name || '优惠券' }}</div>
+                            <div class="text-xs text-gray-500 mt-1">有效期至: {{ c.expire_time || '长期有效' }}</div>
+                            <div class="text-xs text-gray-500">{{ c.description || '全场通用' }}</div>
                         </div>
-                        <div class="text-xs text-gray-600 mt-1">
-                            满 {{ c.min_amount || 0 }} 元可用
-                        </div>
-                    </div>
-                    <div class="p-3 text-sm">
-                        <div class="font-semibold text-gray-800">{{ c.name || '优惠券' }}</div>
-                        <div class="text-xs text-gray-500 mt-1">有效期至: {{ c.expire_time || '长期有效' }}</div>
-                        <div class="text-xs text-gray-500">{{ c.description || '全场通用' }}</div>
-                    </div>
-                </div>
-            </div>
+                    </el-card>
+                </el-col>
+            </el-row>
         </div>
     </Layout>
 </template>
@@ -68,3 +70,10 @@ function load() {
 
 onMounted(load)
 </script>
+
+<style scoped>
+.coupon-card :deep(.el-card__header) {
+    background: linear-gradient(to right, #fff7ed, #fefce8);
+    padding: 16px;
+}
+</style>

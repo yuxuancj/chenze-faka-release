@@ -1,119 +1,106 @@
 <template>
     <Layout>
-        <div class="max-w-md mx-auto space-y-6">
-            <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg overflow-hidden">
+        <div class="max-w-md mx-auto space-y-4">
+            <el-card class="gradient-header" body-style="padding: 0">
                 <div class="px-6 py-8 text-center">
                     <h1 class="text-2xl font-bold text-white mb-2">每日签到</h1>
                     <p class="text-green-100">连续签到领取额外积分奖励</p>
                 </div>
-            </div>
+            </el-card>
 
-            <div v-if="loading" class="card p-8 text-center text-gray-500">
-                <div class="animate-pulse">
-                    <div class="h-4 bg-gray-200 rounded w-1/2 mx-auto mb-4"></div>
-                    <div class="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
-                </div>
-            </div>
-            <template v-else>
-                <div class="card">
-                    <div class="card-body text-center space-y-4">
-                        <div class="text-7xl">{{ canSignin ? '🎯' : '✅' }}</div>
-                        <div v-if="canSignin" class="space-y-4">
-                            <p class="text-gray-600">
-                                今日签到可获得 <span class="text-green-600 font-bold text-xl">{{ signinReward }}</span> 积分
-                            </p>
-                            <p v-if="continuousDays > 0" class="text-sm text-orange-500">
-                                继续坚持！已连续签到 <strong>{{ continuousDays }}</strong> 天
-                            </p>
-                            <p class="text-xs text-gray-400">
-                                连续3天额外+{{ continuousReward }}积分，连续7天双倍奖励
-                            </p>
-                            <button @click="doSignin" :disabled="signing"
-                                class="btn-primary w-full py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all">
-                                <span v-if="signing" class="flex items-center justify-center gap-2">
-                                    <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    签到中...
-                                </span>
-                                <span v-else>立即签到</span>
-                            </button>
-                        </div>
-                        <div v-else class="space-y-3">
-                            <p class="text-gray-600 text-lg">今日已签到</p>
-                            <div class="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full">
-                                <span>🔥</span>
-                                <span class="font-medium">连续签到 {{ continuousDays }} 天</span>
-                            </div>
-                            <p class="text-green-600 font-medium">明日再来领取更多积分</p>
-                        </div>
+            <el-card v-loading="loading" shadow="hover">
+                <div class="text-center space-y-4">
+                    <div class="text-5xl">{{ canSignin ? '🎯' : '✅' }}</div>
+                    <div v-if="canSignin" class="space-y-4">
+                        <p class="text-gray-600">
+                            今日签到可获得 <span class="text-green-600 font-bold text-xl">{{ signinReward }}</span> 积分
+                        </p>
+                        <p v-if="continuousDays > 0" class="text-sm text-orange-500">
+                            继续坚持！已连续签到 <strong>{{ continuousDays }}</strong> 天
+                        </p>
+                        <p class="text-xs text-gray-400">
+                            连续3天额外+{{ continuousReward }}积分，连续7天双倍奖励
+                        </p>
+                        <el-button type="primary" size="large" class="w-full" @click="doSignin" :loading="signing">
+                            立即签到
+                        </el-button>
+                    </div>
+                    <div v-else class="space-y-3">
+                        <p class="text-gray-600 text-lg">今日已签到</p>
+                        <el-tag type="success" size="large">🔥 连续签到 {{ continuousDays }} 天</el-tag>
+                        <p class="text-green-600 font-medium">明日再来领取更多积分</p>
                     </div>
                 </div>
+            </el-card>
 
-                <div class="card">
-                    <div class="card-header font-semibold">签到规则</div>
-                    <div class="card-body space-y-2 text-sm text-gray-600">
-                        <div class="flex items-start gap-2">
-                            <span class="text-green-500">✓</span>
-                            <span>每日签到可获得 <strong>{{ signinReward }}</strong> 积分</span>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <span class="text-orange-500">🔥</span>
-                            <span>连续签到{{ continuousRewardDays }}天额外奖励 <strong>+{{ continuousReward }}</strong> 积分</span>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <span class="text-purple-500">⭐</span>
-                            <span>连续签到{{ doubleRewardDays }}天奖励<strong>翻倍</strong></span>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <span class="text-blue-500">💰</span>
-                            <span>积分可抵扣订单金额</span>
-                        </div>
+            <el-card shadow="hover">
+                <template #header>
+                    <span class="font-semibold">签到规则</span>
+                </template>
+                <div class="space-y-3 text-sm text-gray-600">
+                    <div class="flex items-start gap-2">
+                        <el-icon class="text-green-500"><Check /></el-icon>
+                        <span>每日签到可获得 <strong>{{ signinReward }}</strong> 积分</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <el-icon class="text-orange-500"><Promotion /></el-icon>
+                        <span>连续签到{{ continuousRewardDays }}天额外奖励 <strong>+{{ continuousReward }}</strong> 积分</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <el-icon class="text-purple-500"><Star /></el-icon>
+                        <span>连续签到{{ doubleRewardDays }}天奖励<strong>翻倍</strong></span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <el-icon class="text-blue-500"><Money /></el-icon>
+                        <span>积分可抵扣订单金额</span>
                     </div>
                 </div>
+            </el-card>
 
-                <div class="card">
-                    <div class="card-header font-semibold flex justify-between items-center">
-                        <span>我的积分</span>
+            <el-card shadow="hover">
+                <template #header>
+                    <div class="flex justify-between items-center">
+                        <span class="font-semibold">我的积分</span>
                         <router-link to="/user/points" class="text-blue-500 text-sm font-normal">查看全部</router-link>
                     </div>
-                    <div class="card-body">
-                        <div class="text-center py-4">
-                            <span class="text-5xl font-bold text-green-600">{{ balance || 0 }}</span>
-                            <p class="text-sm text-gray-500 mt-1">可用积分</p>
-                        </div>
-                        <div class="border-t pt-4 space-y-2">
-                            <p class="text-sm text-gray-500 mb-2">最近积分变动</p>
-                            <div v-if="logsLoading" class="text-center text-gray-400 py-4 text-sm">加载中...</div>
-                            <div v-else-if="logs.length === 0" class="text-center text-gray-400 py-4 text-sm">暂无记录</div>
-                            <div v-else class="space-y-2">
-                                <div v-for="log in logs.slice(0, 5)" :key="log.id"
-                                    class="flex justify-between items-center text-sm py-2 border-b border-gray-100 last:border-0">
-                                    <div>
-                                        <span class="text-gray-700">{{ log.description || getTypeDesc(log.type) }}</span>
-                                        <span v-if="log.created_at" class="text-xs text-gray-400 block">
-                                            {{ formatTime(log.created_at) }}
-                                        </span>
-                                    </div>
-                                    <span :class="log.amount > 0 ? 'text-green-600 font-medium' : 'text-red-600'">
-                                        {{ log.amount > 0 ? '+' : '' }}{{ log.amount }}
+                </template>
+                <div class="text-center py-4">
+                    <span class="text-5xl font-bold text-green-600">{{ balance || 0 }}</span>
+                    <p class="text-sm text-gray-500 mt-1">可用积分</p>
+                </div>
+                <el-divider />
+                <p class="text-sm text-gray-500 mb-2">最近积分变动</p>
+                <el-table :data="logs.slice(0, 5)" v-loading="logsLoading" size="small" :show-header="false" style="width: 100%">
+                    <el-table-column>
+                        <template #default="scope">
+                            <div class="flex justify-between items-center text-sm py-2">
+                                <div>
+                                    <span class="text-gray-700">{{ scope.row.description || getTypeDesc(scope.row.type) }}</span>
+                                    <span v-if="scope.row.created_at" class="text-xs text-gray-400 block">
+                                        {{ formatTime(scope.row.created_at) }}
                                     </span>
                                 </div>
+                                <span :class="(scope.row.amount || scope.row.change || 0) > 0 ? 'text-green-600 font-medium' : 'text-red-600'">
+                                    {{ (scope.row.amount || scope.row.change || 0) > 0 ? '+' : '' }}{{ scope.row.amount || scope.row.change || 0 }}
+                                </span>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </template>
+                        </template>
+                    </el-table-column>
+                    <template #empty>
+                        <el-empty description="暂无记录" :image-size="60"></el-empty>
+                    </template>
+                </el-table>
+            </el-card>
         </div>
     </Layout>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { Check, Promotion, Star, Money } from '@element-plus/icons-vue'
 import Layout from '../components/Layout.vue'
 import { signIn } from '../api/points'
-import Toast from '../utils/toast'
+import { ElMessage } from 'element-plus'
 
 const loading = ref(true)
 const logsLoading = ref(false)
@@ -191,23 +178,22 @@ async function doSignin() {
         const earned = data.points || signinReward.value
         const days = data.continuous_days || (continuousDays.value + 1)
 
-        Toast.success(`签到成功！获得 ${earned} 积分`)
+        ElMessage.success(`签到成功！获得 ${earned} 积分`)
         canSignin.value = false
         continuousDays.value = days
         balance.value += earned
 
-        // 重新加载积分记录
         await loadLogs()
     } catch (e) {
         const msg = e.message || ''
         if (msg.includes('已签到')) {
-            Toast.info('今日已签到')
+            ElMessage.info('今日已签到')
             canSignin.value = false
         } else if (msg.includes('登录')) {
-            Toast.error('请先登录')
+            ElMessage.error('请先登录')
             window.location.href = '/user/login'
         } else {
-            Toast.error(msg || '签到失败，请重试')
+            ElMessage.error(msg || '签到失败，请重试')
         }
     } finally {
         signing.value = false
@@ -219,3 +205,13 @@ onMounted(() => {
     loadLogs()
 })
 </script>
+
+<style scoped>
+.gradient-header :deep(.el-card__body) {
+    padding: 0;
+}
+.gradient-header {
+    background: linear-gradient(to right, #10b981, #f59e0b);
+    border: none;
+}
+</style>

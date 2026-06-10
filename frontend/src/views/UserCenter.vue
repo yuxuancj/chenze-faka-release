@@ -2,125 +2,172 @@
     <Layout>
         <div class="space-y-4">
             <h2 class="text-xl font-bold text-gray-800">个人中心</h2>
-            <div v-if="loading" class="card p-8 text-center text-gray-500">
-                加载中...
-            </div>
-            <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="card">
-                    <div class="card-header font-semibold">基本信息</div>
-                    <div class="card-body space-y-4">
-                        <div>
-                            <label class="form-label">邮箱</label>
-                            <input :value="user.email" type="email" class="form-input bg-gray-50" disabled>
-                        </div>
-                        <div>
-                            <label class="form-label">昵称</label>
-                            <input v-model="editNickname" type="text" class="form-input">
-                        </div>
-                        <button @click="saveProfile" :disabled="saving" class="btn-primary">
-                            {{ saving ? '保存中...' : '保存' }}
-                        </button>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header font-semibold">账号信息</div>
-                    <div class="card-body overflow-x-auto">
-                        <table class="table w-full">
-                            <tbody>
-                                <tr><td class="text-gray-500 w-24">用户ID</td><td>{{ user.id || '-' }}</td></tr>
-                                <tr><td class="text-gray-500">余额</td><td>￥{{ user.balance || 0 }}</td></tr>
-                                <tr><td class="text-gray-500">积分</td><td>{{ user.points || 0 }}</td></tr>
-                                <tr><td class="text-gray-500">等级</td><td>{{ user.level || '-' }}</td></tr>
-                                <tr><td class="text-gray-500">状态</td><td>{{ user.status ? '正常' : '禁用' }}</td></tr>
-                                <tr><td class="text-gray-500">注册时间</td><td>{{ user.created_at || '-' }}</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card md:col-span-2">
-                    <div class="card-header font-semibold">修改密码</div>
-                    <div class="card-body space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label class="form-label">当前密码</label>
-                                <input v-model="pwdForm.old" type="password" class="form-input">
-                            </div>
-                            <div>
-                                <label class="form-label">新密码</label>
-                                <input v-model="pwdForm.new" type="password" class="form-input">
-                            </div>
-                            <div>
-                                <label class="form-label">确认新密码</label>
-                                <input v-model="pwdForm.confirm" type="password" class="form-input" @keyup.enter="changePwd">
-                            </div>
-                        </div>
-                        <button @click="changePwd" :disabled="pwdLoading" class="btn-primary">
-                            {{ pwdLoading ? '提交中...' : '修改密码' }}
-                        </button>
-                    </div>
-                </div>
-            </div>
+
+            <el-row v-loading="loading" :gutter="20">
+                <el-col :xs="24" :md="12">
+                    <el-card shadow="never">
+                        <template #header>
+                            <span class="font-semibold">基本信息</span>
+                        </template>
+                        <el-form
+                            ref="profileFormRef"
+                            :model="profileForm"
+                            :rules="profileRules"
+                            label-width="80px"
+                        >
+                            <el-form-item label="邮箱">
+                                <el-input v-model="profileForm.email" disabled />
+                            </el-form-item>
+                            <el-form-item label="昵称" prop="nickname">
+                                <el-input v-model="profileForm.nickname" placeholder="请输入昵称" />
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" :loading="saving" @click="saveProfile">
+                                    保存
+                                </el-button>
+                            </el-form-item>
+                        </el-form>
+                    </el-card>
+                </el-col>
+
+                <el-col :xs="24" :md="12">
+                    <el-card shadow="never">
+                        <template #header>
+                            <span class="font-semibold">账号信息</span>
+                        </template>
+                        <el-table :data="accountInfo" border style="width: 100%">
+                            <el-table-column prop="label" label="项目" width="120" />
+                            <el-table-column prop="value" label="内容" />
+                        </el-table>
+                    </el-card>
+                </el-col>
+
+                <el-col :span="24">
+                    <el-card shadow="never">
+                        <template #header>
+                            <span class="font-semibold">修改密码</span>
+                        </template>
+                        <el-form
+                            ref="pwdFormRef"
+                            :model="pwdForm"
+                            :rules="pwdRules"
+                            label-width="120px"
+                        >
+                            <el-row :gutter="20">
+                                <el-col :xs="24" :sm="8">
+                                    <el-form-item label="当前密码" prop="old">
+                                        <el-input v-model="pwdForm.old" type="password" show-password placeholder="请输入当前密码" />
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :xs="24" :sm="8">
+                                    <el-form-item label="新密码" prop="new">
+                                        <el-input v-model="pwdForm.new" type="password" show-password placeholder="请输入新密码" />
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :xs="24" :sm="8">
+                                    <el-form-item label="确认新密码" prop="confirm">
+                                        <el-input v-model="pwdForm.confirm" type="password" show-password placeholder="请再次输入新密码" @keyup.enter="changePwd" />
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-form-item>
+                                <el-button type="primary" :loading="pwdLoading" @click="changePwd">
+                                    修改密码
+                                </el-button>
+                            </el-form-item>
+                        </el-form>
+                    </el-card>
+                </el-col>
+            </el-row>
         </div>
     </Layout>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import Layout from '../components/Layout.vue'
 import { profile, updateProfile, changePassword } from '../api/user'
 
 const user = ref({})
-const editNickname = ref('')
 const loading = ref(true)
 const saving = ref(false)
 const pwdLoading = ref(false)
+const profileFormRef = ref(null)
+const pwdFormRef = ref(null)
+
+const profileForm = reactive({ email: '', nickname: '' })
 const pwdForm = reactive({ old: '', new: '', confirm: '' })
+
+const profileRules = reactive({
+    nickname: [{ required: true, message: '请输入昵称', trigger: 'blur' }]
+})
+
+const validateConfirm = (rule, value, callback) => {
+    if (!value) {
+        callback(new Error('请再次输入新密码'))
+    } else if (value !== pwdForm.new) {
+        callback(new Error('两次输入的新密码不一致'))
+    } else {
+        callback()
+    }
+}
+
+const pwdRules = reactive({
+    old: [{ required: true, message: '请输入当前密码', trigger: 'blur' }],
+    new: [
+        { required: true, message: '请输入新密码', trigger: 'blur' },
+        { min: 6, message: '新密码至少6位', trigger: 'blur' }
+    ],
+    confirm: [{ validator: validateConfirm, trigger: 'blur' }]
+})
+
+const accountInfo = computed(() => [
+    { label: '用户ID', value: user.value.id || '-' },
+    { label: '余额', value: '￥' + (user.value.balance || 0) },
+    { label: '积分', value: user.value.points || 0 },
+    { label: '等级', value: user.value.level || '-' },
+    { label: '状态', value: user.value.status ? '正常' : '禁用' },
+    { label: '注册时间', value: user.value.created_at || '-' }
+])
 
 function loadProfile() {
     loading.value = true
     profile().then((data) => {
         user.value = data || {}
-        editNickname.value = user.value.nickname || ''
+        profileForm.email = user.value.email || ''
+        profileForm.nickname = user.value.nickname || ''
     }).catch(() => {}).finally(() => {
         loading.value = false
     })
 }
 
 function saveProfile() {
-    if (!editNickname.value) {
-        alert('请输入昵称')
-        return
-    }
-    saving.value = true
-    updateProfile(editNickname.value).then(() => {
-        alert('保存成功')
-        loadProfile()
-    }).catch(() => {}).finally(() => {
-        saving.value = false
+    profileFormRef.value.validate((valid) => {
+        if (!valid) return
+        saving.value = true
+        updateProfile(profileForm.nickname).then(() => {
+            ElMessage.success('保存成功')
+            loadProfile()
+        }).catch(() => {}).finally(() => {
+            saving.value = false
+        })
     })
 }
 
 function changePwd() {
-    if (!pwdForm.old || !pwdForm.new || !pwdForm.confirm) {
-        alert('请完整填写密码')
-        return
-    }
-    if (pwdForm.new.length < 6) {
-        alert('新密码至少6位')
-        return
-    }
-    if (pwdForm.new !== pwdForm.confirm) {
-        alert('两次输入的新密码不一致')
-        return
-    }
-    pwdLoading.value = true
-    changePassword(pwdForm.old, pwdForm.new).then(() => {
-        alert('密码修改成功')
-        pwdForm.old = ''
-        pwdForm.new = ''
-        pwdForm.confirm = ''
-    }).catch(() => {}).finally(() => {
-        pwdLoading.value = false
+    pwdFormRef.value.validate((valid) => {
+        if (!valid) return
+        pwdLoading.value = true
+        changePassword(pwdForm.old, pwdForm.new).then(() => {
+            ElMessage.success('密码修改成功')
+            pwdForm.old = ''
+            pwdForm.new = ''
+            pwdForm.confirm = ''
+            pwdFormRef.value.resetFields()
+        }).catch(() => {}).finally(() => {
+            pwdLoading.value = false
+        })
     })
 }
 

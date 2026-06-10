@@ -1,58 +1,49 @@
 <template>
     <Layout>
-        <div class="space-y-6">
-            <div class="bg-gradient-to-r from-red-600 to-orange-500 rounded-lg overflow-hidden">
+        <div class="space-y-4">
+            <el-card class="gradient-banner" body-style="padding: 0">
                 <div class="px-6 py-8 md:px-12 md:py-10">
                     <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">限时秒杀</h1>
                     <p class="text-red-100">精选商品，限时低价，售完即止</p>
                 </div>
-            </div>
+            </el-card>
 
-            <div v-if="loading" class="card p-8 text-center text-gray-500">
-                加载中...
-            </div>
-            <div v-else-if="activities.length === 0" class="card p-8 text-center text-gray-500">
-                暂无秒杀活动
-            </div>
-            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div v-for="item in activities" :key="item.id" class="card overflow-hidden">
-                    <div class="h-40 bg-gradient-to-br from-red-50 to-orange-100 flex items-center justify-center text-gray-500 text-sm">
-                        {{ item.product_name || '秒杀商品' }}
-                    </div>
-                    <div class="card-body space-y-3">
-                        <h3 class="font-semibold text-gray-800 truncate">{{ item.product_name || '秒杀商品' }}</h3>
-                        <div class="flex items-baseline gap-2">
+            <el-empty v-if="loading" description="加载中..." />
+            <el-empty v-else-if="activities.length === 0" description="暂无秒杀活动" />
+            <el-row v-else :gutter="16">
+                <el-col v-for="item in activities" :key="item.id" :xs="24" :sm="12" :md="8">
+                    <el-card shadow="hover" class="seckill-card">
+                        <div class="h-40 bg-gradient-to-br from-red-50 to-orange-100 flex items-center justify-center text-gray-500 text-sm">
+                            {{ item.product_name || '秒杀商品' }}
+                        </div>
+                        <h3 class="font-semibold text-gray-800 mt-3 truncate">{{ item.product_name || '秒杀商品' }}</h3>
+                        <div class="flex items-baseline gap-2 mt-2">
                             <span class="text-2xl font-bold text-red-600">￥{{ item.seckill_price }}</span>
                             <span class="text-sm text-gray-400 line-through">￥{{ item.original_price }}</span>
                         </div>
-                        <div class="flex items-center gap-4 text-xs text-gray-600">
+                        <div class="flex items-center gap-4 text-xs text-gray-600 mt-2">
                             <span>每人限购 {{ item.limit_per_user }} 件</span>
                             <span>秒杀库存: {{ item.stock }}</span>
                         </div>
-                        <div v-if="item.status === 'ongoing'" class="text-xs text-green-600 font-semibold">
-                            进行中 · 剩余: {{ countdownFor(item) }}
+                        <div class="mt-2">
+                            <el-tag v-if="item.status === 'ongoing'" type="success" size="small">
+                                进行中 · 剩余: {{ countdownFor(item) }}
+                            </el-tag>
+                            <el-tag v-else-if="item.status === 'upcoming'" type="warning" size="small">
+                                即将开始 · {{ formatDateTime(item.start_time) }}
+                            </el-tag>
+                            <el-tag v-else type="info" size="small">已结束</el-tag>
                         </div>
-                        <div v-else-if="item.status === 'upcoming'" class="text-xs text-yellow-600 font-semibold">
-                            即将开始 · {{ formatDateTime(item.start_time) }}
-                        </div>
-                        <div v-else-if="item.status === 'ended'" class="text-xs text-gray-500">
-                            已结束
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-red-500 h-2 rounded-full" :style="{ width: stockProgress(item) + '%' }"></div>
-                        </div>
-                        <button v-if="item.status === 'ongoing'" @click="handleBuy(item)" :disabled="ordering" class="btn-primary w-full bg-red-600 hover:bg-red-700">
-                            {{ ordering ? '提交中...' : '立即抢购' }}
-                        </button>
-                        <button v-else-if="item.status === 'upcoming'" disabled class="btn w-full bg-gray-300 text-gray-600 cursor-not-allowed">
-                            尚未开始
-                        </button>
-                        <button v-else disabled class="btn w-full bg-gray-300 text-gray-600 cursor-not-allowed">
-                            已结束
-                        </button>
-                    </div>
-                </div>
-            </div>
+                        <el-progress :percentage="stockProgress(item)" :color="'#ef4444'" :stroke-width="6" class="mt-3" />
+                        <el-button v-if="item.status === 'ongoing'" type="danger" @click="handleBuy(item)" :loading="ordering" class="w-full mt-3">
+                            立即抢购
+                        </el-button>
+                        <el-button v-else disabled class="w-full mt-3">
+                            {{ item.status === 'upcoming' ? '尚未开始' : '已结束' }}
+                        </el-button>
+                    </el-card>
+                </el-col>
+            </el-row>
         </div>
     </Layout>
 </template>
@@ -62,6 +53,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Layout from '../components/Layout.vue'
 import { seckillActivities, seckillOrder } from '../api/seckill'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const activities = ref([])
@@ -121,11 +113,11 @@ function handleBuy(item) {
         if (orderNo) {
             router.push('/order/' + orderNo)
         } else {
-            alert('秒杀下单成功')
+            ElMessage.success('秒杀下单成功')
             router.push('/user/orders')
         }
     }).catch((err) => {
-        alert(err.response?.data?.msg || '秒杀失败，请稍后重试')
+        ElMessage.error(err.response?.data?.msg || '秒杀失败，请稍后重试')
     }).finally(() => {
         ordering.value = false
         load()
@@ -143,3 +135,16 @@ onUnmounted(() => {
     if (timer) clearInterval(timer)
 })
 </script>
+
+<style scoped>
+.gradient-banner :deep(.el-card__body) {
+    padding: 0;
+}
+.gradient-banner {
+    background: linear-gradient(to right, #dc2626, #f97316);
+    border: none;
+}
+.seckill-card :deep(.el-card__body) {
+    padding: 16px;
+}
+</style>

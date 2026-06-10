@@ -1,49 +1,39 @@
 <template>
     <AdminLayout page-title="积分设置">
-        <div class="space-y-4">
-            <div class="card">
-                <div class="card-header font-semibold">积分规则</div>
-                <div class="card-body space-y-3">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div>
-                            <label class="form-label">消费1元获得积分</label>
-                            <input v-model.number="settings.points_per_yuan" type="number" step="1" class="form-input">
-                        </div>
-                        <div>
-                            <label class="form-label">积分抵扣比例(100积分=多少元)</label>
-                            <input v-model.number="settings.yuan_per_hundred" type="number" step="0.01" class="form-input">
-                        </div>
-                        <div>
-                            <label class="form-label">每日签到奖励积分</label>
-                            <input v-model.number="settings.signin_reward" type="number" step="1" class="form-input">
-                        </div>
-                        <div>
-                            <label class="form-label">连续签到奖励积分</label>
-                            <input v-model.number="settings.continuous_reward" type="number" step="1" class="form-input">
-                        </div>
-                        <div>
-                            <label class="form-label">最高抵扣比例(%)</label>
-                            <input v-model.number="settings.max_discount_rate" type="number" step="1" class="form-input">
-                        </div>
-                        <div>
-                            <label class="form-label">功能开关</label>
-                            <select v-model.number="settings.enabled" class="form-input">
-                                <option :value="1">启用积分</option>
-                                <option :value="0">禁用积分</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button @click="save" :disabled="saving" class="btn-primary btn-sm">
-                        {{ saving ? '保存中...' : '保存设置' }}
-                    </button>
-                </div>
-            </div>
-        </div>
+        <el-card v-loading="loading" shadow="never">
+            <template #header>
+                <span class="font-semibold">积分规则</span>
+            </template>
+            <el-form :model="settings" label-width="180px">
+                <el-form-item label="消费1元获得积分">
+                    <el-input-number v-model="settings.points_per_yuan" :step="1" :min="0" controls-position="right" style="width: 100%" />
+                </el-form-item>
+                <el-form-item label="积分抵扣比例(100积分=多少元)">
+                    <el-input-number v-model="settings.yuan_per_hundred" :precision="2" :step="0.01" :min="0" controls-position="right" style="width: 100%" />
+                </el-form-item>
+                <el-form-item label="每日签到奖励积分">
+                    <el-input-number v-model="settings.signin_reward" :step="1" :min="0" controls-position="right" style="width: 100%" />
+                </el-form-item>
+                <el-form-item label="连续签到奖励积分">
+                    <el-input-number v-model="settings.continuous_reward" :step="1" :min="0" controls-position="right" style="width: 100%" />
+                </el-form-item>
+                <el-form-item label="最高抵扣比例(%)">
+                    <el-input-number v-model="settings.max_discount_rate" :step="1" :min="0" :max="100" controls-position="right" style="width: 100%" />
+                </el-form-item>
+                <el-form-item label="功能开关">
+                    <el-switch v-model="settings.enabled" :active-value="1" :inactive-value="0" active-text="启用积分" inactive-text="禁用积分" />
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" :loading="saving" @click="save">保存设置</el-button>
+                </el-form-item>
+            </el-form>
+        </el-card>
     </AdminLayout>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import AdminLayout from '../components/AdminLayout.vue'
 import { adminPointsGet, adminPointsSet } from '../api/points'
 
@@ -71,7 +61,7 @@ function load() {
 function save() {
     saving.value = true
     adminPointsSet({ ...settings }).then(() => {
-        alert('保存成功')
+        ElMessage.success('保存成功')
     }).catch(() => {}).finally(() => { saving.value = false })
 }
 

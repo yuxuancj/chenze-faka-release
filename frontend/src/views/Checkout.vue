@@ -3,45 +3,52 @@
         <div class="space-y-4">
             <h2 class="text-xl font-bold text-gray-800">结算</h2>
 
-            <div v-if="loadingProduct && fromProduct" class="card p-8 text-center text-gray-500">加载商品信息...</div>
-            <div v-else-if="!hasItems" class="card p-8 text-center text-gray-500">
-                没有可以结算的商品。
-                <div class="mt-4">
-                    <router-link to="/products" class="btn-primary">去购物</router-link>
-                </div>
-            </div>
+            <el-card v-if="loadingProduct && fromProduct" shadow="never">
+                <el-skeleton active :rows="3" />
+            </el-card>
+            <el-card v-else-if="!hasItems" class="text-center" shadow="never">
+                <el-empty description="没有可以结算的商品。">
+                    <el-button type="primary" @click="$router.push('/products')">去购物</el-button>
+                </el-empty>
+            </el-card>
 
             <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="md:col-span-2 space-y-4">
-                    <div class="card">
-                        <div class="card-header font-semibold">订单信息</div>
-                        <div class="card-body space-y-4">
-                            <div>
-                                <label class="form-label">联系邮箱</label>
-                                <input v-model="form.email" type="email" class="form-input" placeholder="请输入接收卡密的邮箱">
-                            </div>
-                            <div>
-                                <label class="form-label">支付方式</label>
-                                <select v-model="form.pay_type" class="form-input">
-                                    <option value="epay">在线支付</option>
-                                    <option value="balance">余额支付</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="form-label">备注</label>
-                                <textarea v-model="form.remark" class="form-input" rows="3" placeholder="选填"></textarea>
-                            </div>
-                        </div>
-                    </div>
+                    <el-card shadow="never">
+                        <template #header>
+                            <span class="font-semibold">订单信息</span>
+                        </template>
+                        <el-form :model="form" label-width="100px">
+                            <el-form-item label="联系邮箱" :error="emailError">
+                                <el-input v-model="form.email" placeholder="请输入接收卡密的邮箱" />
+                            </el-form-item>
+                            <el-form-item label="支付方式">
+                                <el-select v-model="form.pay_type" style="width: 100%">
+                                    <el-option label="在线支付" value="epay" />
+                                    <el-option label="余额支付" value="balance" />
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="备注">
+                                <el-input v-model="form.remark" type="textarea" :rows="3" placeholder="选填" />
+                            </el-form-item>
+                        </el-form>
+                    </el-card>
 
-                    <div class="card">
-                        <div class="card-header font-semibold">选择优惠券</div>
-                        <div class="card-body">
-                            <div v-if="couponsLoading" class="text-sm text-gray-500">加载中...</div>
-                            <div v-else-if="availableCoupons.length === 0" class="text-sm text-gray-500">暂无可使用的优惠券</div>
-                            <div v-else class="space-y-2">
-                                <label v-for="c in availableCoupons" :key="c.id" class="flex items-center gap-3 border border-gray-200 rounded-md p-3 cursor-pointer hover:bg-gray-50">
-                                    <input type="radio" :value="c.id" v-model="selectedCouponId">
+                    <el-card shadow="never">
+                        <template #header>
+                            <span class="font-semibold">选择优惠券</span>
+                        </template>
+                        <div v-if="couponsLoading" class="text-sm text-gray-500">加载中...</div>
+                        <el-empty v-else-if="availableCoupons.length === 0" description="暂无可使用的优惠券" :image-size="80" />
+                        <div v-else class="space-y-2">
+                            <el-radio-group v-model="selectedCouponId" class="w-full">
+                                <div
+                                    v-for="c in availableCoupons"
+                                    :key="c.id"
+                                    class="flex items-start gap-3 border border-gray-200 rounded-md p-3 cursor-pointer hover:bg-gray-50"
+                                    @click="selectedCouponId = c.id"
+                                >
+                                    <el-radio :value="c.id" />
                                     <div class="flex-1">
                                         <div class="text-orange-600 font-bold">
                                             {{ formatDiscount(c) }}
@@ -49,43 +56,40 @@
                                         </div>
                                         <div class="text-xs text-gray-600">{{ c.name }} · 有效期至 {{ c.expire_time || '长期有效' }}</div>
                                     </div>
-                                </label>
-                                <label class="flex items-center gap-3 border border-gray-200 rounded-md p-3 cursor-pointer hover:bg-gray-50">
-                                    <input type="radio" :value="0" v-model="selectedCouponId">
+                                </div>
+                                <div
+                                    class="flex items-center gap-3 border border-gray-200 rounded-md p-3 cursor-pointer hover:bg-gray-50"
+                                    @click="selectedCouponId = 0"
+                                >
+                                    <el-radio :value="0" />
                                     <span class="text-sm text-gray-600">不使用优惠券</span>
-                                </label>
-                            </div>
+                                </div>
+                            </el-radio-group>
                         </div>
-                    </div>
+                    </el-card>
 
-                    <div class="card">
-                        <div class="card-header font-semibold">商品清单</div>
-                        <div class="card-body overflow-x-auto">
-                            <table class="table w-full">
-                                <thead>
-                                    <tr>
-                                        <th>商品</th>
-                                        <th>单价</th>
-                                        <th>数量</th>
-                                        <th>小计</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="(item, index) in items" :key="'i-' + item.product_id + '-' + item.sku_id + '-' + index">
-                                        <td>{{ item.name }}</td>
-                                        <td>￥{{ item.price }}</td>
-                                        <td>{{ item.quantity }}</td>
-                                        <td>￥{{ (item.price * item.quantity).toFixed(2) }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <el-card shadow="never">
+                        <template #header>
+                            <span class="font-semibold">商品清单</span>
+                        </template>
+                        <el-table :data="items" stripe>
+                            <el-table-column prop="name" label="商品" />
+                            <el-table-column label="单价" width="120">
+                                <template #default="scope">￥{{ scope.row.price }}</template>
+                            </el-table-column>
+                            <el-table-column prop="quantity" label="数量" width="100" />
+                            <el-table-column label="小计" width="150">
+                                <template #default="scope">￥{{ (scope.row.price * scope.row.quantity).toFixed(2) }}</template>
+                            </el-table-column>
+                        </el-table>
+                    </el-card>
                 </div>
 
-                <div class="card h-fit sticky top-4">
-                    <div class="card-header font-semibold">结算</div>
-                    <div class="card-body space-y-3">
+                <el-card class="h-fit" shadow="never">
+                    <template #header>
+                        <span class="font-semibold">结算</span>
+                    </template>
+                    <div class="space-y-3">
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">商品总数</span>
                             <span>{{ totalCount }} 件</span>
@@ -102,11 +106,11 @@
                             <span class="text-gray-800">应付</span>
                             <span class="text-blue-600">￥{{ finalPrice.toFixed(2) }}</span>
                         </div>
-                        <button @click="submitOrder" :disabled="loading" class="btn-primary w-full">
-                            {{ loading ? '提交中...' : '提交订单' }}
-                        </button>
+                        <el-button type="primary" class="w-full" :loading="loading" @click="submitOrder">
+                            提交订单
+                        </el-button>
                     </div>
-                </div>
+                </el-card>
             </div>
         </div>
     </Layout>
@@ -120,6 +124,7 @@ import { useCartStore } from '../stores/cart'
 import { createOrder, payOrder } from '../api/order'
 import { productDetail } from '../api/product'
 import { userCoupons } from '../api/coupon'
+import { ElMessage } from 'element-plus'
 
 const route = useRoute()
 const router = useRouter()
@@ -127,6 +132,7 @@ const cartStore = useCartStore()
 const loading = ref(false)
 const loadingProduct = ref(false)
 const couponsLoading = ref(false)
+const emailError = ref('')
 const form = reactive({ email: '', pay_type: 'epay', remark: '' })
 const productItem = ref(null)
 const availableCoupons = ref([])
@@ -179,11 +185,11 @@ function loadProduct() {
                 quantity: quantity
             }
         } else {
-            alert('商品不存在')
+            ElMessage.error('商品不存在')
             router.push('/products')
         }
     }).catch(() => {
-        alert('商品不存在')
+        ElMessage.error('商品不存在')
         router.push('/products')
     }).finally(() => {
         loadingProduct.value = false
@@ -203,17 +209,20 @@ function loadCoupons() {
 }
 
 function submitOrder() {
+    emailError.value = ''
     if (!form.email) {
-        alert('请输入邮箱')
+        emailError.value = '请输入邮箱'
+        ElMessage.warning('请输入邮箱')
         return
     }
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRe.test(form.email)) {
-        alert('邮箱格式不正确')
+        emailError.value = '邮箱格式不正确'
+        ElMessage.warning('邮箱格式不正确')
         return
     }
     if (items.value.length === 0) {
-        alert('没有可结算的商品')
+        ElMessage.warning('没有可结算的商品')
         return
     }
     loading.value = true
@@ -233,7 +242,6 @@ function submitOrder() {
     if (selectedCouponId.value) {
         payload.coupon_id = selectedCouponId.value
     }
-    // Single product fallback for compatibility
     if (orderItems.length === 1 && !productItem.value) {
         payload.product_id = orderItems[0].product_id
         payload.quantity = orderItems[0].quantity

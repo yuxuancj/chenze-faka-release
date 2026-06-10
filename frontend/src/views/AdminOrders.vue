@@ -1,129 +1,124 @@
 <template>
     <AdminLayout page-title="订单管理">
         <div class="space-y-4">
-            <div class="flex flex-col md:flex-row md:items-center gap-3">
+            <el-card shadow="never">
                 <div class="flex items-center gap-2">
-                    <input
+                    <el-input
                         v-model="keyword"
-                        type="text"
                         placeholder="搜索订单"
-                        class="form-input w-48"
+                        style="width: 240px"
                         @keyup.enter="search"
-                    >
-                    <button @click="search" class="btn-primary btn-sm">搜索</button>
+                    />
+                    <el-button type="primary" @click="search">搜索</el-button>
                 </div>
-            </div>
+            </el-card>
 
-            <div v-if="loading" class="card p-8 text-center text-gray-500">
-                加载中...
-            </div>
-            <div v-else class="card">
-                <div class="card-body overflow-x-auto">
-                    <table class="table w-full">
-                        <thead>
-                            <tr>
-                                <th>订单号</th>
-                                <th>商品</th>
-                                <th>数量</th>
-                                <th>金额</th>
-                                <th>状态</th>
-                                <th>创建时间</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-if="orders.length === 0">
-                                <td colspan="7" class="text-center text-gray-500 py-8">暂无订单</td>
-                            </tr>
-                            <tr v-for="order in orders" :key="order.id">
-                                <td>{{ order.order_no }}</td>
-                                <td>{{ order.product_snapshot || order.product_name || '-' }}</td>
-                                <td>{{ order.quantity }}</td>
-                                <td>￥{{ order.amount }}</td>
-                                <td>
-                                    <span v-if="order.status === 0" class="badge-yellow">待支付</span>
-                                    <span v-else-if="order.status === 1" class="badge-green">已支付</span>
-                                    <span v-else-if="order.status === 2" class="badge-blue">已完成</span>
-                                    <span v-else-if="order.status === 3" class="badge-red">已关闭</span>
-                                    <span v-else class="badge-gray">未知</span>
-                                </td>
-                                <td>{{ order.created_at }}</td>
-                                <td>
-                                    <button @click="showDetail(order)" class="btn-sm btn-primary">查看</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <el-card shadow="never">
+                <el-table :data="orders" stripe v-loading="loading">
+                    <el-table-column prop="order_no" label="订单号" min-width="160" />
+                    <el-table-column label="商品" min-width="200">
+                        <template #default="scope">
+                            {{ scope.row.product_snapshot || scope.row.product_name || '-' }}
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="quantity" label="数量" width="80" />
+                    <el-table-column label="金额" width="120">
+                        <template #default="scope">￥{{ scope.row.amount }}</template>
+                    </el-table-column>
+                    <el-table-column label="状态" width="100">
+                        <template #default="scope">
+                            <el-tag :type="statusType(scope.row.status)" effect="light">
+                                {{ statusText(scope.row.status) }}
+                            </el-tag>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="created_at" label="创建时间" min-width="160" />
+                    <el-table-column label="操作" width="100" fixed="right">
+                        <template #default="scope">
+                            <el-button type="primary" link @click="showDetail(scope.row)">查看</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+
+                <div class="mt-4 flex items-center justify-end">
+                    <el-pagination
+                        v-if="pagination.total > 0"
+                        v-model:current-page="page"
+                        v-model:page-size="pagination.size"
+                        :total="pagination.total"
+                        layout="prev, pager, next"
+                        @current-change="load"
+                    />
                 </div>
-            </div>
+            </el-card>
 
-            <div v-if="pagination && pagination.total > pagination.size" class="flex items-center justify-center gap-2">
-                <button @click="prevPage" :disabled="page <= 1" class="btn-sm btn-secondary">上一页</button>
-                <span class="text-sm text-gray-600">第 {{ page }} / {{ totalPages }} 页</span>
-                <button @click="nextPage" :disabled="page >= totalPages" class="btn-sm btn-secondary">下一页</button>
-            </div>
-
-            <div v-if="detail" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
-                <div class="card w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-                    <div class="card-header flex items-center justify-between">
-                        <span class="font-semibold">订单详情</span>
-                        <button @click="detail = null" class="btn-sm btn-secondary">关闭</button>
+            <el-dialog
+                v-model="detailVisible"
+                title="订单详情"
+                width="600px"
+            >
+                <template v-if="detail">
+                    <el-descriptions :column="1" border>
+                        <el-descriptions-item label="订单号">{{ detail.order_no }}</el-descriptions-item>
+                        <el-descriptions-item label="商品">
+                            {{ detail.product_snapshot || detail.product_name || '-' }}
+                        </el-descriptions-item>
+                        <el-descriptions-item label="数量">{{ detail.quantity }}</el-descriptions-item>
+                        <el-descriptions-item label="金额">￥{{ detail.amount }}</el-descriptions-item>
+                        <el-descriptions-item label="状态">
+                            <el-tag :type="statusType(detail.status)" effect="light">
+                                {{ statusText(detail.status) }}
+                            </el-tag>
+                        </el-descriptions-item>
+                        <el-descriptions-item label="邮箱">{{ detail.email }}</el-descriptions-item>
+                        <el-descriptions-item label="备注">{{ detail.remark || '-' }}</el-descriptions-item>
+                        <el-descriptions-item label="创建时间">{{ detail.created_at }}</el-descriptions-item>
+                    </el-descriptions>
+                    <div v-if="detail.cards && detail.cards.length > 0" class="mt-4">
+                        <h4 class="font-semibold mb-2">卡密</h4>
+                        <el-table :data="detail.cards" stripe size="small">
+                            <el-table-column label="卡号">
+                                <template #default="scope">
+                                    <span class="font-mono text-sm">{{ scope.row.card_data }}</span>
+                                </template>
+                            </el-table-column>
+                        </el-table>
                     </div>
-                    <div class="card-body">
-                        <table class="table w-full">
-                            <tbody>
-                                <tr><td class="w-32 text-gray-500">订单号</td><td>{{ detail.order_no }}</td></tr>
-                                <tr><td class="text-gray-500">商品</td><td>{{ detail.product_snapshot || detail.product_name || '-' }}</td></tr>
-                                <tr><td class="text-gray-500">数量</td><td>{{ detail.quantity }}</td></tr>
-                                <tr><td class="text-gray-500">金额</td><td>￥{{ detail.amount }}</td></tr>
-                                <tr><td class="text-gray-500">状态</td>
-                                    <td>
-                                        <span v-if="detail.status === 0" class="badge-yellow">待支付</span>
-                                        <span v-else-if="detail.status === 1" class="badge-green">已支付</span>
-                                        <span v-else-if="detail.status === 2" class="badge-blue">已完成</span>
-                                        <span v-else-if="detail.status === 3" class="badge-red">已关闭</span>
-                                        <span v-else class="badge-gray">未知</span>
-                                    </td>
-                                </tr>
-                                <tr><td class="text-gray-500">邮箱</td><td>{{ detail.email }}</td></tr>
-                                <tr><td class="text-gray-500">备注</td><td>{{ detail.remark || '-' }}</td></tr>
-                                <tr><td class="text-gray-500">创建时间</td><td>{{ detail.created_at }}</td></tr>
-                            </tbody>
-                        </table>
-                        <div v-if="detail.cards && detail.cards.length > 0" class="mt-4">
-                            <h4 class="font-semibold mb-2">卡密</h4>
-                            <table class="table w-full">
-                                <thead>
-                                    <tr><th>卡密</th></tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="(c, i) in detail.cards" :key="i">
-                                        <td class="font-mono text-sm">{{ c.card_data }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                </template>
+            </el-dialog>
         </div>
     </AdminLayout>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import AdminLayout from '../components/AdminLayout.vue'
 import { adminOrderList, adminOrderDetail } from '../api/admin'
 
 const orders = ref([])
 const detail = ref(null)
+const detailVisible = ref(false)
 const page = ref(1)
 const pageSize = 20
 const pagination = reactive({ total: 0, size: 20 })
 const keyword = ref('')
 const loading = ref(false)
 
-const totalPages = computed(() => Math.ceil(pagination.total / pagination.size) || 1)
+function statusType(status) {
+    if (status === 0) return 'warning'
+    if (status === 1) return 'success'
+    if (status === 2) return 'primary'
+    if (status === 3) return 'danger'
+    return 'info'
+}
+
+function statusText(status) {
+    if (status === 0) return '待支付'
+    if (status === 1) return '已支付'
+    if (status === 2) return '已完成'
+    if (status === 3) return '已关闭'
+    return '未知'
+}
 
 function load() {
     loading.value = true
@@ -147,6 +142,7 @@ function search() {
 function showDetail(order) {
     if (!order.id) {
         detail.value = order
+        detailVisible.value = true
         return
     }
     adminOrderDetail(order.id).then((data) => {
@@ -157,23 +153,11 @@ function showDetail(order) {
         } else {
             detail.value = order
         }
+        detailVisible.value = true
     }).catch(() => {
         detail.value = order
+        detailVisible.value = true
     })
-}
-
-function prevPage() {
-    if (page.value > 1) {
-        page.value--
-        load()
-    }
-}
-
-function nextPage() {
-    if (page.value < totalPages.value) {
-        page.value++
-        load()
-    }
 }
 
 onMounted(load)

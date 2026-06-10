@@ -1,118 +1,322 @@
 <template>
-    <div class="min-h-screen bg-gray-50">
-        <nav class="bg-white border-b border-gray-200 sticky top-0 z-10">
-            <div class="max-w-7xl mx-auto px-4">
-                <div class="flex items-center justify-between h-14">
-                    <router-link to="/" class="text-xl font-bold text-gray-800">
+    <el-container class="layout-container">
+        <el-header class="layout-header">
+            <div class="header-inner">
+                <div class="header-left">
+                    <router-link to="/" class="site-title">
                         {{ siteName }}
                     </router-link>
-
-                    <div class="hidden md:flex items-center space-x-6">
-                        <router-link to="/" class="nav-link">首页</router-link>
-                        <router-link to="/products" class="nav-link">商品</router-link>
-                        <router-link to="/cart" class="btn-primary btn-sm">
-                            购物车
-                            <span v-if="cartCount > 0" class="ml-1 bg-white text-blue-600 rounded-full text-xs w-5 h-5 inline-flex items-center justify-center">{{ cartCount }}</span>
-                        </router-link>
-                        <template v-if="token">
-                            <div class="relative" ref="userMenuRef">
-                                <button @click="userMenuOpen = !userMenuOpen" class="nav-link flex items-center gap-1">
-                                    <span>{{ userNickname || '用户' }}</span>
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                </button>
-                                <div v-if="userMenuOpen" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1">
-                                    <router-link to="/user/profile" @click="userMenuOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">个人资料</router-link>
-                                    <router-link to="/user/orders" @click="userMenuOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">我的订单</router-link>
-                                    <router-link to="/user/distribution" @click="userMenuOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">推广中心</router-link>
-                                    <router-link to="/user/signin" @click="userMenuOpen = false" class="block px-4 py-2 text-sm text-green-600 hover:bg-gray-100 font-medium">每日签到</router-link>
-                                    <router-link to="/user/coupons" @click="userMenuOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">我的优惠券</router-link>
-                                    <router-link to="/user/points" @click="userMenuOpen = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">积分明细</router-link>
-                                    <div class="border-t border-gray-100 my-1"></div>
-                                    <button @click="logout" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">退出登录</button>
-                                </div>
-                            </div>
-                        </template>
-                        <template v-else>
-                            <router-link to="/user/login" class="nav-link">登录</router-link>
-                            <router-link to="/user/register" class="nav-link">注册</router-link>
-                        </template>
-                    </div>
-
-                    <button class="md:hidden btn-secondary btn-sm" @click="mobileMenuOpen = !mobileMenuOpen">
-                        {{ mobileMenuOpen ? '关闭' : '菜单' }}
-                    </button>
                 </div>
 
-                <div v-if="mobileMenuOpen" class="md:hidden border-t border-gray-200 py-3 space-y-1">
-                    <router-link to="/" class="nav-link block">首页</router-link>
-                    <router-link to="/products" class="nav-link block">商品</router-link>
-                    <router-link to="/cart" class="nav-link block">购物车</router-link>
+                <el-menu
+                    mode="horizontal"
+                    :router="true"
+                    class="header-menu"
+                    :default-active="activeMenu"
+                >
+                    <el-menu-item index="/">首页</el-menu-item>
+                    <el-menu-item index="/products">商品</el-menu-item>
+                </el-menu>
+
+                <div class="header-right">
+                    <el-badge
+                        :value="cartCount"
+                        :hidden="cartCount === 0"
+                        class="cart-badge"
+                    >
+                        <router-link to="/cart">
+                            <el-button type="primary" size="default">
+                                购物车
+                            </el-button>
+                        </router-link>
+                    </el-badge>
+
                     <template v-if="token">
-                        <div class="border-t border-gray-200 pt-2 mt-2">
-                            <router-link to="/user/profile" class="nav-link block">个人资料</router-link>
-                            <router-link to="/user/orders" class="nav-link block">我的订单</router-link>
-                            <router-link to="/user/distribution" class="nav-link block">推广中心</router-link>
-                            <router-link to="/user/signin" class="nav-link block text-green-600">每日签到</router-link>
-                            <router-link to="/user/coupons" class="nav-link block">我的优惠券</router-link>
-                            <router-link to="/user/points" class="nav-link block">积分明细</router-link>
-                            <button @click="logout" class="nav-link block w-full text-left">退出登录</button>
-                        </div>
+                        <el-dropdown trigger="click" @command="handleUserCommand">
+                            <span class="user-trigger">
+                                {{ userNickname || '用户' }}
+                                <el-icon class="el-icon--right"><arrow-down /></el-icon>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item command="/user/profile">个人资料</el-dropdown-item>
+                                    <el-dropdown-item command="/user/orders">我的订单</el-dropdown-item>
+                                    <el-dropdown-item command="/user/distribution">推广中心</el-dropdown-item>
+                                    <el-dropdown-item command="/user/signin" divided>
+                                        <span style="color: #67c23a; font-weight: 500;">每日签到</span>
+                                    </el-dropdown-item>
+                                    <el-dropdown-item command="/user/coupons">我的优惠券</el-dropdown-item>
+                                    <el-dropdown-item command="/user/points">积分明细</el-dropdown-item>
+                                    <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
                     </template>
                     <template v-else>
-                        <router-link to="/user/login" class="nav-link block">登录</router-link>
-                        <router-link to="/user/register" class="nav-link block">注册</router-link>
+                        <router-link to="/user/login">
+                            <el-button type="default" size="default">登录</el-button>
+                        </router-link>
+                        <router-link to="/user/register">
+                            <el-button type="default" size="default">注册</el-button>
+                        </router-link>
                     </template>
+
+                    <el-button
+                        class="mobile-menu-btn"
+                        text
+                        @click="mobileMenuVisible = true"
+                    >
+                        <el-icon><menu /></el-icon>
+                    </el-button>
                 </div>
             </div>
-        </nav>
 
-        <main class="max-w-7xl mx-auto px-4 py-6">
-            <slot></slot>
-        </main>
+            <el-drawer
+                v-model="mobileMenuVisible"
+                direction="rtl"
+                size="240px"
+                class="mobile-drawer"
+            >
+                <template #header>
+                    <span>{{ siteName }}</span>
+                </template>
+                <el-menu
+                    :default-active="activeMenu"
+                    @select="handleMobileSelect"
+                >
+                    <el-menu-item index="/">
+                        <el-icon><house /></el-icon>
+                        <span>首页</span>
+                    </el-menu-item>
+                    <el-menu-item index="/products">
+                        <el-icon><goods /></el-icon>
+                        <span>商品</span>
+                    </el-menu-item>
+                    <el-menu-item index="/cart">
+                        <el-icon><shopping-cart /></el-icon>
+                        <span>购物车</span>
+                    </el-menu-item>
+                    <template v-if="token">
+                        <el-menu-item index="/user/profile">
+                            <el-icon><user /></el-icon>
+                            <span>个人资料</span>
+                        </el-menu-item>
+                        <el-menu-item index="/user/orders">
+                            <el-icon><document /></el-icon>
+                            <span>我的订单</span>
+                        </el-menu-item>
+                        <el-menu-item index="/user/distribution">
+                            <el-icon><share /></el-icon>
+                            <span>推广中心</span>
+                        </el-menu-item>
+                        <el-menu-item index="/user/signin">
+                            <el-icon><calendar /></el-icon>
+                            <span>每日签到</span>
+                        </el-menu-item>
+                        <el-menu-item index="/user/coupons">
+                            <el-icon><ticket /></el-icon>
+                            <span>我的优惠券</span>
+                        </el-menu-item>
+                        <el-menu-item index="/user/points">
+                            <el-icon><coin /></el-icon>
+                            <span>积分明细</span>
+                        </el-menu-item>
+                        <el-menu-item index="logout" @click="logout">
+                            <el-icon><switch-button /></el-icon>
+                            <span>退出登录</span>
+                        </el-menu-item>
+                    </template>
+                    <template v-else>
+                        <el-menu-item index="/user/login">
+                            <el-icon><user /></el-icon>
+                            <span>登录</span>
+                        </el-menu-item>
+                        <el-menu-item index="/user/register">
+                            <el-icon><edit-pen /></el-icon>
+                            <span>注册</span>
+                        </el-menu-item>
+                    </template>
+                </el-menu>
+            </el-drawer>
+        </el-header>
 
-        <footer class="bg-white border-t border-gray-200 mt-8">
-            <div class="max-w-7xl mx-auto px-4 py-6 text-center text-sm text-gray-500">
-                版权所有 &copy; {{ new Date().getFullYear() }} {{ siteName }}
+        <el-main class="layout-main">
+            <div class="page-container">
+                <slot></slot>
             </div>
-        </footer>
-    </div>
+        </el-main>
+
+        <el-footer class="layout-footer">
+            <div class="footer-inner">
+                版权所有 &copy; {{ currentYear }} {{ siteName }}
+            </div>
+        </el-footer>
+    </el-container>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
 import { useUserStore } from '../stores/user'
+import {
+    ArrowDown,
+    Menu,
+    House,
+    Goods,
+    ShoppingCart,
+    User,
+    Document,
+    Share,
+    Calendar,
+    Ticket,
+    Coin,
+    SwitchButton,
+    EditPen
+} from '@element-plus/icons-vue'
 
+const route = useRoute()
 const router = useRouter()
-const mobileMenuOpen = ref(false)
-const userMenuOpen = ref(false)
-const userMenuRef = ref(null)
+const mobileMenuVisible = ref(false)
 const cartStore = useCartStore()
 const userStore = useUserStore()
 const siteName = ref('发卡平台')
-
-function logout() {
-    userMenuOpen.value = false
-    userStore.logout()
-    router.push('/')
-}
+const currentYear = new Date().getFullYear()
 
 const token = computed(() => userStore.token)
 const cartCount = computed(() => cartStore.totalCount)
 const userNickname = computed(() => userStore.userInfo?.nickname || userStore.userInfo?.username || '')
+const activeMenu = computed(() => route.path)
 
-function handleClickOutside(event) {
-    if (userMenuRef.value && !userMenuRef.value.contains(event.target)) {
-        userMenuOpen.value = false
+function logout() {
+    mobileMenuVisible.value = false
+    userStore.logout()
+    router.push('/')
+}
+
+function handleUserCommand(command) {
+    if (command === 'logout') {
+        logout()
+    } else {
+        router.push(command)
     }
 }
 
-onMounted(() => {
-    document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-    document.removeEventListener('click', handleClickOutside)
-})
+function handleMobileSelect(index) {
+    if (index === 'logout') {
+        logout()
+    } else {
+        mobileMenuVisible.value = false
+    }
+}
 </script>
+
+<style scoped>
+.layout-container {
+    min-height: 100vh;
+}
+
+.layout-header {
+    height: 56px;
+    padding: 0;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e4e7ed;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 16px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.site-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #303133;
+    white-space: nowrap;
+}
+
+.site-title:hover {
+    color: #409eff;
+}
+
+.header-menu {
+    border-bottom: none;
+    flex: 1;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    color: #303133;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: color 0.2s;
+}
+
+.user-trigger:hover {
+    color: #409eff;
+}
+
+.mobile-menu-btn {
+    display: none;
+}
+
+.layout-main {
+    padding: 0;
+    background-color: #f5f7fa;
+    flex: 1;
+}
+
+.layout-footer {
+    background-color: #ffffff;
+    border-top: 1px solid #e4e7ed;
+    padding: 0;
+    height: auto;
+    margin-top: 24px;
+}
+
+.footer-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    text-align: center;
+    font-size: 13px;
+    color: #909399;
+}
+
+@media (max-width: 768px) {
+    .header-inner {
+        gap: 12px;
+    }
+
+    .header-menu {
+        display: none;
+    }
+
+    .header-right .cart-badge,
+    .header-right .user-trigger,
+    .header-right > router-link {
+        display: none;
+    }
+
+    .mobile-menu-btn {
+        display: inline-flex;
+    }
+}
+</style>

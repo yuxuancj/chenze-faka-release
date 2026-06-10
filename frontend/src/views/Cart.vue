@@ -2,62 +2,59 @@
     <Layout>
         <div class="space-y-4">
             <h2 class="text-xl font-bold text-gray-800">购物车</h2>
-            <div v-if="cartStore.items.length === 0" class="card p-8 text-center text-gray-500">
-                购物车是空的，去选购商品吧。
-                <div class="mt-4">
-                    <router-link to="/products" class="btn-primary">去购物</router-link>
-                </div>
-            </div>
-            <div v-else class="space-y-4">
-                <div class="card overflow-x-auto">
-                    <div class="card-body">
-                        <table class="table w-full">
-                            <thead>
-                                <tr>
-                                    <th>商品</th>
-                                    <th>单价</th>
-                                    <th>数量</th>
-                                    <th>小计</th>
-                                    <th>操作</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="item in cartStore.items" :key="item.product_id">
-                                    <td>
-                                        <router-link :to="'/product/' + item.product_id" class="text-blue-600 hover:underline">
-                                            {{ item.name }}
-                                        </router-link>
-                                    </td>
-                                    <td>￥{{ item.price }}</td>
-                                    <td>
-                                        <div class="flex items-center gap-2">
-                                            <button @click="cartStore.updateQuantity(item.product_id, item.quantity - 1)" class="btn-sm btn-secondary">-</button>
-                                            <input v-model.number="item.quantity" type="number" min="1" class="form-input w-20 text-center" @change="cartStore.updateQuantity(item.product_id, item.quantity)">
-                                            <button @click="cartStore.updateQuantity(item.product_id, item.quantity + 1)" class="btn-sm btn-secondary">+</button>
-                                        </div>
-                                    </td>
-                                    <td>￥{{ (item.price * item.quantity).toFixed(2) }}</td>
-                                    <td>
-                                        <button @click="cartStore.removeItem(item.product_id)" class="btn-sm btn-danger">删除</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-body flex flex-col sm:flex-row items-center justify-between gap-4">
+            <el-card v-if="cartStore.items.length === 0" class="text-center" shadow="never">
+                <template #default>
+                    <el-empty description="购物车是空的，去选购商品吧。">
+                        <el-button type="primary" @click="$router.push('/products')">去购物</el-button>
+                    </el-empty>
+                </template>
+            </el-card>
+            <template v-else>
+                <el-card shadow="never">
+                    <el-table :data="cartStore.items" stripe>
+                        <el-table-column label="商品">
+                            <template #default="scope">
+                                <router-link :to="'/product/' + scope.row.product_id" class="text-blue-600 hover:underline">
+                                    {{ scope.row.name }}
+                                </router-link>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="单价" width="120">
+                            <template #default="scope">￥{{ scope.row.price }}</template>
+                        </el-table-column>
+                        <el-table-column label="数量" width="200">
+                            <template #default="scope">
+                                <el-input-number
+                                    v-model="scope.row.quantity"
+                                    :min="1"
+                                    size="small"
+                                    @change="cartStore.updateQuantity(scope.row.product_id, scope.row.quantity)"
+                                />
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="小计" width="120">
+                            <template #default="scope">￥{{ (scope.row.price * scope.row.quantity).toFixed(2) }}</template>
+                        </el-table-column>
+                        <el-table-column label="操作" width="120">
+                            <template #default="scope">
+                                <el-button type="danger" size="small" @click="cartStore.removeItem(scope.row.product_id)">删除</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-card>
+                <el-card shadow="never">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div class="text-lg">
                             共 <span class="font-semibold">{{ cartStore.totalCount }}</span> 件商品，
                             合计: <span class="text-blue-600 font-bold text-xl">￥{{ cartStore.totalPrice.toFixed(2) }}</span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <button @click="cartStore.clearCart()" class="btn-secondary">清空购物车</button>
-                            <router-link to="/checkout" class="btn-primary">去结算</router-link>
+                            <el-button @click="handleClearCart">清空购物车</el-button>
+                            <el-button type="primary" @click="$router.push('/checkout')">去结算</el-button>
                         </div>
                     </div>
-                </div>
-            </div>
+                </el-card>
+            </template>
         </div>
     </Layout>
 </template>
@@ -65,6 +62,18 @@
 <script setup>
 import Layout from '../components/Layout.vue'
 import { useCartStore } from '../stores/cart'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const cartStore = useCartStore()
+
+function handleClearCart() {
+    ElMessageBox.confirm('确定要清空购物车吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+    }).then(() => {
+        cartStore.clearCart()
+        ElMessage.success('购物车已清空')
+    }).catch(() => {})
+}
 </script>

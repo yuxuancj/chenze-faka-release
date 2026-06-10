@@ -2,64 +2,51 @@
     <Layout>
         <div class="space-y-4">
             <h2 class="text-xl font-bold text-gray-800">订单详情</h2>
-            <div v-if="loading" class="card p-8 text-center text-gray-500">
-                加载中...
-            </div>
-            <div v-else-if="!order.order_no" class="card p-8 text-center text-gray-500">
-                订单不存在
-            </div>
-            <div v-else class="space-y-4">
-                <div class="card">
-                    <div class="card-header font-semibold">订单信息</div>
-                    <div class="card-body overflow-x-auto">
-                        <table class="table w-full">
-                            <tbody>
-                                <tr><td class="w-32 text-gray-500">订单号</td><td>{{ order.order_no }}</td></tr>
-                                <tr><td class="text-gray-500">商品名称</td><td>{{ order.product_snapshot || order.product_name || '-' }}</td></tr>
-                                <tr><td class="text-gray-500">购买数量</td><td>{{ order.quantity || 1 }}</td></tr>
-                                <tr><td class="text-gray-500">订单金额</td><td>￥{{ order.amount }}</td></tr>
-                                <tr><td class="text-gray-500">状态</td>
-                                    <td>
-                                        <span v-if="order.status === 0" class="badge-yellow">待支付</span>
-                                        <span v-else-if="order.status === 1" class="badge-green">已支付</span>
-                                        <span v-else-if="order.status === 2" class="badge-blue">已完成</span>
-                                        <span v-else-if="order.status === 3" class="badge-red">已关闭</span>
-                                        <span v-else class="badge-gray">未知</span>
-                                    </td>
-                                </tr>
-                                <tr><td class="text-gray-500">邮箱</td><td>{{ order.email }}</td></tr>
-                                <tr><td class="text-gray-500">备注</td><td>{{ order.remark || '-' }}</td></tr>
-                                <tr><td class="text-gray-500">创建时间</td><td>{{ order.created_at }}</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div v-if="order.status === 0" class="card">
-                    <div class="card-body flex items-center justify-between">
+            <el-card v-if="loading" class="text-center" shadow="never">
+                <el-skeleton active :rows="5" />
+            </el-card>
+            <el-card v-else-if="!order.order_no" class="text-center" shadow="never">
+                <el-empty description="订单不存在" />
+            </el-card>
+            <template v-else>
+                <el-card shadow="never">
+                    <template #header>
+                        <span class="font-semibold">订单信息</span>
+                    </template>
+                    <el-descriptions :column="1" border>
+                        <el-descriptions-item label="订单号">{{ order.order_no }}</el-descriptions-item>
+                        <el-descriptions-item label="商品名称">{{ order.product_snapshot || order.product_name || '-' }}</el-descriptions-item>
+                        <el-descriptions-item label="购买数量">{{ order.quantity || 1 }}</el-descriptions-item>
+                        <el-descriptions-item label="订单金额">￥{{ order.amount }}</el-descriptions-item>
+                        <el-descriptions-item label="状态">
+                            <el-tag :type="statusType(order.status)" effect="light">
+                                {{ statusText(order.status) }}
+                            </el-tag>
+                        </el-descriptions-item>
+                        <el-descriptions-item label="邮箱">{{ order.email }}</el-descriptions-item>
+                        <el-descriptions-item label="备注">{{ order.remark || '-' }}</el-descriptions-item>
+                        <el-descriptions-item label="创建时间">{{ order.created_at }}</el-descriptions-item>
+                    </el-descriptions>
+                </el-card>
+                <el-card v-if="order.status === 0" shadow="never">
+                    <div class="flex items-center justify-between">
                         <span>待支付金额: <span class="text-blue-600 font-bold text-xl">￥{{ order.amount }}</span></span>
-                        <button @click="payNow" :disabled="paying" class="btn-primary">
-                            {{ paying ? '支付中...' : '立即支付' }}
-                        </button>
+                        <el-button type="primary" :loading="paying" @click="payNow">立即支付</el-button>
                     </div>
-                </div>
-                <div v-if="cards && cards.length > 0" class="card">
-                    <div class="card-header font-semibold">卡密信息</div>
-                    <div class="card-body overflow-x-auto">
-                        <table class="table w-full">
-                            <thead>
-                                <tr>
-                                    <th>卡密</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(card, idx) in cards" :key="idx">
-                                    <td class="font-mono">{{ card.card_data || card.card_no || card }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+                </el-card>
+                <el-card v-if="cards && cards.length > 0" shadow="never">
+                    <template #header>
+                        <span class="font-semibold">卡密信息</span>
+                    </template>
+                    <el-table :data="cards" stripe>
+                        <el-table-column label="卡号">
+                            <template #default="scope">
+                                <span class="font-mono">{{ scope.row.card_data || scope.row.card_no || scope.row }}</span>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-card>
+            </template>
         </div>
     </Layout>
 </template>
@@ -69,12 +56,29 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import Layout from '../components/Layout.vue'
 import { orderDetail, payOrder } from '../api/order'
+import { ElMessage } from 'element-plus'
 
 const route = useRoute()
 const order = ref({})
 const cards = ref([])
 const loading = ref(true)
 const paying = ref(false)
+
+function statusType(status) {
+    if (status === 0) return 'warning'
+    if (status === 1) return 'success'
+    if (status === 2) return 'primary'
+    if (status === 3) return 'danger'
+    return 'info'
+}
+
+function statusText(status) {
+    if (status === 0) return '待支付'
+    if (status === 1) return '已支付'
+    if (status === 2) return '已完成'
+    if (status === 3) return '已关闭'
+    return '未知'
+}
 
 function loadDetail() {
     loading.value = true
@@ -100,7 +104,7 @@ function payNow() {
         if (data && data.pay_url) {
             window.location.href = data.pay_url
         } else {
-            alert('支付成功')
+            ElMessage.success('支付成功')
             loadDetail()
         }
     }).catch(() => {}).finally(() => {

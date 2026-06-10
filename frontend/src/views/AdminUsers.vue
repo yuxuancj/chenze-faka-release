@@ -1,102 +1,73 @@
 <template>
     <AdminLayout page-title="用户管理">
-        <div class="space-y-4">
-            <div v-if="loading" class="card p-8 text-center text-gray-500">
-                加载中...
-            </div>
-            <div v-else class="card">
-                <div class="card-body overflow-x-auto">
-                    <table class="table w-full">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>邮箱</th>
-                                <th>昵称</th>
-                                <th>余额</th>
-                                <th>积分</th>
-                                <th>等级</th>
-                                <th>状态</th>
-                                <th>注册时间</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-if="users.length === 0">
-                                <td colspan="9" class="text-center text-gray-500 py-8">暂无用户</td>
-                            </tr>
-                            <tr v-for="user in users" :key="user.id">
-                                <td>{{ user.id }}</td>
-                                <td>{{ user.email }}</td>
-                                <td>{{ user.nickname || '-' }}</td>
-                                <td>￥{{ user.balance || 0 }}</td>
-                                <td>{{ user.points || 0 }}</td>
-                                <td>{{ user.level || 1 }}</td>
-                                <td>
-                                    <span v-if="user.status === 1 || user.status === undefined" class="badge-green">正常</span>
-                                    <span v-else class="badge-red">禁用</span>
-                                </td>
-                                <td>{{ user.created_at }}</td>
-                                <td>
-                                    <button @click="editUser(user)" class="btn-sm btn-primary">编辑</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <el-table v-loading="loading" :data="users" style="width: 100%" border stripe empty-text="暂无用户">
+            <el-table-column prop="id" label="ID" width="80" />
+            <el-table-column prop="email" label="邮箱" />
+            <el-table-column prop="nickname" label="昵称" />
+            <el-table-column label="余额" width="120">
+                <template #default="scope">￥{{ scope.row.balance || 0 }}</template>
+            </el-table-column>
+            <el-table-column prop="points" label="积分" width="100" />
+            <el-table-column prop="level" label="等级" width="80" />
+            <el-table-column label="状态" width="100">
+                <template #default="scope">
+                    <el-tag v-if="scope.row.status === 1 || scope.row.status === undefined" type="success">正常</el-tag>
+                    <el-tag v-else type="danger">禁用</el-tag>
+                </template>
+            </el-table-column>
+            <el-table-column prop="created_at" label="注册时间" width="180" />
+            <el-table-column label="操作" width="120" fixed="right">
+                <template #default="scope">
+                    <el-button type="primary" size="small" @click="editUser(scope.row)">编辑</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
 
-            <div v-if="pagination && pagination.total > pagination.size" class="flex items-center justify-center gap-2">
-                <button @click="prevPage" :disabled="page <= 1" class="btn-sm btn-secondary">上一页</button>
-                <span class="text-sm text-gray-600">第 {{ page }} / {{ totalPages }} 页</span>
-                <button @click="nextPage" :disabled="page >= totalPages" class="btn-sm btn-secondary">下一页</button>
-            </div>
+        <el-pagination
+            v-if="pagination.total > pagination.size"
+            class="mt-4"
+            v-model:current-page="page"
+            v-model:page-size="pagination.size"
+            :total="pagination.total"
+            :page-sizes="[10, 20, 50, 100]"
+            layout="total, sizes, prev, pager, next, jumper"
+            background
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+        />
 
-            <div v-if="editing.id" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
-                <div class="card w-full max-w-md">
-                    <div class="card-header font-semibold">编辑用户</div>
-                    <div class="card-body space-y-4">
-                        <div>
-                            <label class="form-label">昵称</label>
-                            <input v-model="editing.nickname" type="text" class="form-input">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="form-label">余额</label>
-                                <input v-model.number="editing.balance" type="number" step="0.01" class="form-input">
-                            </div>
-                            <div>
-                                <label class="form-label">积分</label>
-                                <input v-model.number="editing.points" type="number" class="form-input">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="form-label">等级</label>
-                                <input v-model.number="editing.level" type="number" class="form-input">
-                            </div>
-                            <div>
-                                <label class="form-label">状态</label>
-                                <select v-model.number="editing.status" class="form-input">
-                                    <option :value="1">正常</option>
-                                    <option :value="0">禁用</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-end gap-2 pt-2">
-                            <button @click="cancel" class="btn-secondary">取消</button>
-                            <button @click="save" :disabled="saving" class="btn-primary">
-                                {{ saving ? '保存中...' : '保存' }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <el-dialog v-model="dialogVisible" title="编辑用户" width="500px">
+            <el-form :model="editing" label-width="100px">
+                <el-form-item label="昵称">
+                    <el-input v-model="editing.nickname" />
+                </el-form-item>
+                <el-form-item label="余额">
+                    <el-input-number v-model="editing.balance" :precision="2" :step="0.01" :min="0" controls-position="right" style="width: 100%" />
+                </el-form-item>
+                <el-form-item label="积分">
+                    <el-input-number v-model="editing.points" :step="1" :min="0" controls-position="right" style="width: 100%" />
+                </el-form-item>
+                <el-form-item label="等级">
+                    <el-input-number v-model="editing.level" :step="1" :min="0" controls-position="right" style="width: 100%" />
+                </el-form-item>
+                <el-form-item label="状态">
+                    <el-select v-model="editing.status" style="width: 100%">
+                        <el-option label="正常" :value="1" />
+                        <el-option label="禁用" :value="0" />
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <el-button @click="cancel">取消</el-button>
+                <el-button type="primary" :loading="saving" @click="save">保存</el-button>
+            </template>
+        </el-dialog>
     </AdminLayout>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import AdminLayout from '../components/AdminLayout.vue'
 import { adminUserList, adminUserUpdate } from '../api/admin'
 
@@ -106,13 +77,12 @@ const pageSize = 20
 const pagination = reactive({ total: 0, size: 20 })
 const loading = ref(false)
 const saving = ref(false)
+const dialogVisible = ref(false)
 const editing = reactive({ id: null, nickname: '', balance: 0, points: 0, level: 0, status: 1 })
-
-const totalPages = computed(() => Math.ceil(pagination.total / pagination.size) || 1)
 
 function load() {
     loading.value = true
-    adminUserList(page.value, pageSize).then((data) => {
+    adminUserList(page.value, pagination.size).then((data) => {
         users.value = (data && data.list) ? data.list : []
         pagination.total = (data && data.total) ? data.total : 0
         pagination.size = (data && data.size) ? data.size : pageSize
@@ -131,9 +101,11 @@ function editUser(user) {
     editing.points = user.points || 0
     editing.level = user.level || 1
     editing.status = user.status === undefined ? 1 : user.status
+    dialogVisible.value = true
 }
 
 function cancel() {
+    dialogVisible.value = false
     editing.id = null
     editing.nickname = ''
     editing.balance = 0
@@ -151,7 +123,7 @@ function save() {
         level: editing.level,
         status: editing.status
     }).then(() => {
-        alert('保存成功')
+        ElMessage.success('保存成功')
         cancel()
         load()
     }).catch(() => {}).finally(() => {
@@ -159,18 +131,15 @@ function save() {
     })
 }
 
-function prevPage() {
-    if (page.value > 1) {
-        page.value--
-        load()
-    }
+function handleSizeChange(val) {
+    pagination.size = val
+    page.value = 1
+    load()
 }
 
-function nextPage() {
-    if (page.value < totalPages.value) {
-        page.value++
-        load()
-    }
+function handleCurrentChange(val) {
+    page.value = val
+    load()
 }
 
 onMounted(load)

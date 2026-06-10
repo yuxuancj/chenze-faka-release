@@ -2,76 +2,89 @@
     <Layout>
         <div class="space-y-4">
             <h2 class="text-xl font-bold text-gray-800">我的订单</h2>
-            <div v-if="loading" class="card p-8 text-center text-gray-500">
-                加载中...
-            </div>
-            <div v-else class="card">
-                <div class="card-body overflow-x-auto">
-                    <table class="table w-full">
-                        <thead>
-                            <tr>
-                                <th>订单号</th>
-                                <th>商品</th>
-                                <th>数量</th>
-                                <th>金额</th>
-                                <th>状态</th>
-                                <th>创建时间</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-if="orders.length === 0">
-                                <td colspan="7" class="text-center text-gray-500 py-8">暂无订单</td>
-                            </tr>
-                            <tr v-for="order in orders" :key="order.order_no || order.id">
-                                <td>{{ order.order_no || '-' }}</td>
-                                <td>{{ order.product_snapshot || order.product_name || '-' }}</td>
-                                <td>{{ order.quantity || 1 }}</td>
-                                <td>￥{{ order.amount }}</td>
-                                <td>
-                                    <span v-if="order.status === 0" class="badge-yellow">待支付</span>
-                                    <span v-else-if="order.status === 1" class="badge-green">已支付</span>
-                                    <span v-else-if="order.status === 2" class="badge-blue">已完成</span>
-                                    <span v-else-if="order.status === 3" class="badge-red">已关闭</span>
-                                    <span v-else class="badge-gray">未知</span>
-                                </td>
-                                <td>{{ order.created_at }}</td>
-                                <td>
-                                    <router-link :to="'/order/' + order.order_no" class="btn-sm btn-primary">查看</router-link>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <el-card shadow="never" v-loading="loading">
+                <el-table :data="orders" style="width: 100%" stripe empty-text="暂无订单">
+                    <el-table-column prop="order_no" label="订单号" min-width="180">
+                        <template #default="scope">
+                            {{ scope.row.order_no || '-' }}
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="商品" min-width="200">
+                        <template #default="scope">
+                            {{ scope.row.product_snapshot || scope.row.product_name || '-' }}
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="数量" width="80">
+                        <template #default="scope">
+                            {{ scope.row.quantity || 1 }}
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="金额" width="100">
+                        <template #default="scope">
+                            ￥{{ scope.row.amount }}
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="状态" width="100">
+                        <template #default="scope">
+                            <el-tag v-if="scope.row.status === 0" type="warning">待支付</el-tag>
+                            <el-tag v-else-if="scope.row.status === 1" type="success">已支付</el-tag>
+                            <el-tag v-else-if="scope.row.status === 2" type="primary">已完成</el-tag>
+                            <el-tag v-else-if="scope.row.status === 3" type="danger">已关闭</el-tag>
+                            <el-tag v-else type="info">未知</el-tag>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="created_at" label="创建时间" min-width="180">
+                        <template #default="scope">
+                            {{ scope.row.created_at }}
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="操作" width="100" fixed="right">
+                        <template #default="scope">
+                            <el-button type="primary" link @click="viewOrder(scope.row.order_no)">
+                                查看
+                            </el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <div class="mt-4 flex justify-end">
+                    <el-pagination
+                        v-model:current-page="page"
+                        v-model:page-size="pageSize"
+                        :page-sizes="[10, 20, 50, 100]"
+                        :total="pagination.total"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                    />
                 </div>
-            </div>
-            <div v-if="pagination && pagination.total > pagination.size" class="flex items-center justify-center gap-2">
-                <button @click="prevPage" :disabled="page <= 1" class="btn-sm btn-secondary">上一页</button>
-                <span class="text-sm text-gray-600">第 {{ page }} / {{ totalPages }} 页</span>
-                <button @click="nextPage" :disabled="page >= totalPages" class="btn-sm btn-secondary">下一页</button>
-            </div>
+            </el-card>
         </div>
     </Layout>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import Layout from '../components/Layout.vue'
 import { orderList } from '../api/order'
 
+const router = useRouter()
 const orders = ref([])
 const page = ref(1)
-const pageSize = 20
+const pageSize = ref(20)
 const pagination = reactive({ total: 0, size: 20 })
 const loading = ref(false)
 
-const totalPages = computed(() => Math.ceil(pagination.total / pagination.size) || 1)
+function viewOrder(orderNo) {
+    router.push('/order/' + orderNo)
+}
 
 function loadOrders() {
     loading.value = true
-    orderList(page.value, pageSize).then((data) => {
+    orderList(page.value, pageSize.value).then((data) => {
         orders.value = (data && data.list) ? data.list : []
         pagination.total = (data && data.total) ? data.total : 0
-        pagination.size = (data && data.size) ? data.size : pageSize
+        pagination.size = (data && data.size) ? data.size : pageSize.value
     }).catch(() => {
         orders.value = []
         pagination.total = 0
@@ -80,18 +93,15 @@ function loadOrders() {
     })
 }
 
-function prevPage() {
-    if (page.value > 1) {
-        page.value--
-        loadOrders()
-    }
+function handleSizeChange(val) {
+    pageSize.value = val
+    page.value = 1
+    loadOrders()
 }
 
-function nextPage() {
-    if (page.value < totalPages.value) {
-        page.value++
-        loadOrders()
-    }
+function handleCurrentChange(val) {
+    page.value = val
+    loadOrders()
 }
 
 onMounted(loadOrders)

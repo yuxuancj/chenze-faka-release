@@ -3,53 +3,55 @@
         <div class="space-y-4">
             <h2 class="text-xl font-bold text-gray-800">我的积分</h2>
 
-            <div class="card bg-gradient-to-r from-purple-50 to-indigo-50">
-                <div class="card-body">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <div class="text-sm text-gray-500">当前积分</div>
-                            <div class="text-4xl font-bold text-purple-700 mt-2">{{ currentPoints }}</div>
-                        </div>
-                        <button @click="handleSignin" :disabled="signingIn || signedToday" class="btn-primary">
-                            <template v-if="signingIn">签到中...</template>
-                            <template v-else-if="signedToday">今日已签到</template>
-                            <template v-else>每日签到</template>
-                        </button>
+            <el-card shadow="hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-sm text-gray-500">当前积分</div>
+                        <div class="text-4xl font-bold text-purple-700 mt-2">{{ currentPoints }}</div>
                     </div>
-                    <div v-if="signinReward" class="text-sm text-green-600 mt-3">
-                        签到奖励: +{{ signinReward }} 积分
-                    </div>
+                    <el-button type="primary" size="large" @click="handleSignin" :disabled="signingIn || signedToday">
+                        <span v-if="signingIn">签到中...</span>
+                        <span v-else-if="signedToday">今日已签到</span>
+                        <span v-else>每日签到</span>
+                    </el-button>
                 </div>
-            </div>
+                <div v-if="signinReward" class="text-sm text-green-600 mt-3">
+                    签到奖励: +{{ signinReward }} 积分
+                </div>
+            </el-card>
 
-            <div class="card">
-                <div class="card-header font-semibold">积分明细</div>
-                <div class="card-body overflow-x-auto">
-                    <table class="table w-full">
-                        <thead>
-                            <tr>
-                                <th>类型</th>
-                                <th>变动</th>
-                                <th>备注</th>
-                                <th>时间</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-if="logs.length === 0">
-                                <td colspan="4" class="text-center text-gray-500 py-8">暂无积分记录</td>
-                            </tr>
-                            <tr v-for="log in logs" :key="log.id">
-                                <td>{{ log.type_name || (log.type === 1 ? '获取' : (log.type === 2 ? '消耗' : '其他')) }}</td>
-                                <td :class="(log.change || log.points || 0) >= 0 ? 'text-green-600' : 'text-red-600'" class="font-semibold">
-                                    {{ (log.change || log.points || 0) > 0 ? '+' : '' }}{{ log.change || log.points || 0 }}
-                                </td>
-                                <td class="text-gray-600">{{ log.remark || log.description || '-' }}</td>
-                                <td>{{ log.created_at || '-' }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <el-card shadow="hover">
+                <template #header>
+                    <span class="font-semibold">积分明细</span>
+                </template>
+                <el-table :data="logs" v-loading="loading" style="width: 100%">
+                    <el-table-column prop="type_name" label="类型">
+                        <template #default="scope">
+                            {{ scope.row.type_name || (scope.row.type === 1 ? '获取' : (scope.row.type === 2 ? '消耗' : '其他')) }}
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="变动">
+                        <template #default="scope">
+                            <span :class="(scope.row.change || scope.row.points || 0) >= 0 ? 'text-green-600' : 'text-red-600'" class="font-semibold">
+                                {{ (scope.row.change || scope.row.points || 0) > 0 ? '+' : '' }}{{ scope.row.change || scope.row.points || 0 }}
+                            </span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="remark" label="备注">
+                        <template #default="scope">
+                            {{ scope.row.remark || scope.row.description || '-' }}
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="created_at" label="时间">
+                        <template #default="scope">
+                            {{ scope.row.created_at || '-' }}
+                        </template>
+                    </el-table-column>
+                    <template #empty>
+                        <el-empty description="暂无积分记录"></el-empty>
+                    </template>
+                </el-table>
+            </el-card>
         </div>
     </Layout>
 </template>

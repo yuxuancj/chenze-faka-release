@@ -1,69 +1,50 @@
 <template>
     <AdminLayout page-title="分类管理">
-        <div class="space-y-4">
+        <el-card shadow="never" class="mb-4">
             <div class="flex items-center justify-between">
-                <h3 class="font-semibold text-gray-800">商品分类</h3>
-                <button @click="showAddModal" class="btn-primary">新增分类</button>
+                <span class="text-gray-700">商品分类列表</span>
+                <el-button type="primary" @click="showAddModal">新增分类</el-button>
             </div>
-            <div v-if="loading" class="card p-8 text-center text-gray-500">
-                加载中...
-            </div>
-            <div v-else class="card">
-                <div class="card-body overflow-x-auto">
-                    <table class="table w-full">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>名称</th>
-                                <th>排序</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-if="categories.length === 0">
-                                <td colspan="4" class="text-center text-gray-500 py-8">暂无分类</td>
-                            </tr>
-                            <tr v-for="item in categories" :key="item.id">
-                                <td>{{ item.id }}</td>
-                                <td>{{ item.name }}</td>
-                                <td>{{ item.sort || 0 }}</td>
-                                <td>
-                                    <button @click="editItem(item)" class="btn-sm btn-primary">编辑</button>
-                                    <button @click="del(item.id)" class="btn-sm btn-danger ml-2">删除</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        </el-card>
 
-            <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
-                <div class="card w-full max-w-md">
-                    <div class="card-header font-semibold">{{ editing.id ? '编辑分类' : '新增分类' }}</div>
-                    <div class="card-body space-y-4">
-                        <div>
-                            <label class="form-label">分类名称</label>
-                            <input v-model="editing.name" type="text" class="form-input">
-                        </div>
-                        <div>
-                            <label class="form-label">排序</label>
-                            <input v-model.number="editing.sort" type="number" class="form-input">
-                        </div>
-                        <div class="flex items-center justify-end gap-2 pt-2">
-                            <button @click="cancelEdit" class="btn-secondary">取消</button>
-                            <button @click="save" :disabled="saving" class="btn-primary">
-                                {{ saving ? '保存中...' : '保存' }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <el-card v-loading="loading" shadow="never">
+            <el-table :data="categories" style="width: 100%" empty-text="暂无分类" stripe>
+                <el-table-column prop="id" label="ID" width="120" />
+                <el-table-column prop="name" label="名称" min-width="200" />
+                <el-table-column prop="sort" label="排序" width="120" />
+                <el-table-column label="操作" width="200" fixed="right">
+                    <template #default="scope">
+                        <el-button size="small" type="primary" @click="editItem(scope.row)">编辑</el-button>
+                        <el-button size="small" type="danger" @click="del(scope.row)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-card>
+
+        <el-dialog
+            v-model="showModal"
+            :title="editing.id ? '编辑分类' : '新增分类'"
+            width="500px"
+        >
+            <el-form :model="editing" label-width="80px">
+                <el-form-item label="分类名称">
+                    <el-input v-model="editing.name" placeholder="请输入分类名称" />
+                </el-form-item>
+                <el-form-item label="排序">
+                    <el-input-number v-model="editing.sort" :step="1" />
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <el-button @click="cancelEdit">取消</el-button>
+                <el-button type="primary" :loading="saving" @click="save">保存</el-button>
+            </template>
+        </el-dialog>
     </AdminLayout>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import AdminLayout from '../components/AdminLayout.vue'
 import { adminCategoryList, adminCategoryCreate, adminCategoryUpdate, adminCategoryDelete } from '../api/admin'
 
@@ -113,7 +94,7 @@ function cancelEdit() {
 
 function save() {
     if (!editing.name) {
-        alert('请输入分类名称')
+        ElMessage.warning('请输入分类名称')
         return
     }
     saving.value = true
@@ -121,7 +102,7 @@ function save() {
         ? adminCategoryUpdate(editing.id, { name: editing.name, sort: editing.sort })
         : adminCategoryCreate({ name: editing.name, sort: editing.sort })
     action.then(() => {
-        alert('保存成功')
+        ElMessage.success('保存成功')
         cancelEdit()
         load()
     }).catch(() => {}).finally(() => {
@@ -129,10 +110,16 @@ function save() {
     })
 }
 
-function del(id) {
-    if (!confirm('确认删除该分类？')) return
-    adminCategoryDelete(id).then(() => {
-        load()
+function del(row) {
+    ElMessageBox.confirm('确认删除该分类？', '提示', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+    }).then(() => {
+        adminCategoryDelete(row.id).then(() => {
+            ElMessage.success('删除成功')
+            load()
+        }).catch(() => {})
     }).catch(() => {})
 }
 

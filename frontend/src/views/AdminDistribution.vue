@@ -1,45 +1,36 @@
 <template>
     <AdminLayout page-title="分销设置">
-        <div class="space-y-4">
-            <div class="card">
-                <div class="card-header font-semibold">佣金设置</div>
-                <div class="card-body space-y-3">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div>
-                            <label class="form-label">一级佣金比例（%）</label>
-                            <input v-model.number="settings.level1_rate" type="number" step="0.01" class="form-input">
-                        </div>
-                        <div>
-                            <label class="form-label">二级佣金比例（%）</label>
-                            <input v-model.number="settings.level2_rate" type="number" step="0.01" class="form-input">
-                        </div>
-                        <div>
-                            <label class="form-label">三级佣金比例（%）</label>
-                            <input v-model.number="settings.level3_rate" type="number" step="0.01" class="form-input">
-                        </div>
-                        <div>
-                            <label class="form-label">最低提现金额</label>
-                            <input v-model.number="settings.min_withdraw" type="number" step="0.01" class="form-input">
-                        </div>
-                        <div>
-                            <label class="form-label">功能开关</label>
-                            <select v-model.number="settings.enabled" class="form-input">
-                                <option :value="1">启用分销</option>
-                                <option :value="0">禁用分销</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button @click="save" :disabled="saving" class="btn-primary btn-sm">
-                        {{ saving ? '保存中...' : '保存设置' }}
-                    </button>
-                </div>
-            </div>
-        </div>
+        <el-card v-loading="loading" shadow="never">
+            <template #header>
+                <span class="font-semibold">佣金设置</span>
+            </template>
+            <el-form :model="settings" label-width="150px">
+                <el-form-item label="一级佣金比例（%）">
+                    <el-input-number v-model="settings.level1_rate" :precision="2" :step="0.01" :min="0" :max="100" controls-position="right" style="width: 100%" />
+                </el-form-item>
+                <el-form-item label="二级佣金比例（%）">
+                    <el-input-number v-model="settings.level2_rate" :precision="2" :step="0.01" :min="0" :max="100" controls-position="right" style="width: 100%" />
+                </el-form-item>
+                <el-form-item label="三级佣金比例（%）">
+                    <el-input-number v-model="settings.level3_rate" :precision="2" :step="0.01" :min="0" :max="100" controls-position="right" style="width: 100%" />
+                </el-form-item>
+                <el-form-item label="最低提现金额">
+                    <el-input-number v-model="settings.min_withdraw" :precision="2" :step="0.01" :min="0" controls-position="right" style="width: 100%" />
+                </el-form-item>
+                <el-form-item label="功能开关">
+                    <el-switch v-model="settings.enabled" :active-value="1" :inactive-value="0" active-text="启用分销" inactive-text="禁用分销" />
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" :loading="saving" @click="save">保存设置</el-button>
+                </el-form-item>
+            </el-form>
+        </el-card>
     </AdminLayout>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import AdminLayout from '../components/AdminLayout.vue'
 import { adminDistributionGet, adminDistributionSet } from '../api/distribution'
 
@@ -66,7 +57,7 @@ function load() {
 function save() {
     saving.value = true
     adminDistributionSet({ ...settings }).then(() => {
-        alert('保存成功')
+        ElMessage.success('保存成功')
     }).catch(() => {}).finally(() => { saving.value = false })
 }
 
