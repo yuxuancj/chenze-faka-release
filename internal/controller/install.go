@@ -1,14 +1,17 @@
 package controller
 
 import (
+	appcfg "chenze-faka/config"
 	"chenze-faka/internal/model"
 	"chenze-faka/internal/pkg/config"
 	"chenze-faka/internal/pkg/db"
 	"chenze-faka/internal/pkg/response"
+	"chenze-faka/internal/service"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -60,6 +63,7 @@ func (ic *InstallController) Install(ctx *gin.Context) {
 		AdminUser  string `json:"admin_user"`
 		AdminPass  string `json:"admin_pass"`
 		AdminEmail string `json:"admin_email"`
+		LicenseKey string `json:"license_key"` // 授权码
 	}
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -82,6 +86,17 @@ func (ic *InstallController) Install(ctx *gin.Context) {
 	}
 	if req.AdminUser == "" || req.AdminPass == "" || req.AdminEmail == "" {
 		response.Error(ctx, response.CodeParamError, "管理员信息不完整")
+		return
+	}
+
+	// 授权码验证（调用授权站）
+	licenseSvc := service.NewLicenseService()
+	siteURL := licenseSvc.DetectURL(ctx.Request)
+	if siteURL == "" {
+		siteURL = "http://localhost"
+	}
+	if _, err := licenseSvc.VerifyLicense(siteURL, req.LicenseKey); err != nil {
+		response.Error(ctx, response.CodeParamError, err.Error())
 		return
 	}
 
@@ -240,6 +255,18 @@ logger:
 		return
 	}
 
+	// 写入授权配置文件 config/Auth.php
+	if err := licenseSvc.SaveAuthPHP(&service.AuthInfo{
+		AppName:     "晨泽发卡",
+		AppVersion:  versionString(),
+		AuthCode:    req.LicenseKey,
+		URL:         siteURL,
+		InstalledAt: int64(time.Now().Unix()),
+	}); err != nil {
+		response.Error(ctx, response.CodeServerError, "写入授权配置失败: "+err.Error())
+		return
+	}
+
 	// 创建 install.lock
 	if err := os.WriteFile("install.lock", []byte("installed"), 0644); err != nil {
 		response.Error(ctx, response.CodeServerError, "创建安装锁文件失败: "+err.Error())
@@ -260,4 +287,12 @@ func generateSecret() string {
 		b[i] = chars[i%len(chars)]
 	}
 	return string(b)
+}
+
+// versionString 返回当前版本号
+func versionString() string {
+	if appcfg.Version != "" {
+		return appcfg.Version
+	}
+	return "v2.3.0"
 }

@@ -99,6 +99,14 @@
                                 <input type="email" class="form-input" name="admin_email" placeholder="请输入管理员邮箱" required>
                             </div>
                         </div>
+                        <div class="form-section">
+                            <div class="form-section-title">授权信息</div>
+                            <div class="form-item">
+                                <label class="form-label">授权码</label>
+                                <input type="text" class="form-input" name="license_key" placeholder="请输入您的授权码（长度 32~64）" required>
+                                <div style="margin-top:6px;font-size:12px;color:#888;">请填写从授权站获取的正版授权码，系统将实时联网验证。</div>
+                            </div>
+                        </div>
                         <button type="button" class="btn btn-primary btn-full" onclick="doInstall()" id="btn-install">开始安装</button>
                     </form>
                 </div>
@@ -163,10 +171,15 @@ function doInstall() {
         db_name: fd.get('db_name'),
         admin_user: fd.get('admin_user'),
         admin_pass: fd.get('admin_pass'),
-        admin_email: fd.get('admin_email')
+        admin_email: fd.get('admin_email'),
+        license_key: fd.get('license_key')
     };
     if (!data.admin_user || !data.admin_pass || !data.admin_email) {
         showMsg('form-msg', '请填写所有管理员信息', 'error');
+        return;
+    }
+    if (!data.license_key || data.license_key.length < 8) {
+        showMsg('form-msg', '请填写有效的授权码', 'error');
         return;
     }
     var btn = document.getElementById('btn-install');

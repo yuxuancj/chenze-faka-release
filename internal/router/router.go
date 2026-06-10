@@ -108,6 +108,7 @@ func Setup(r *gin.Engine) {
 		distCtrl := controller.NewDistributionController()
 		pointsCtrl := controller.NewPointsController()
 		settingCtrl := controller.NewSettingController()
+		updateCtrl := controller.NewUpdateController()
 
 		adminAPI.GET("/dashboard", settingCtrl.GetDashboard)
 		adminAPI.GET("/settings/:group", settingCtrl.GetSettings)
@@ -160,6 +161,11 @@ func Setup(r *gin.Engine) {
 		// 积分设置
 		adminAPI.GET("/points/settings", pointsCtrl.GetSettings)
 		adminAPI.POST("/points/settings", pointsCtrl.SetSettings)
+
+		// 授权状态 & 系统更新
+		adminAPI.GET("/license", updateCtrl.License)
+		adminAPI.GET("/update/check", updateCtrl.Check)
+		adminAPI.POST("/update/execute", updateCtrl.Execute)
 	}
 
 	setupInstallAPI(r)
