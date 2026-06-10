@@ -17,6 +17,10 @@ export function adminProductUpdate(id, data) {
     return request.put('/admin/api/products/' + id, data)
 }
 
+export function adminProductDetail(id) {
+    return request.get('/admin/api/products/' + id)
+}
+
 export function adminProductDelete(id) {
     return request.delete('/admin/api/products/' + id)
 }

@@ -62,39 +62,27 @@ func (a *AdminController) ProductList(ctx *gin.Context) {
 	response.Success(ctx, gin.H{"total": total, "list": list, "page": page, "size": size})
 }
 
-func (a *AdminController) ProductCreate(ctx *gin.Context) {
-	var req struct {
-		CategoryID  uint    `json:"category_id" form:"category_id"`
-		Name        string  `json:"name" form:"name"`
-		Description string  `json:"description" form:"description"`
-		Price      float64 `json:"price" form:"price"`
-		Stock      int     `json:"stock" form:"stock"`
-		Image      string  `json:"image" form:"image"`
-		Type       string  `json:"type" form:"type"`
-		Status     int     `json:"status" form:"status"`
+func (a *AdminController) ProductDetail(ctx *gin.Context) {
+	id, _ := strconv.Atoi(ctx.Param("id"))
+	p, err := service.NewProductService().GetByID(uint(id))
+	if err != nil {
+		response.Error(ctx, response.CodeServerError, err.Error())
+		return
 	}
+	response.Success(ctx, p)
+}
+
+func (a *AdminController) ProductCreate(ctx *gin.Context) {
+	var req map[string]interface{}
 	ctx.ShouldBind(&req)
-	if req.Name == "" || req.Price <= 0 {
+	name, _ := req["name"].(string)
+	price, _ := req["price"].(float64)
+	if name == "" || price <= 0 {
 		response.Error(ctx, response.CodeParamError, "商品名称或价格无效")
 		return
 	}
-	p := &model.Product{
-		CategoryID:  req.CategoryID,
-		Name:        req.Name,
-		Description: req.Description,
-		Price:       req.Price,
-		Stock:       req.Stock,
-		Image:       req.Image,
-		Type:        req.Type,
-		Status:      req.Status,
-	}
-	if p.Status == 0 {
-		p.Status = 1
-	}
-	if p.Type == "" {
-		p.Type = "card"
-	}
-	if err := service.NewProductService().Create(p); err != nil {
+	p, err := service.NewProductService().CreateFull(req)
+	if err != nil {
 		response.Error(ctx, response.CodeServerError, err.Error())
 		return
 	}
@@ -104,8 +92,15 @@ func (a *AdminController) ProductCreate(ctx *gin.Context) {
 func (a *AdminController) ProductUpdate(ctx *gin.Context) {
 	id, _ := strconv.Atoi(ctx.Param("id"))
 	var req map[string]interface{}
-	ctx.ShouldBindJSON(&req)
-	if err := service.NewProductService().Update(uint(id), req); err != nil {
+	ctx.ShouldBind(&req)
+	name, _ := req["name"].(string)
+	price, _ := req["price"].(float64)
+	if name == "" || price <= 0 {
+		response.Error(ctx, response.CodeParamError, "商品名称或价格无效")
+		return
+	}
+	err := service.NewProductService().UpdateFull(uint(id), req)
+	if err != nil {
 		response.Error(ctx, response.CodeServerError, err.Error())
 		return
 	}

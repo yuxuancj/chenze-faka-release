@@ -111,6 +111,7 @@ func Setup(r *gin.Engine) {
 
 		adminAPI.GET("/dashboard", dashCtrl.AdminDashboard)
 		adminAPI.GET("/products", admin.ProductList)
+		adminAPI.GET("/products/:id", admin.ProductDetail)
 		adminAPI.POST("/products", admin.ProductCreate)
 		adminAPI.PUT("/products/:id", admin.ProductUpdate)
 		adminAPI.DELETE("/products/:id", admin.ProductDelete)

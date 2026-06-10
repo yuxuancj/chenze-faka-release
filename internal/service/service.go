@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 
@@ -238,7 +239,276 @@ func (s *ProductService) Delete(id uint) error {
 		if err := tx.Delete(&model.Product{}, id).Error; err != nil {
 			return err
 		}
-		return tx.Where("product_id=?", id).Delete(&model.Card{}).Error
+		if err := tx.Where("product_id=?", id).Delete(&model.Card{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("product_id=?", id).Delete(&model.ProductSku{}).Error; err != nil {
+			return err
+		}
+		return tx.Where("product_id=?", id).Delete(&model.ProductMemberPrice{}).Error
+	})
+}
+
+func (s *ProductService) CreateFull(req map[string]interface{}) (*model.Product, error) {
+	if db.DB == nil {
+		return nil, errors.New("数据库未连接")
+	}
+
+	var p model.Product
+	err := db.DB.Transaction(func(tx *gorm.DB) error {
+		p.Name, _ = req["name"].(string)
+		if catID, ok := req["category_id"].(float64); ok {
+			p.CategoryID = uint(catID)
+		}
+		if price, ok := req["price"].(float64); ok {
+			p.Price = price
+		}
+		if stock, ok := req["stock"].(float64); ok {
+			p.Stock = int(stock)
+		}
+		p.Description, _ = req["description"].(string)
+		p.Image, _ = req["image"].(string)
+		if status, ok := req["status"].(float64); ok {
+			p.Status = int(status)
+		}
+		if isHidden, ok := req["is_hidden"].(bool); ok {
+			p.IsHidden = isHidden
+		}
+		if hasSku, ok := req["has_sku"].(bool); ok {
+			p.HasSku = hasSku
+		}
+		if sort, ok := req["sort"].(float64); ok {
+			p.Sort = int(sort)
+		}
+		p.DeliveryType, _ = req["delivery_type"].(string)
+		if dc, ok := req["delivery_config"].(map[string]interface{}); ok {
+			p.DeliveryConfig = dc
+		}
+		if seo, ok := req["seo"].(map[string]interface{}); ok {
+			p.Seo = seo
+		}
+
+		if p.Status == 0 {
+			p.Status = 1
+		}
+		if p.DeliveryType == "" {
+			p.DeliveryType = "card"
+		}
+		if images, ok := req["images"].([]interface{}); ok && len(images) > 0 {
+			p.Images = make(model.JSONMap)
+			for i, img := range images {
+				if imgStr, ok := img.(string); ok {
+					p.Images[strconv.Itoa(i)] = imgStr
+				}
+			}
+		}
+
+		if err := tx.Create(&p).Error; err != nil {
+			return err
+		}
+
+		if p.DeliveryType == "card" && p.DeliveryConfig != nil {
+			if cardList, ok := p.DeliveryConfig["card_list"].([]interface{}); ok {
+				for _, cd := range cardList {
+					if cardData, ok := cd.(string); ok && cardData != "" {
+						if err := tx.Create(&model.Card{ProductID: p.ID, CardData: strings.TrimSpace(cardData)}).Error; err != nil {
+							return err
+						}
+					}
+				}
+			}
+		}
+
+		if p.HasSku {
+			if skus, ok := req["skus"].([]interface{}); ok && len(skus) > 0 {
+				for _, skuData := range skus {
+					if skuMap, ok := skuData.(map[string]interface{}); ok {
+						sku := model.ProductSku{
+							ProductID: p.ID,
+						}
+						if code, ok := skuMap["sku_code"].(string); ok {
+							sku.SkuCode = code
+						}
+						if price, ok := skuMap["price"].(float64); ok {
+							sku.Price = price
+						}
+						if stock, ok := skuMap["stock"].(int); ok {
+							sku.Stock = stock
+						} else if stockFloat, ok := skuMap["stock"].(float64); ok {
+							sku.Stock = int(stockFloat)
+						}
+						if specNames, ok := skuMap["spec_names"].(string); ok {
+							sku.SpecNames = model.JSONMap{"spec": specNames}
+						} else if specNamesMap, ok := skuMap["spec_names"].(map[string]interface{}); ok {
+							sku.SpecNames = model.JSONMap(specNamesMap)
+						}
+						if image, ok := skuMap["image"].(string); ok {
+							sku.Image = image
+						}
+						if err := tx.Create(&sku).Error; err != nil {
+							return err
+						}
+					}
+				}
+			}
+		}
+
+		if memberPrices, ok := req["member_prices"].([]interface{}); ok && len(memberPrices) > 0 {
+			for _, mpData := range memberPrices {
+				if mpMap, ok := mpData.(map[string]interface{}); ok {
+					mp := model.ProductMemberPrice{ProductID: p.ID}
+					if levelID, ok := mpMap["level_id"].(int); ok {
+						mp.LevelID = levelID
+					} else if levelIDFloat, ok := mpMap["level_id"].(float64); ok {
+						mp.LevelID = int(levelIDFloat)
+					}
+					if price, ok := mpMap["price"].(float64); ok {
+						mp.Price = price
+					}
+					if mp.LevelID > 0 && mp.Price > 0 {
+						if err := tx.Create(&mp).Error; err != nil {
+							return err
+						}
+					}
+				}
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return &p, nil
+}
+
+func (s *ProductService) UpdateFull(id uint, req map[string]interface{}) error {
+	if db.DB == nil {
+		return errors.New("数据库未连接")
+	}
+
+	return db.DB.Transaction(func(tx *gorm.DB) error {
+		var p model.Product
+		if err := tx.First(&p, id).Error; err != nil {
+			return err
+		}
+
+		if name, ok := req["name"].(string); ok {
+			p.Name = name
+		}
+		if catID, ok := req["category_id"].(float64); ok {
+			p.CategoryID = uint(catID)
+		}
+		if price, ok := req["price"].(float64); ok {
+			p.Price = price
+		}
+		if stock, ok := req["stock"].(float64); ok {
+			p.Stock = int(stock)
+		}
+		if description, ok := req["description"].(string); ok {
+			p.Description = description
+		}
+		if image, ok := req["image"].(string); ok {
+			p.Image = image
+		}
+		if status, ok := req["status"].(float64); ok {
+			p.Status = int(status)
+		}
+		if isHidden, ok := req["is_hidden"].(bool); ok {
+			p.IsHidden = isHidden
+		}
+		if hasSku, ok := req["has_sku"].(bool); ok {
+			p.HasSku = hasSku
+		}
+		if sort, ok := req["sort"].(float64); ok {
+			p.Sort = int(sort)
+		}
+		if deliveryType, ok := req["delivery_type"].(string); ok {
+			p.DeliveryType = deliveryType
+		}
+		if dc, ok := req["delivery_config"].(map[string]interface{}); ok {
+			p.DeliveryConfig = dc
+		}
+		if seo, ok := req["seo"].(map[string]interface{}); ok {
+			p.Seo = seo
+		}
+
+		if images, ok := req["images"].([]interface{}); ok && len(images) > 0 {
+			p.Images = make(model.JSONMap)
+			for i, img := range images {
+				if imgStr, ok := img.(string); ok {
+					p.Images[strconv.Itoa(i)] = imgStr
+				}
+			}
+		}
+
+		if err := tx.Save(&p).Error; err != nil {
+			return err
+		}
+
+		if p.HasSku {
+			if err := tx.Where("product_id=?", id).Delete(&model.ProductSku{}).Error; err != nil {
+				return err
+			}
+			if skus, ok := req["skus"].([]interface{}); ok && len(skus) > 0 {
+				for _, skuData := range skus {
+					if skuMap, ok := skuData.(map[string]interface{}); ok {
+						sku := model.ProductSku{
+							ProductID: p.ID,
+						}
+						if code, ok := skuMap["sku_code"].(string); ok {
+							sku.SkuCode = code
+						}
+						if price, ok := skuMap["price"].(float64); ok {
+							sku.Price = price
+						}
+						if stock, ok := skuMap["stock"].(int); ok {
+							sku.Stock = stock
+						} else if stockFloat, ok := skuMap["stock"].(float64); ok {
+							sku.Stock = int(stockFloat)
+						}
+						if specNames, ok := skuMap["spec_names"].(string); ok {
+							sku.SpecNames = model.JSONMap{"spec": specNames}
+						} else if specNamesMap, ok := skuMap["spec_names"].(map[string]interface{}); ok {
+							sku.SpecNames = model.JSONMap(specNamesMap)
+						}
+						if image, ok := skuMap["image"].(string); ok {
+							sku.Image = image
+						}
+						if err := tx.Create(&sku).Error; err != nil {
+							return err
+						}
+					}
+				}
+			}
+		}
+
+		if err := tx.Where("product_id=?", id).Delete(&model.ProductMemberPrice{}).Error; err != nil {
+			return err
+		}
+		if memberPrices, ok := req["member_prices"].([]interface{}); ok && len(memberPrices) > 0 {
+			for _, mpData := range memberPrices {
+				if mpMap, ok := mpData.(map[string]interface{}); ok {
+					mp := model.ProductMemberPrice{ProductID: p.ID}
+					if levelID, ok := mpMap["level_id"].(int); ok {
+						mp.LevelID = levelID
+					} else if levelIDFloat, ok := mpMap["level_id"].(float64); ok {
+						mp.LevelID = int(levelIDFloat)
+					}
+					if price, ok := mpMap["price"].(float64); ok {
+						mp.Price = price
+					}
+					if mp.LevelID > 0 && mp.Price > 0 {
+						if err := tx.Create(&mp).Error; err != nil {
+							return err
+						}
+					}
+				}
+			}
+		}
+
+		return nil
 	})
 }
 

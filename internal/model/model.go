@@ -81,21 +81,34 @@ type Category struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type ProductMemberPrice struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	ProductID uint      `gorm:"index;not null" json:"product_id"`
+	LevelID   int       `gorm:"not null" json:"level_id"`
+	Price     float64   `gorm:"type:decimal(10,2);not null" json:"price"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type Product struct {
-	ID          uint      `gorm:"primaryKey" json:"id"`
-	CategoryID  uint      `json:"category_id"`
-	Name        string    `gorm:"size:200;not null" json:"name"`
-	Description string    `gorm:"type:text" json:"description"`
-	Price       float64   `gorm:"type:decimal(10,2);not null" json:"price"`
-	Stock       int       `gorm:"default:0" json:"stock"`
-	Sales       int       `gorm:"default:0" json:"sales"`
-	Type        string    `gorm:"size:20;default:'card'" json:"type"`
-	Image       string    `gorm:"size:255" json:"image"`
-	Status      int       `gorm:"default:1" json:"status"`
-	IsHidden    bool      `gorm:"default:false" json:"is_hidden"`
-	HasSku      bool      `gorm:"default:false" json:"has_sku"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID             uint      `gorm:"primaryKey" json:"id"`
+	CategoryID     uint      `json:"category_id"`
+	Name           string    `gorm:"size:200;not null" json:"name"`
+	Description    string    `gorm:"type:text" json:"description"`
+	Price          float64   `gorm:"type:decimal(10,2);not null" json:"price"`
+	Stock          int       `gorm:"default:0" json:"stock"`
+	Sales          int       `gorm:"default:0" json:"sales"`
+	Type           string    `gorm:"size:20;default:'card'" json:"type"`
+	Image          string    `gorm:"size:255" json:"image"`
+	Images         JSONMap   `gorm:"type:json" json:"images"`
+	Status         int       `gorm:"default:1" json:"status"`
+	IsHidden       bool      `gorm:"default:false" json:"is_hidden"`
+	HasSku         bool      `gorm:"default:false" json:"has_sku"`
+	Sort           int       `gorm:"default:0" json:"sort"`
+	DeliveryType   string    `gorm:"size:20;default:'card'" json:"delivery_type"`
+	DeliveryConfig JSONMap   `gorm:"type:json" json:"delivery_config"`
+	Seo            JSONMap   `gorm:"type:json" json:"seo"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 type ProductSku struct {
