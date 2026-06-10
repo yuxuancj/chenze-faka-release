@@ -3,7 +3,7 @@ server:
   mode: release
 
 jwt:
-  secret: ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuv
+  secret: test_secret_key_for_ci
   expire: 720
 
 database:
@@ -12,4 +12,4 @@ database:
 
 logger:
   level: info
-  path: logs/app.log
+  path: storage/logs/app.log

@@ -179,15 +179,26 @@ logger:
 		config.AppConfig.Database.Driver = req.Driver
 	}
 
-	// 执行迁移
+	// 执行迁移（完整模型列表，与 cmd/main.go 保持一致）
 	if err := db.DB.AutoMigrate(
 		&model.User{},
 		&model.Category{},
 		&model.Product{},
+		&model.ProductSku{},
 		&model.Card{},
 		&model.Order{},
 		&model.OrderCard{},
 		&model.Setting{},
+		&model.Coupon{},
+		&model.UserCoupon{},
+		&model.Seckill{},
+		&model.WholesaleRule{},
+		&model.Commission{},
+		&model.Withdraw{},
+		&model.PointsLog{},
+		&model.SigninLog{},
+		&model.AuditLog{},
+		&model.DistributionTree{},
 	); err != nil {
 		response.Error(ctx, response.CodeServerError, "数据库迁移失败: "+err.Error())
 		return

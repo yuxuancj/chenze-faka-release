@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	_ "modernc.org/sqlite" // pure-Go SQLite driver (registers as "sqlite")
+
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -44,13 +46,17 @@ func Init(dsn string) error {
 	// 检测是否为 SQLite（.db 扩展名或不包含 MySQL 特定格式）
 	isSQLite := strings.HasSuffix(dsn, ".db") || strings.HasSuffix(dsn, ".sqlite") ||
 		(len(dsn) < 30 && strings.HasPrefix(dsn, "./") && !strings.Contains(dsn, "@tcp"))
-	
+
 	if isSQLite {
-		// SQLite DSN 直接是文件路径
-		dialector = sqlite.Open(dsn)
+		// SQLite：使用 modernc.org/sqlite（纯 Go，无 CGO）
+		// 通过 DriverName=sqlite 让 gorm 走 modernc 的驱动注册
+		dialector = sqlite.Dialector{
+			DSN:        dsn,
+			DriverName: "sqlite",
+		}
 		driverType = "sqlite"
 	} else {
-		// MySQL DSN
+		// MySQL
 		dialector = mysql.Open(dsn)
 		driverType = "mysql"
 	}
