@@ -29,6 +29,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '../stores/user'
+import { login } from '../api/user'
 
 const router = useRouter()
 const route = useRoute()
