@@ -1,14 +1,15 @@
+// Package router 提供 HTTP 路由配置。
+// Vue 3 SPA 通过 embed.FS 提供静态服务，所有非 API 路径返回 index.html。
 package router
 
 import (
 	"chenze-faka/internal/controller"
 	"chenze-faka/internal/middleware"
 	"chenze-faka/internal/pkg/config"
-	"chenze-faka/internal/pkg/logger"
-	"chenze-faka/internal/service"
 	"chenze-faka/web"
-	"html/template"
+	"io/fs"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -69,114 +70,52 @@ func Setup(r *gin.Engine) {
 		adminAPI.POST("/settings", admin.SettingsSet)
 	}
 
-	setupPages(r)
 	setupInstallAPI(r)
+	setupStaticFiles(r)
 }
 
-// renderEmbed 从 embed.FS 加载单个模板文件并渲染
-func renderEmbed(c *gin.Context, tplPath string, data interface{}) {
-	tmpl, err := template.ParseFS(web.StaticFiles, tplPath)
+// setupStaticFiles 将 Vue 3 SPA 构建产物通过 embed.FS 提供静态服务。
+// 对于包含扩展名的请求（如 /assets/app.js），直接返回静态文件；
+// 其他所有路径（API 和 /install/api 除外）返回 index.html。
+func setupStaticFiles(r *gin.Engine) {
+	subFS, err := fs.Sub(web.StaticFiles, "frontend/dist")
 	if err != nil {
-		c.String(http.StatusInternalServerError, "template error: %v", err)
+		r.NoRoute(func(c *gin.Context) {
+			c.String(http.StatusOK, "前端资源尚未构建，请先在 frontend 目录执行 npm run build。")
+		})
 		return
 	}
-	c.Status(http.StatusOK)
-	if err := tmpl.Execute(c.Writer, data); err != nil {
-		logger.Errorf("template execute error: path=%s err=%v", tplPath, err)
-	}
-}
 
-func setupPages(r *gin.Engine) {
-	// 模板路径（相对于 embed 根目录 web/）：
-	// 前台: templates/index.html, templates/product/list.html, templates/user/login.html 等
-	// 后台: templates/admin/dashboard.html, templates/admin/products.html 等
-	// 安装: templates/install/index.html
-
-	// 前台页面
-	r.GET("/", func(c *gin.Context) {
-		renderEmbed(c, "templates/index.html", commonData(c))
-	})
-	r.GET("/products", func(c *gin.Context) {
-		renderEmbed(c, "templates/product/list.html", commonData(c))
-	})
-	r.GET("/product/:id", func(c *gin.Context) {
-		data := commonData(c)
-		data["product_id"] = c.Param("id")
-		renderEmbed(c, "templates/product/detail.html", data)
-	})
-	r.GET("/user/login", func(c *gin.Context) {
-		renderEmbed(c, "templates/user/login.html", commonData(c))
-	})
-	r.GET("/user/register", func(c *gin.Context) {
-		renderEmbed(c, "templates/user/register.html", commonData(c))
-	})
-	r.GET("/user/profile", func(c *gin.Context) {
-		renderEmbed(c, "templates/user/profile.html", commonData(c))
-	})
-	r.GET("/user/orders", func(c *gin.Context) {
-		renderEmbed(c, "templates/user/orders.html", commonData(c))
-	})
-	r.GET("/order/:order_no", func(c *gin.Context) {
-		data := commonData(c)
-		data["order_no"] = c.Param("order_no")
-		renderEmbed(c, "templates/order/detail.html", data)
-	})
-
-	// 后台页面
-	admin := r.Group("/admin")
-	{
-		// 后台登录页复用前台用户登录模板
-		admin.GET("/login", func(c *gin.Context) {
-			renderEmbed(c, "templates/user/login.html", commonData(c))
+	indexHTML, readErr := fs.ReadFile(subFS, "index.html")
+	if readErr != nil {
+		r.NoRoute(func(c *gin.Context) {
+			c.String(http.StatusOK, "index.html 不存在，请先构建前端。")
 		})
-		admin.GET("", func(c *gin.Context) {
-			c.Redirect(http.StatusFound, "/admin/")
-		})
-		admin.GET("/", func(c *gin.Context) {
-			renderEmbed(c, "templates/admin/dashboard.html", commonData(c))
-		})
-		admin.GET("/products", func(c *gin.Context) {
-			renderEmbed(c, "templates/admin/products.html", commonData(c))
-		})
-		admin.GET("/product/new", func(c *gin.Context) {
-			renderEmbed(c, "templates/admin/product_edit.html", commonData(c))
-		})
-		admin.GET("/product/:id", func(c *gin.Context) {
-			data := commonData(c)
-			data["product_id"] = c.Param("id")
-			renderEmbed(c, "templates/admin/product_edit.html", data)
-		})
-		admin.GET("/cards", func(c *gin.Context) {
-			renderEmbed(c, "templates/admin/cards.html", commonData(c))
-		})
-		admin.GET("/categories", func(c *gin.Context) {
-			renderEmbed(c, "templates/admin/categories.html", commonData(c))
-		})
-		admin.GET("/orders", func(c *gin.Context) {
-			renderEmbed(c, "templates/admin/orders.html", commonData(c))
-		})
-		admin.GET("/users", func(c *gin.Context) {
-			renderEmbed(c, "templates/admin/users.html", commonData(c))
-		})
+		return
 	}
 
-	// 安装向导
-	r.GET("/install", func(c *gin.Context) {
-		renderEmbed(c, "templates/install/index.html", commonData(c))
-	})
+	fileServer := http.FileServer(http.FS(subFS))
 
-	// 404
-	r.NoRoute(func(c *gin.Context) {
-		renderEmbed(c, "templates/404.html", commonData(c))
+	r.Use(func(c *gin.Context) {
+		path := c.Request.URL.Path
+		if strings.HasPrefix(path, "/api/") || strings.HasPrefix(path, "/install/api") ||
+			strings.HasPrefix(path, "/admin/api") {
+			c.Next()
+			return
+		}
+		// 路径包含扩展名，作为静态资源处理
+		if strings.Contains(path, ".") {
+			c.Writer.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+			fileServer.ServeHTTP(c.Writer, c.Request)
+			c.Abort()
+			return
+		}
+		// SPA 路由，返回 index.html
+		c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
+		c.Writer.WriteHeader(http.StatusOK)
+		c.Writer.Write(indexHTML)
+		c.Abort()
 	})
-}
-
-func commonData(c *gin.Context) map[string]interface{} {
-	ss := service.NewSettingService()
-	return map[string]interface{}{
-		"site_name": ss.Get("site_name", "晨泽发卡"),
-		"site_desc": ss.Get("site_desc", ""),
-	}
 }
 
 // setupInstallAPI 注册安装向导 API 路由
