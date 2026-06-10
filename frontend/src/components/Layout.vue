@@ -11,6 +11,7 @@
                         <router-link to="/" class="nav-link">首页</router-link>
                         <router-link to="/products" class="nav-link">商品</router-link>
                         <template v-if="token">
+                            <span v-if="userNickname" class="text-sm text-gray-600">{{ userNickname }}</span>
                             <router-link to="/user/orders" class="nav-link">我的订单</router-link>
                             <router-link to="/user/profile" class="nav-link">个人中心</router-link>
                             <button @click="logout" class="btn-secondary btn-sm">退出</button>
@@ -35,6 +36,7 @@
                     <router-link to="/products" class="nav-link block">商品</router-link>
                     <router-link to="/cart" class="nav-link block">购物车</router-link>
                     <template v-if="token">
+                        <span v-if="userNickname" class="nav-link block">{{ userNickname }}</span>
                         <router-link to="/user/orders" class="nav-link block">我的订单</router-link>
                         <router-link to="/user/profile" class="nav-link block">个人中心</router-link>
                         <button @click="logout" class="nav-link block w-full text-left">退出登录</button>
@@ -61,17 +63,22 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
+import { useUserStore } from '../stores/user'
 
+const router = useRouter()
 const mobileMenuOpen = ref(false)
 const cartStore = useCartStore()
+const userStore = useUserStore()
 const siteName = ref('发卡平台')
-const token = computed(() => localStorage.getItem('token'))
-const cartCount = computed(() => cartStore.totalCount)
 
 function logout() {
-    localStorage.removeItem('token')
-    localStorage.removeItem('is_admin')
-    window.location.href = '/'
+    userStore.logout()
+    router.push('/')
 }
+
+const token = computed(() => userStore.token)
+const cartCount = computed(() => cartStore.totalCount)
+const userNickname = computed(() => userStore.userInfo?.nickname || userStore.userInfo?.username || '')
 </script>

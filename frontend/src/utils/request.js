@@ -34,11 +34,12 @@ request.interceptors.response.use((response) => {
 }, (error) => {
     if (error.response) {
         const data = error.response.data
-        if (data && data.code === 1004) {
+        // Handle 401 unauthorized
+        if (error.response.status === 401 || (data && data.code === 1004)) {
             localStorage.removeItem('token')
             localStorage.removeItem('is_admin')
             window.location.href = '/user/login'
-            return
+            return Promise.reject(new Error(data && data.msg ? data.msg : '登录状态已过期'))
         }
         alert(data && data.msg ? data.msg : '网络请求失败')
     } else {

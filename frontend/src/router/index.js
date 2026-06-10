@@ -36,9 +36,15 @@ router.beforeEach((to, from, next) => {
     const token = localStorage.getItem('token')
     const isAdmin = localStorage.getItem('is_admin') === 'true'
 
+    // If logged in and trying to access login/register, redirect to home
+    if (token && (to.path === '/user/login' || to.path === '/login' || to.path === '/user/register' || to.path === '/register')) {
+        next({ path: '/' })
+        return
+    }
+
     if (to.meta.auth) {
         if (!token) {
-            next({ path: '/user/login' })
+            next({ path: '/user/login', query: { redirect: to.fullPath } })
         } else {
             next()
         }

@@ -27,9 +27,11 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '../stores/user'
 import { login } from '../api/user'
 
 const router = useRouter()
+const userStore = useUserStore()
 const loading = ref(false)
 const form = reactive({ email: '', password: '' })
 
@@ -41,7 +43,7 @@ function submit() {
     loading.value = true
     login(form.email, form.password).then((data) => {
         if (data && data.token && data.user && data.user.is_admin) {
-            localStorage.setItem('token', data.token)
+            userStore.login(data.token, data.user)
             localStorage.setItem('is_admin', 'true')
             router.push('/admin/')
         } else {

@@ -51,6 +51,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '../stores/user'
 
 const props = defineProps({
     pageTitle: {
@@ -59,11 +61,12 @@ const props = defineProps({
     }
 })
 
+const router = useRouter()
+const userStore = useUserStore()
 const mobileSidebar = ref(false)
 
 function logout() {
-    localStorage.removeItem('token')
-    localStorage.removeItem('is_admin')
-    window.location.href = '/admin/login'
+    userStore.logout()
+    router.push('/admin/login')
 }
 </script>
