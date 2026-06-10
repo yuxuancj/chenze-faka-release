@@ -2,7 +2,9 @@
   <div class="login-container">
     <div class="login-box">
       <div class="login-header">
-        <img src="/logo.png" alt="logo" class="login-logo" />
+        <div class="login-logo-icon">
+          <el-icon :size="32" color="#409eff"><User /></el-icon>
+        </div>
         <h1 class="login-title">辰泽发卡管理系统</h1>
         <p class="login-subtitle">请登录您的管理员账号</p>
       </div>
@@ -149,10 +151,15 @@ const handleLogin = async () => {
   margin-bottom: 30px;
 }
 
-.login-logo {
+.login-logo-icon {
   width: 64px;
   height: 64px;
-  margin-bottom: 16px;
+  margin: 0 auto 16px auto;
+  background: #ecf5ff;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .login-title {

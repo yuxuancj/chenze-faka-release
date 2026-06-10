@@ -2,7 +2,7 @@
   <el-container class="admin-layout">
     <el-aside :width="isCollapse ? '64px' : '220px'" class="admin-aside">
       <div class="logo">
-        <img src="/logo.png" alt="logo" />
+        <el-icon :size="32" color="#409eff"><ShoppingCart /></el-icon>
         <span v-show="!isCollapse" class="logo-text">辰泽发卡</span>
       </div>
       <el-menu
@@ -180,9 +180,7 @@ const handleCommand = (command) => {
   overflow: hidden;
 }
 
-.logo img {
-  width: 32px;
-  height: 32px;
+.logo .el-icon {
   margin-right: 8px;
 }
 
