@@ -1,50 +1,21 @@
-# 晨泽发卡 - 生产部署包
+# 晨泽发卡系统 - 成品包
 
-## 快速启动
+## 最新版本
 
-```bash
-# 1. 修改配置
-vim full/config.yaml
+- **v1.0.0** - P0 完整功能版
 
-# 2. 启动
-cd full
-chmod +x chenze_faka
-./chenze_faka
-```
+## 下载
 
-## 运行环境
+见 `full/` 目录下的 `chenze_faka_v1.0.0.zip`
 
-- Linux amd64（已静态编译，无需 CGO）
-- MySQL 5.7+
+## 包内容
 
-## 首次启动
+- `chenze_faka` - Linux amd64 静态编译二进制（内含前端资源）
+- `config.yaml.example` - 配置文件示例
 
-1. 修改 `full/config.yaml` 中的数据库连接信息
-2. 运行后访问 `http://your-server:8080/admin/` 用默认管理员登录：
-   - 邮箱：`admin@chenze.com`
-   - 密码：`admin123`
+## 部署
 
-## systemd 部署（可选）
-
-```ini
-[Unit]
-Description=Chenze Faka
-After=network.target
-
-[Service]
-Type=simple
-WorkingDirectory=/opt/chenze-faka
-ExecStart=/opt/chenze-faka/chenze_faka
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```bash
-sudo cp chenze_faka /usr/local/bin/
-sudo cp config.yaml /etc/chenze-faka/config.yaml
-sudo systemctl daemon-reload
-sudo systemctl enable chenze-faka
-sudo systemctl start chenze-faka
-```
+1. 解压 zip 包
+2. 复制 `config.yaml.example` 为 `config.yaml` 并填写配置
+3. 运行 `./chenze_faka`
+4. 访问 `http://localhost:8080/install` 完成安装
